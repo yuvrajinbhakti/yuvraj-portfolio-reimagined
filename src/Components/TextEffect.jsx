@@ -16,6 +16,8 @@ const AnimatedText = ({
   onComplete = () => {} 
 }) => {
   const textRef = useRef(null);
+  // Declare glitchInterval in component scope
+  const glitchIntervalRef = useRef(null);
   
   useEffect(() => {
     const element = textRef.current;
@@ -111,13 +113,12 @@ const AnimatedText = ({
         const originalGlitchText = element.textContent;
         const glitchChars = "!<>-_\\/[]{}—=+*^?#@%$&~".split('');
         
-        let glitchInterval;
         let iteration = 0;
         
         // Create the glitch animation
         tl.set(element, { opacity: 1 })
           .call(() => {
-            glitchInterval = setInterval(() => {
+            glitchIntervalRef.current = setInterval(() => {
               element.textContent = originalGlitchText
                 .split('')
                 .map((char, index) => {
@@ -129,7 +130,7 @@ const AnimatedText = ({
                 .join('');
               
               if(iteration >= originalGlitchText.length) { 
-                clearInterval(glitchInterval);
+                clearInterval(glitchIntervalRef.current);
                 element.textContent = originalGlitchText;
               }
               iteration += 1/3;
@@ -166,8 +167,9 @@ const AnimatedText = ({
     
     return () => {
       tl.kill();
-      if (type === 'glitch') {
-        clearInterval(glitchInterval);
+      if (glitchIntervalRef.current) {
+        clearInterval(glitchIntervalRef.current);
+        glitchIntervalRef.current = null;
       }
     };
   }, [text, delay, duration, type, staggerDelay, onComplete]);
