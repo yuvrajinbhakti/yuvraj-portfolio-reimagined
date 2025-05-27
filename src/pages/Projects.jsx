@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { projects } from "../constants";
-import { arrow } from "../assets/icons";
 import CTA from "../Components/CTA";
 import { motion } from "framer-motion";
 import ScrollReveal from "../Components/ScrollReveal";
@@ -102,7 +100,7 @@ const Projects = () => {
                         >
                           <div className="p-4 w-full">
                             <div className="flex gap-2 mb-2">
-                              {project.tags.slice(0, 3).map((tag) => (
+                              {project.tags && project.tags.slice(0, 3).map((tag) => (
                                 <span 
                                   key={tag} 
                                   className="text-xs bg-blue-500/70 text-white px-2 py-1 rounded-full"
@@ -110,7 +108,7 @@ const Projects = () => {
                                   {tag}
                                 </span>
                               ))}
-                              {project.tags.length > 3 && (
+                              {project.tags && project.tags.length > 3 && (
                                 <span className="text-xs text-white">+{project.tags.length - 3} more</span>
                               )}
                             </div>
