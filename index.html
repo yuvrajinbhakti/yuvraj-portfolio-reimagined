@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Yuvraj Singh Nain | Portfolio</title>
+    <meta name="description"
+      content="Software Engineer & Full Stack Developer specializing in building modern web applications" />
+    <!-- Preconnect to improve loading performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      body {
+        background-color: #020617;
+        color: white;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+      }
+    
+      html {
+        background-color: #020617;
+      }
+    
+      #root {
+        background-color: #020617;
+      }
+    
+      /* Loading state */
+      .initial-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        width: 100vw;
+        background-color: #020617;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 9999;
+      }
+    
+      .spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid rgba(255, 255, 255, 0.1);
+        border-left-color: #3b82f6;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+    
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <!-- Initial loading state that will be replaced by React -->
+      <div class="initial-loading">
+        <div class="spinner"></div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
