@@ -17,7 +17,7 @@ const AnimatedBackground = ({ children }) => {
     // Set canvas dimensions
     const updateDimensions = () => {
       width = window.innerWidth;
-      height = window.innerHeight * 1.1; // Make canvas slightly taller to avoid gaps when scrolling
+      height = window.innerHeight; // Remove the 1.1 multiplier to prevent extra height
       canvas.width = width;
       canvas.height = height;
       
@@ -393,19 +393,20 @@ const AnimatedBackground = ({ children }) => {
   };
   
   return (
-    <div ref={containerRef} className="relative w-full min-h-screen bg-[#020617]">
+    <div ref={containerRef} className="relative w-full min-h-screen bg-[#020617] overflow-hidden">
       <canvas 
         ref={canvasRef} 
         className="fixed top-0 left-0 w-full h-screen pointer-events-none"
         style={{ 
           background: 'linear-gradient(to bottom, #020617, #0f172a)',
           willChange: 'transform',
-          zIndex: 0
+          zIndex: 0,
+          overflow: 'hidden' // Add overflow hidden to prevent scrollbars
         }}
       />
       
       <div 
-        className="relative w-full"
+        className="relative w-full overflow-visible"
         style={{
           ...parallaxStyle,
           zIndex: 1

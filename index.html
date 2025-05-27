@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Yuvraj Singh Nain | Portfolio</title>
     <meta name="description"
       content="Software Engineer & Full Stack Developer specializing in building modern web applications" />
@@ -18,14 +18,17 @@
         margin: 0;
         padding: 0;
         overflow-x: hidden;
+        overscroll-behavior: none; /* Prevent bouncing/multiple scrollbars */
       }
     
       html {
         background-color: #020617;
+        overscroll-behavior: none;
       }
     
       #root {
         background-color: #020617;
+        overscroll-behavior: none;
       }
     
       /* Loading state */
