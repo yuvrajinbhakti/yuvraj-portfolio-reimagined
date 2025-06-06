@@ -1,4 +1,4 @@
-import { meta, shopify, starbucks, tesla,amazon, personalProjectIcon, razorpay } from "../assets/images";
+import { amazon, razorpay } from "../assets/images";
 import {
     realtimeCodeEditorIcon,
     fileSharingAppIcon,
@@ -6,10 +6,8 @@ import {
     careCarRentalIcon,
     dockerNodeAppIcon,
     codeGenieIcon,
-    car,
     contact,
     css,
-    estate,
     express,
     git,
     github,
@@ -21,14 +19,9 @@ import {
     mui,
     nextjs,
     nodejs,
-    pricewise,
     react,
     redux,
-    sass,
-    snapgram,
-    summiz,
     tailwindcss,
-    threads,
     typescript,
     golang,
     docker,
@@ -226,7 +219,7 @@ export const experiences = [
 
 export const socialLinks = [
     {
-        name: 'Contact',
+        name: 'Email',
         iconUrl: contact,
         link: 'mailto:yuvrajsinghnain03@gmail.com',
     },

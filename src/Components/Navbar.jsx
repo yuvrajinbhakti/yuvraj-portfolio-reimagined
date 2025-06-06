@@ -1,4 +1,3 @@
-import React from 'react'
 import { NavLink } from 'react-router-dom'
 
 const Navbar = () => {
@@ -9,15 +8,17 @@ const Navbar = () => {
 <p className="blue-gradient_text" >YSN</p>
 </NavLink>
 <nav className="flex text-lg gap-7 font-medium">
-  <NavLink to="/about" className={({isActive})=>isActive?'text-blue-500':'text-black'}>
+  <NavLink to="/about" className={({isActive})=>isActive?'text-blue-500':'text-white hover:text-blue-300 transition-colors duration-300'}>
   About
   </NavLink>
 
-  <NavLink to="/projects" className={({isActive})=>isActive?'text-blue-500':'text-black'}>
+  <NavLink to="/projects" className={({isActive})=>isActive?'text-blue-500':'text-white hover:text-blue-300 transition-colors duration-300'}>
   Projects
   </NavLink>
 
-
+  <NavLink to="/contact" className={({isActive})=>isActive?'text-blue-500':'text-white hover:text-blue-300 transition-colors duration-300'}>
+  Contact
+  </NavLink>
 
 </nav>
         </header>

@@ -1,11 +1,12 @@
 import { Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom';
-import { Home, About, Contact, Projects } from './pages';
+import { Home, About, Contact, Projects, NotFound } from './pages';
 import Navbar from './Components/Navbar';
-import { useEffect, useState, Suspense, lazy } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
+import PropTypes from 'prop-types';
 
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
@@ -35,6 +36,10 @@ const PageTransition = ({ children }) => {
       {children}
     </motion.div>
   );
+};
+
+PageTransition.propTypes = {
+  children: PropTypes.node.isRequired,
 };
 
 // ScrollToTop component - scrolls to top when navigating to a new page
@@ -93,6 +98,11 @@ const App = () => {
                 <Route path="/contact" element={
                   <PageTransition>
                     <Contact />
+                  </PageTransition>
+                } />
+                <Route path="*" element={
+                  <PageTransition>
+                    <NotFound />
                   </PageTransition>
                 } />
               </Routes>

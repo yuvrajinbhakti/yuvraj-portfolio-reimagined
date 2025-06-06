@@ -144,21 +144,49 @@ const Home = () => {
                 
                 {/* Social Links */}
                 <motion.div variants={itemVariants} className="flex justify-center gap-6">
-                  {socialLinks.map((link) => (
-                    <a
+                  {socialLinks.map((link, index) => (
+                    <motion.a
                       key={link.name}
                       href={link.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-12 h-12 rounded-full flex items-center justify-center bg-black/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-110"
+                      className="group relative w-14 h-14 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-600/20 to-purple-600/20 backdrop-blur-sm border border-white/10 transition-all duration-300 transform hover:scale-110 hover:rotate-3 hover:shadow-xl hover:shadow-blue-500/25"
                       aria-label={link.name}
+                      whileHover={{ 
+                        scale: 1.15, 
+                        rotate: 5,
+                        transition: { duration: 0.2 }
+                      }}
+                      whileTap={{ 
+                        scale: 0.95,
+                        transition: { duration: 0.1 }
+                      }}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1 * index, duration: 0.3 }}
                     >
-                      <img src={link.iconUrl} alt={link.name} className="w-6 h-6" />
-                    </a>
+                      {/* Glow effect */}
+                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur-sm"></div>
+                      
+                      {/* Icon */}
+                      <div className="relative z-10 w-8 h-8 transition-transform duration-300 group-hover:scale-110">
+                        <img 
+                          src={link.iconUrl} 
+                          alt={link.name} 
+                          className="w-full h-full object-contain filter brightness-0 invert group-hover:brightness-100 group-hover:invert-0 transition-all duration-300"
+                        />
+                      </div>
+                      
+                      {/* Tooltip */}
+                      <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs px-3 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none backdrop-blur-sm border border-white/20">
+                        {link.name}
+                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-black/80"></div>
+                      </div>
+                    </motion.a>
                   ))}
                 </motion.div>
               </motion.div>
-      </div>
+            </div>
 
             {/* Scroll Indicator */}
             <motion.div 
