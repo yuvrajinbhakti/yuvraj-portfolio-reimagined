@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import AnimatedBackground from "../Components/AnimatedBackground";
 import ScrollReveal from "../Components/ScrollReveal";
 import GlassCard from "../Components/GlassCard";
+import { sendContactEmail, isEmailJSConfigured, createMailtoLink } from "../utils/emailService";
 
 const Contact = () => {
   const formRef = useRef(null);
@@ -25,28 +26,63 @@ const Contact = () => {
     setSubmitStatus(null);
 
     try {
-      // Simulate form submission
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      
-      console.log("Form submitted:", formData);
-      
-      // Reset form
-      setFormData({ name: "", email: "", message: "" });
-      setSubmitStatus({
-        success: true,
-        message: "Thanks for your message! I'll get back to you soon.",
-      });
-      
-      // Reset status after 5 seconds
-      setTimeout(() => {
-        setSubmitStatus(null);
-      }, 5000);
+      if (isEmailJSConfigured()) {
+        // Use EmailJS service
+        const result = await sendContactEmail(formData);
+        
+        console.log('Email sent successfully:', result.response);
+        
+        // Reset form
+        setFormData({ name: "", email: "", message: "" });
+        setSubmitStatus({
+          success: true,
+          message: "🎉 Thanks for your message! I'll get back to you within 24 hours.",
+        });
+        
+        // Reset status after 8 seconds
+        setTimeout(() => {
+          setSubmitStatus(null);
+        }, 8000);
+
+      } else {
+        // Fallback: Create mailto link
+        const mailtoLink = createMailtoLink(formData);
+        
+        setSubmitStatus({
+          success: false,
+          message: (
+            <div className="space-y-2">
+              <p>📧 EmailJS not configured yet.</p>
+              <p>
+                <a 
+                  href={mailtoLink}
+                  className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 underline transition-colors"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  Click here to send email directly
+                </a>
+              </p>
+            </div>
+          ),
+        });
+      }
+
     } catch (error) {
-      console.error("Error submitting form:", error);
+      console.error("Error sending email:", error);
+      
       setSubmitStatus({
         success: false,
-        message: "Something went wrong. Please try again later.",
+        message: `❌ ${error.message}`,
       });
+      
+      // Reset error after 10 seconds
+      setTimeout(() => {
+        setSubmitStatus(null);
+      }, 10000);
     } finally {
       setIsSubmitting(false);
     }
@@ -81,6 +117,7 @@ const Contact = () => {
               <ScrollReveal animation="slide" direction="left">
                 <GlassCard className="p-8 h-full">
                   <h2 className="text-2xl font-bold mb-6 text-white">Contact Information</h2>
+
                   <div className="space-y-6">
                     <div className="flex items-start group">
                       <div className="flex-shrink-0 p-3 bg-gradient-to-br from-blue-500/30 to-cyan-500/20 rounded-xl border border-blue-400/30 group-hover:border-blue-400/60 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-blue-500/25">
@@ -91,8 +128,8 @@ const Contact = () => {
                       <div className="ml-4">
                         <h3 className="text-lg font-semibold text-white mb-1 group-hover:text-blue-300 transition-colors duration-300">Email</h3>
                         <p className="text-gray-300 mt-1">
-                          <a href="mailto:nainsinghs2020@gmail.com" className="hover:text-blue-400 transition-all duration-300 hover:underline decoration-blue-400/50 underline-offset-2">
-                            nainsinghs2020@gmail.com
+                          <a href="mailto:yuvrajsinghnain03@gmail.com" className="hover:text-blue-400 transition-all duration-300 hover:underline decoration-blue-400/50 underline-offset-2">
+                            yuvrajsinghnain03@gmail.com
                           </a>
                         </p>
                       </div>
@@ -107,7 +144,7 @@ const Contact = () => {
                       </div>
                       <div className="ml-4">
                         <h3 className="text-lg font-semibold text-white mb-1 group-hover:text-purple-300 transition-colors duration-300">Location</h3>
-                        <p className="text-gray-300 mt-1">Delhi, India</p>
+                        <p className="text-gray-300 mt-1">Chandigarh, India</p>
                       </div>
                     </div>
                     
@@ -169,14 +206,14 @@ const Contact = () => {
                       <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
                         Your Name
                       </label>
-    <input
-    type="text"
+                      <input
+                        type="text"
                         id="name"
-    name="name"
+                        name="name"
                         value={formData.name}
                         onChange={handleChange}
-    required
-                        className="w-full px-4 py-3 rounded-lg bg-[#0f172a]/60 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        required
+                        className="w-full px-4 py-3 rounded-lg bg-[#0f172a]/60 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
                         placeholder="John Doe"
                       />
                     </div>
@@ -184,15 +221,15 @@ const Contact = () => {
                     <div>
                       <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
                         Your Email
-  </label>
-    <input
-    type="email"
+                      </label>
+                      <input
+                        type="email"
                         id="email"
-    name="email"
+                        name="email"
                         value={formData.email}
                         onChange={handleChange}
-    required
-                        className="w-full px-4 py-3 rounded-lg bg-[#0f172a]/60 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        required
+                        className="w-full px-4 py-3 rounded-lg bg-[#0f172a]/60 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
                         placeholder="john@example.com"
                       />
                     </div>
@@ -200,58 +237,97 @@ const Contact = () => {
                     <div>
                       <label htmlFor="message" className="block text-sm font-medium text-gray-300 mb-2">
                         Your Message
-  </label>
-    <textarea
+                      </label>
+                      <textarea
                         id="message"
-    name="message"
+                        name="message"
                         value={formData.message}
                         onChange={handleChange}
-    required
+                        required
                         rows={5}
-                        className="w-full px-4 py-3 rounded-lg bg-[#0f172a]/60 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-3 rounded-lg bg-[#0f172a]/60 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 resize-none"
                         placeholder="Hi Yuvraj, I would like to talk about..."
                       ></textarea>
                     </div>
 
-  <button
-  type="submit"
+                    <motion.button
+                      type="submit"
                       disabled={isSubmitting}
-                      className={`w-full py-3 px-6 rounded-lg font-medium text-white transition-all duration-300 ${
+                      whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
+                      whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
+                      className={`w-full py-4 px-6 rounded-xl font-semibold text-white transition-all duration-500 relative overflow-hidden group shadow-lg ${
                         isSubmitting
-                          ? "bg-blue-400 cursor-not-allowed"
-                          : "bg-blue-600 hover:bg-blue-700 hover:shadow-lg"
+                          ? "bg-blue-400/80 cursor-not-allowed shadow-blue-400/20"
+                          : "bg-gradient-to-r from-blue-600 via-blue-700 to-purple-600 hover:from-blue-700 hover:via-purple-600 hover:to-blue-800 hover:shadow-2xl hover:shadow-blue-500/30 hover:-translate-y-1"
                       }`}
                     >
+                      {/* Background gradient animation */}
+                      {!isSubmitting && (
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
+                      )}
+                      
+                      {/* Sparkle effects */}
+                      {!isSubmitting && (
+                        <>
+                          <div className="absolute top-2 left-6 w-1 h-1 bg-white/60 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping transition-opacity duration-300" />
+                          <div className="absolute bottom-3 right-8 w-1 h-1 bg-white/60 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping transition-opacity duration-300 delay-150" />
+                          <div className="absolute top-1/2 right-4 w-0.5 h-0.5 bg-white/60 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-pulse transition-opacity duration-300 delay-75" />
+                        </>
+                      )}
+
                       {isSubmitting ? (
-                        <div className="flex justify-center items-center">
-                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <div className="flex justify-center items-center relative z-10">
+                          <svg className="animate-spin -ml-1 mr-3 h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                           </svg>
-                          Sending...
+                          <span className="text-lg">Sending your message...</span>
                         </div>
                       ) : (
-                        "Send Message"
+                        <span className="flex items-center justify-center gap-3 relative z-10 text-lg">
+                          <svg 
+                            className="w-6 h-6 transition-transform duration-300 group-hover:translate-x-1" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path 
+                              strokeLinecap="round" 
+                              strokeLinejoin="round" 
+                              strokeWidth={2.5} 
+                              d="M13 7l5 5m0 0l-5 5m5-5H6" 
+                            />
+                          </svg>
+                          <span className="font-semibold tracking-wide">Send Message</span>
+                          <div className="absolute -right-1 top-1/2 transform -translate-y-1/2 w-2 h-2 bg-white/20 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:scale-150" />
+                        </span>
                       )}
-  </button>
+                      
+                      {/* Glow effect */}
+                      {!isSubmitting && (
+                        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-600/50 via-purple-600/50 to-blue-600/50 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500 -z-10" />
+                      )}
+                    </motion.button>
 
                     {submitStatus && (
-                      <div
-                        className={`mt-4 p-4 rounded-lg ${
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className={`mt-4 p-4 rounded-lg border ${
                           submitStatus.success
-                            ? "bg-green-500/20 text-green-300"
-                            : "bg-red-500/20 text-red-300"
+                            ? "bg-green-500/20 text-green-300 border-green-400/30"
+                            : "bg-red-500/20 text-red-300 border-red-400/30"
                         }`}
                       >
                         {submitStatus.message}
-                      </div>
+                      </motion.div>
                     )}
-</form>
+                  </form>
                 </GlassCard>
               </ScrollReveal>
-</div>
-  </div>
-   </section>   
+            </div>
+          </div>
+        </section>   
       </AnimatedBackground>
     </div>
   );

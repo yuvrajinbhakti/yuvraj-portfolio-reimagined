@@ -20,9 +20,9 @@ const About = () => {
   const education = [
     {
       degree: "Bachelor of Technology in Computer Science",
-      institution: "Manipal University Jaipur",
-      date: "2020 - 2024",
-      description: "Focused on machine learning, data structures, and full-stack development. Maintained a strong academic record with an 8.5 CGPA.",
+      institution: "Chitkara University, Punjab",
+      date: "2021 - 2025",
+      description: "Focused on machine learning, data structures, and full-stack development. Maintained a strong academic record with an 9.26 CGPA.",
       iconBg: "#e6f0ff"
     },
     {
