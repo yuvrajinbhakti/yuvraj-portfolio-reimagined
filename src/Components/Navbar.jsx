@@ -57,6 +57,22 @@ const Navbar = () => {
 
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <NavLink 
+              to="/playground" 
+              className={({isActive}) => `
+                px-4 py-2 rounded-lg backdrop-blur-sm border border-transparent transition-all duration-300 relative overflow-hidden group
+                ${isActive 
+                  ? 'text-blue-400 bg-blue-500/20 border-blue-400/30 shadow-lg shadow-blue-500/25' 
+                  : 'text-white hover:text-blue-300 hover:bg-white/10 hover:border-white/20 hover:shadow-lg hover:shadow-white/10'
+                }
+              `}
+            >
+              <span className="relative z-10">Playground</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-pink-600/0 via-pink-600/20 to-pink-600/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            </NavLink>
+          </motion.div>
+
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <NavLink 
               to="/contact" 
               className={({isActive}) => `
                 px-4 py-2 rounded-lg backdrop-blur-sm border border-transparent transition-all duration-300 relative overflow-hidden group

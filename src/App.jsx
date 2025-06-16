@@ -1,6 +1,8 @@
 import { Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom';
 import { Home, About, Contact, Projects, NotFound } from './pages';
+import Interactive from './pages/Interactive';
 import Navbar from './Components/Navbar';
+import VoiceNavigation from './Components/VoiceNavigation';
 import { useEffect, useState, Suspense } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { gsap } from 'gsap';
@@ -76,6 +78,7 @@ const App = () => {
       ) : (
         <Router>
           <Navbar />
+          <VoiceNavigation />
           <ScrollToTop />
           <Suspense fallback={<InitialLoader />}>
             <AnimatePresence mode="wait">
@@ -93,6 +96,11 @@ const App = () => {
                 <Route path="/projects" element={
                   <PageTransition>
                     <Projects />
+                  </PageTransition>
+                } />
+                <Route path="/playground" element={
+                  <PageTransition>
+                    <Interactive />
                   </PageTransition>
                 } />
                 <Route path="/contact" element={

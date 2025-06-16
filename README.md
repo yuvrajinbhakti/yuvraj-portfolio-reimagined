@@ -19,6 +19,14 @@ A modern, interactive 3D portfolio website built with React and Three.js. This p
 - Experience timeline
 - Smooth page transitions
 
+# Future
+- Interactive Code Playground: Let visitors experiment with your code live
+- 3D Project Previews: Show projects as interactive 3D models
+- Voice Navigation: Add voice commands for accessibility
+- AR Business Card: QR code that opens AR version of your portfolio
+- Real-time Collaboration: Show live coding sessions or pair programming
+- Interactive trerminal -> which will give info about me like my internships, eductation,...
+
 ## 🛠️ Technologies Used
 
 - **Frontend**: React, Vite
