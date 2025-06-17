@@ -291,45 +291,81 @@ export const socialLinks = [
 
 export const projects = [
     {
+        id: 1,
         iconUrl: realtimeCodeEditorIcon, 
+        image: realtimeCodeEditorIcon, // Using icon as image for now
         theme: 'btn-back-blue',
         name: 'Realtime Code Editor',
-        description: 'Developed a collaborative real-time code editor using Socket.io and React.js, enabling multiple users to write and edit code simultaneously.',
-        link: 'https://github.com/yuvrajinbhakti/Real-Time-Code-Editor-With-Database', 
+        description: 'Developed a collaborative real-time code editor using Socket.io and React.js, enabling multiple users to write and edit code simultaneously with live cursor tracking and syntax highlighting.',
+        source_code_link: 'https://github.com/yuvrajinbhakti/Real-Time-Code-Editor-With-Database',
+        demo_link: null, // Add demo link if available
+        tags: ['React', 'Socket.io', 'Node.js', 'MongoDB', 'Real-time'],
+        status: 'Completed',
+        gradient: 'from-blue-500 to-cyan-500'
     },
     {
+        id: 2,
         iconUrl: fileSharingAppIcon, 
+        image: fileSharingAppIcon,
         theme: 'btn-back-green',
         name: 'File Sharing App',
-        description: 'Built a secure file-sharing web app that allows users to upload and share files with an expiration time, ensuring privacy and security.',
-        link: 'https://github.com/yuvrajinbhakti/FileSharing', 
+        description: 'Built a secure file-sharing web app that allows users to upload and share files with an expiration time, ensuring privacy and security with encrypted file storage.',
+        source_code_link: 'https://github.com/yuvrajinbhakti/FileSharing',
+        demo_link: null,
+        tags: ['Node.js', 'Express', 'Multer', 'Security', 'File Upload'],
+        status: 'Completed',
+        gradient: 'from-green-500 to-emerald-500'
     },
     {
+        id: 3,
         iconUrl: moneyzoldIcon, 
+        image: moneyzoldIcon,
         theme: 'btn-back-yellow',
         name: 'MoneyZold Finance App',
-        description: 'Developed a finance app using Flutter that tracks expenses and savings, offering users a simple and intuitive way to manage their finances.',
-        link: 'https://github.com/yuvrajinbhakti/MoneyZold_Flutter', 
+        description: 'Developed a finance app using Flutter that tracks expenses and savings, offering users a simple and intuitive way to manage their finances with beautiful charts and analytics.',
+        source_code_link: 'https://github.com/yuvrajinbhakti/MoneyZold_Flutter',
+        demo_link: null,
+        tags: ['Flutter', 'Dart', 'Finance', 'Mobile', 'Charts'],
+        status: 'Completed',
+        gradient: 'from-yellow-500 to-orange-500'
     },
     {
+        id: 4,
         iconUrl: careCarRentalIcon, 
+        image: careCarRentalIcon,
         theme: 'btn-back-red',
         name: 'Care Car Rental Website',
-        description: 'Overhauled and relaunched the Care car rental website, streamlining the booking process and improving user experience through an intuitive interface.',
-        link: 'https://github.com/yuvrajinbhakti/Care-Car-Rental-Website', 
+        description: 'Overhauled and relaunched the Care car rental website, streamlining the booking process and improving user experience through an intuitive interface with modern design.',
+        source_code_link: 'https://github.com/yuvrajinbhakti/Care-Car-Rental-Website',
+        demo_link: null,
+        tags: ['HTML', 'CSS', 'JavaScript', 'Responsive', 'UI/UX'],
+        status: 'Completed',
+        gradient: 'from-red-500 to-pink-500'
     },
     {
+        id: 5,
         iconUrl: dockerNodeAppIcon, 
+        image: dockerNodeAppIcon,
         theme: 'btn-back-black',
         name: 'Dockerized Node.js Application',
-        description: 'Created a Dockerized Node.js application, pushing the image to DockerHub for easy deployment, demonstrating skills in containerization.',
-        link: 'https://github.com/yuvrajinbhakti/Hi-Docker-World', 
+        description: 'Created a Dockerized Node.js application, pushing the image to DockerHub for easy deployment, demonstrating skills in containerization and DevOps practices.',
+        source_code_link: 'https://github.com/yuvrajinbhakti/Hi-Docker-World',
+        demo_link: null,
+        tags: ['Docker', 'Node.js', 'DevOps', 'Containerization', 'CI/CD'],
+        status: 'Completed',
+        gradient: 'from-gray-700 to-gray-900'
     },
     {
+        id: 6,
         iconUrl: codeGenieIcon, 
+        image: codeGenieIcon,
         theme: 'btn-back-purple',
         name: 'CodeGenie',
         description: 'Developed a Python code generation tool that automates the creation of functions, classes, exceptions, and machine learning/NLP components, ensuring well-structured, PEP 8-compliant code.',
-        link: 'https://github.com/yuvrajinbhakti/code_genie_automatic_code_generator',
+        source_code_link: 'https://github.com/yuvrajinbhakti/code_genie_automatic_code_generator',
+        demo_link: null,
+        tags: ['Python', 'Code Generation', 'AI', 'Automation', 'Machine Learning'],
+        status: 'Completed',
+        gradient: 'from-purple-500 to-indigo-500'
     }    
 ];
