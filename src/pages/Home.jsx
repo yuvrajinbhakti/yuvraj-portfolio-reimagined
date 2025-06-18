@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense, useRef } from "react";
+import { useState, useEffect, Suspense, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion, useScroll, useTransform } from "framer-motion";
 
@@ -13,6 +13,7 @@ import GlassCard from "../Components/GlassCard";
 import { socialLinks } from "../constants";
 import sakura from '../assets/sakura.mp3';
 import { soundoff, soundon } from "../assets/icons";
+import realtimeCodeEditorImage from '../assets/images/realtime-code-editor.svg';
 
 const Home = () => {
   const [isPlayingMusic, setIsPlayingMusic] = useState(false);
@@ -150,7 +151,7 @@ const Home = () => {
                       href={link.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group relative w-14 h-14 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-600/20 to-purple-600/20 backdrop-blur-sm border border-white/10 transition-all duration-300 transform hover:scale-110 hover:rotate-3 hover:shadow-xl hover:shadow-blue-500/25"
+                      className="group relative w-14 h-14 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-600/20 to-purple-600/20 backdrop-blur-sm border border-white/10 transition-all duration-300 transform hover:scale-110 hover:rotate-3 hover:shadow-xl hover:shadow-blue-500/25 hover:border-white/20"
                       aria-label={link.name}
                       whileHover={{ 
                         scale: 1.15, 
@@ -165,22 +166,27 @@ const Home = () => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.1 * index, duration: 0.3 }}
                     >
-                      {/* Glow effect */}
+                      {/* Enhanced glow effect */}
                       <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur-sm"></div>
                       
-                      {/* Icon */}
-                      <div className="relative z-10 w-8 h-8 transition-transform duration-300 group-hover:scale-110">
-                        <img 
-                          src={link.iconUrl} 
-                          alt={link.name} 
-                          className="w-full h-full object-contain filter brightness-0 invert group-hover:brightness-100 group-hover:invert-0 transition-all duration-300"
-                        />
+                      {/* Icon background for better contrast */}
+                      <div className="absolute inset-2 rounded-lg bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      
+                      {/* Icon with consistent styling */}
+                      <div className="relative z-10 w-8 h-8 transition-all duration-300 group-hover:scale-110">
+                        <div className="w-full h-full rounded-lg bg-black/20 backdrop-blur-sm flex items-center justify-center p-1 group-hover:bg-black/30 transition-all duration-300 border border-white/10">
+                          <img 
+                            src={link.iconUrl} 
+                            alt={link.name} 
+                            className="w-full h-full object-contain opacity-90 group-hover:opacity-100 transition-all duration-300 group-hover:drop-shadow-lg"
+                          />
+                        </div>
                       </div>
                       
-                      {/* Tooltip */}
-                      <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs px-3 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none backdrop-blur-sm border border-white/20">
+                      {/* Enhanced tooltip */}
+                      <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-black/90 text-white text-xs px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none backdrop-blur-sm border border-white/20 shadow-lg">
                         {link.name}
-                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-black/80"></div>
+                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-black/90"></div>
                       </div>
                     </motion.a>
                   ))}
@@ -289,10 +295,12 @@ const Home = () => {
                       </Link>
                     </div>
                     <div className="aspect-video bg-blue-900/30 rounded-lg overflow-hidden">
-                      {/* Project Preview Image or Animation could go here */}
-                      <div className="w-full h-full flex items-center justify-center text-white/30 text-sm">
-                        Project Preview
-                      </div>
+                      {/* Project Preview Image */}
+                      <img 
+                        src={realtimeCodeEditorImage} 
+                        alt="Realtime Code Editor Interface" 
+                        className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                      />
                     </div>
                   </div>
                 </GlassCard>

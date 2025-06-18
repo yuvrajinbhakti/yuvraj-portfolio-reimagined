@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500" fill="none">
+  <!-- Background -->
+  <rect width="800" height="500" fill="url(#gradient1)"/>
+  
+  <!-- Code Editor Window -->
+  <rect x="50" y="50" width="700" height="400" rx="12" fill="#1a1a1a" stroke="#333" stroke-width="2"/>
+  
+  <!-- Title Bar -->
+  <rect x="50" y="50" width="700" height="40" rx="12" fill="#2d2d2d"/>
+  <rect x="50" y="78" width="700" height="2" fill="#333"/>
+  
+  <!-- Window Controls -->
+  <circle cx="75" cy="70" r="6" fill="#ff5f57"/>
+  <circle cx="95" cy="70" r="6" fill="#ffbd2e"/>
+  <circle cx="115" cy="70" r="6" fill="#28ca42"/>
+  
+  <!-- File Tab -->
+  <rect x="150" y="55" width="120" height="30" rx="6" fill="#3d3d3d"/>
+  <text x="210" y="74" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="12">app.js</text>
+  
+  <!-- Line Numbers -->
+  <rect x="60" y="90" width="40" height="350" fill="#252525"/>
+  <text x="70" y="110" fill="#666" font-family="monospace" font-size="12">1</text>
+  <text x="70" y="130" fill="#666" font-family="monospace" font-size="12">2</text>
+  <text x="70" y="150" fill="#666" font-family="monospace" font-size="12">3</text>
+  <text x="70" y="170" fill="#666" font-family="monospace" font-size="12">4</text>
+  <text x="70" y="190" fill="#666" font-family="monospace" font-size="12">5</text>
+  <text x="70" y="210" fill="#666" font-family="monospace" font-size="12">6</text>
+  <text x="70" y="230" fill="#666" font-family="monospace" font-size="12">7</text>
+  <text x="70" y="250" fill="#666" font-family="monospace" font-size="12">8</text>
+  <text x="70" y="270" fill="#666" font-family="monospace" font-size="12">9</text>
+  <text x="70" y="290" fill="#666" font-family="monospace" font-size="12">10</text>
+  
+  <!-- Code Content -->
+  <text x="120" y="110" fill="#c586c0" font-family="monospace" font-size="14">const</text>
+  <text x="170" y="110" fill="#9cdcfe" font-family="monospace" font-size="14">io</text>
+  <text x="190" y="110" fill="#d4d4d4" font-family="monospace" font-size="14">=</text>
+  <text x="210" y="110" fill="#4ec9b0" font-family="monospace" font-size="14">require</text>
+  <text x="270" y="110" fill="#d4d4d4" font-family="monospace" font-size="14">(</text>
+  <text x="285" y="110" fill="#ce9178" font-family="monospace" font-size="14">'socket.io'</text>
+  <text x="365" y="110" fill="#d4d4d4" font-family="monospace" font-size="14">);</text>
+  
+  <text x="120" y="130" fill="#c586c0" font-family="monospace" font-size="14">const</text>
+  <text x="170" y="130" fill="#9cdcfe" font-family="monospace" font-size="14">server</text>
+  <text x="220" y="130" fill="#d4d4d4" font-family="monospace" font-size="14">=</text>
+  <text x="240" y="130" fill="#4ec9b0" font-family="monospace" font-size="14">http</text>
+  <text x="275" y="130" fill="#d4d4d4" font-family="monospace" font-size="14">.</text>
+  <text x="285" y="130" fill="#dcdcaa" font-family="monospace" font-size="14">createServer</text>
+  <text x="375" y="130" fill="#d4d4d4" font-family="monospace" font-size="14">();</text>
+  
+  <text x="120" y="170" fill="#9cdcfe" font-family="monospace" font-size="14">io</text>
+  <text x="140" y="170" fill="#d4d4d4" font-family="monospace" font-size="14">.</text>
+  <text x="150" y="170" fill="#dcdcaa" font-family="monospace" font-size="14">on</text>
+  <text x="170" y="170" fill="#d4d4d4" font-family="monospace" font-size="14">(</text>
+  <text x="185" y="170" fill="#ce9178" font-family="monospace" font-size="14">'connection'</text>
+  <text x="275" y="170" fill="#d4d4d4" font-family="monospace" font-size="14">,</text>
+  <text x="295" y="170" fill="#d4d4d4" font-family="monospace" font-size="14">(</text>
+  <text x="305" y="170" fill="#9cdcfe" font-family="monospace" font-size="14">socket</text>
+  <text x="350" y="170" fill="#d4d4d4" font-family="monospace" font-size="14">)</text>
+  <text x="365" y="170" fill="#c586c0" font-family="monospace" font-size="14">=></text>
+  <text x="395" y="170" fill="#d4d4d4" font-family="monospace" font-size="14">{</text>
+  
+  <text x="140" y="190" fill="#4fc1ff" font-family="monospace" font-size="14">console</text>
+  <text x="195" y="190" fill="#d4d4d4" font-family="monospace" font-size="14">.</text>
+  <text x="205" y="190" fill="#dcdcaa" font-family="monospace" font-size="14">log</text>
+  <text x="230" y="190" fill="#d4d4d4" font-family="monospace" font-size="14">(</text>
+  <text x="245" y="190" fill="#ce9178" font-family="monospace" font-size="14">'User connected'</text>
+  <text x="355" y="190" fill="#d4d4d4" font-family="monospace" font-size="14">);</text>
+  
+  <text x="140" y="230" fill="#9cdcfe" font-family="monospace" font-size="14">socket</text>
+  <text x="185" y="230" fill="#d4d4d4" font-family="monospace" font-size="14">.</text>
+  <text x="195" y="230" fill="#dcdcaa" font-family="monospace" font-size="14">on</text>
+  <text x="215" y="230" fill="#d4d4d4" font-family="monospace" font-size="14">(</text>
+  <text x="230" y="230" fill="#ce9178" font-family="monospace" font-size="14">'code-change'</text>
+  <text x="325" y="230" fill="#d4d4d4" font-family="monospace" font-size="14">,</text>
+  <text x="345" y="230" fill="#d4d4d4" font-family="monospace" font-size="14">(</text>
+  <text x="355" y="230" fill="#9cdcfe" font-family="monospace" font-size="14">data</text>
+  <text x="385" y="230" fill="#d4d4d4" font-family="monospace" font-size="14">)</text>
+  <text x="400" y="230" fill="#c586c0" font-family="monospace" font-size="14">=></text>
+  <text x="430" y="230" fill="#d4d4d4" font-family="monospace" font-size="14">{</text>
+  
+  <text x="160" y="250" fill="#9cdcfe" font-family="monospace" font-size="14">socket</text>
+  <text x="205" y="250" fill="#d4d4d4" font-family="monospace" font-size="14">.</text>
+  <text x="215" y="250" fill="#dcdcaa" font-family="monospace" font-size="14">broadcast</text>
+  <text x="285" y="250" fill="#d4d4d4" font-family="monospace" font-size="14">.</text>
+  <text x="295" y="250" fill="#dcdcaa" font-family="monospace" font-size="14">emit</text>
+  <text x="330" y="250" fill="#d4d4d4" font-family="monospace" font-size="14">(</text>
+  <text x="345" y="250" fill="#ce9178" font-family="monospace" font-size="14">'code-update'</text>
+  <text x="440" y="250" fill="#d4d4d4" font-family="monospace" font-size="14">,</text>
+  <text x="460" y="250" fill="#9cdcfe" font-family="monospace" font-size="14">data</text>
+  <text x="490" y="250" fill="#d4d4d4" font-family="monospace" font-size="14">);</text>
+  
+  <!-- Multiple Cursors (showing collaboration) -->
+  <rect x="390" y="102" width="2" height="16" fill="#007acc" opacity="0.8"/>
+  <rect x="390" y="100" width="8" height="2" fill="#007acc" opacity="0.8"/>
+  
+  <rect x="500" y="242" width="2" height="16" fill="#ff6b6b" opacity="0.8"/>
+  <rect x="500" y="240" width="8" height="2" fill="#ff6b6b" opacity="0.8"/>
+  
+  <rect x="270" y="182" width="2" height="16" fill="#4ecdc4" opacity="0.8"/>
+  <rect x="270" y="180" width="8" height="2" fill="#4ecdc4" opacity="0.8"/>
+  
+  <!-- User Indicators -->
+  <circle cx="650" cy="70" r="12" fill="#007acc"/>
+  <text x="650" y="75" text-anchor="middle" fill="white" font-family="Arial" font-size="10" font-weight="bold">A</text>
+  
+  <circle cx="680" cy="70" r="12" fill="#ff6b6b"/>
+  <text x="680" y="75" text-anchor="middle" fill="white" font-family="Arial" font-size="10" font-weight="bold">B</text>
+  
+  <circle cx="710" cy="70" r="12" fill="#4ecdc4"/>
+  <text x="710" y="75" text-anchor="middle" fill="white" font-family="Arial" font-size="10" font-weight="bold">C</text>
+  
+  <!-- Status Bar -->
+  <rect x="50" y="430" width="700" height="20" fill="#2d2d2d"/>
+  <text x="60" y="443" fill="#ffffff" font-family="Arial" font-size="11">3 users online • Socket.io connected • Real-time sync</text>
+  
+  <!-- Floating Elements -->
+  <circle cx="150" cy="350" r="3" fill="#007acc" opacity="0.3">
+    <animate attributeName="cy" values="350;340;350" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="600" cy="320" r="2" fill="#ff6b6b" opacity="0.4">
+    <animate attributeName="cy" values="320;315;320" dur="1.5s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="400" cy="380" r="2.5" fill="#4ecdc4" opacity="0.3">
+    <animate attributeName="cy" values="380;375;380" dur="2.5s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Gradient Definitions -->
+  <defs>
+    <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f1419;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#1a1a2e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#16213e;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg> 

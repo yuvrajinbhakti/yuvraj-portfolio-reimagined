@@ -45,6 +45,14 @@ const ProjectCard = ({ project, index, setCursorVariant }) => {
   const handleMouseEnter = useCallback(() => {
     setCursorVariant("project");
   }, [setCursorVariant]);
+
+  const handleLinkMouseEnter = useCallback(() => {
+    setCursorVariant("link");
+  }, [setCursorVariant]);
+
+  const handleLinkMouseLeave = useCallback(() => {
+    setCursorVariant("project");
+  }, [setCursorVariant]);
   
   return (
     <motion.div
@@ -232,8 +240,8 @@ const ProjectCard = ({ project, index, setCursorVariant }) => {
                   className="flex items-center gap-1.5 text-blue-400 hover:text-blue-300 transition-colors font-medium text-sm group/link cursor-pointer"
                   whileHover={{ scale: 1.02, x: 2 }}
                   whileTap={{ scale: 0.98 }}
-                  onMouseEnter={() => setCursorVariant("link")}
-                  onMouseLeave={() => setCursorVariant("project")}
+                  onMouseEnter={handleLinkMouseEnter}
+                  onMouseLeave={handleLinkMouseLeave}
                 >
                   <div className="p-1 rounded-full bg-blue-500/10 border border-blue-500/20 group-hover/link:bg-blue-500/15 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -252,8 +260,8 @@ const ProjectCard = ({ project, index, setCursorVariant }) => {
                   className="flex items-center gap-1.5 text-emerald-400 hover:text-emerald-300 transition-colors font-medium text-sm group/link cursor-pointer"
                   whileHover={{ scale: 1.02, x: 2 }}
                   whileTap={{ scale: 0.98 }}
-                  onMouseEnter={() => setCursorVariant("link")}
-                  onMouseLeave={() => setCursorVariant("project")}
+                  onMouseEnter={handleLinkMouseEnter}
+                  onMouseLeave={handleLinkMouseLeave}
                 >
                   <div className="p-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 group-hover/link:bg-emerald-500/15 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -305,7 +313,6 @@ const Projects = () => {
   const containerRef = useRef(null);
   const heroRef = useRef(null);
   const statsRef = useRef(null);
-  const cursorRef = useRef(null);
   
   // Stable mouse tracking
   const mouseX = useMotionValue(0);
@@ -327,7 +334,7 @@ const Projects = () => {
     offset: ["start start", "end start"]
   });
   
-  // Stable transforms - moved outside useMemo to fix hook call error
+  // Stable transforms
   const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0.8]);
   const progressBarWidth = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
@@ -343,6 +350,14 @@ const Projects = () => {
     setCursorVariant(variant);
   }, []);
 
+  const handleDefaultCursor = useCallback(() => {
+    setCursorVariant("default");
+  }, []);
+
+  const handleLinkCursor = useCallback(() => {
+    setCursorVariant("link");
+  }, []);
+
   useEffect(() => {
     window.addEventListener("mousemove", handleMouseMove, { passive: true });
     return () => window.removeEventListener("mousemove", handleMouseMove);
@@ -355,14 +370,14 @@ const Projects = () => {
     }
     
     const filtered = projects.filter((project) =>
-      project.tags.includes(activeFilter)
+      project.tags && project.tags.includes(activeFilter)
     );
     setFilteredProjects(filtered);
   }, [activeFilter]);
 
   // Stable memoized tags
   const allTags = useMemo(() => 
-    ["All", ...new Set(projects.flatMap(project => project.tags))], 
+    ["All", ...new Set(projects.flatMap(project => project.tags || []))], 
     []
   );
 
@@ -370,8 +385,7 @@ const Projects = () => {
     <div className="overflow-y-auto overflow-x-hidden" ref={containerRef} style={{ scrollBehavior: 'smooth' }}>
       {/* Enhanced Custom Cursor */}
       <motion.div
-        ref={cursorRef}
-        className="fixed top-0 left-0 pointer-events-none z-50"
+        className="fixed top-0 left-0 pointer-events-none z-50 mix-blend-difference"
         style={{
           x: smoothMouseX,
           y: smoothMouseY,
@@ -460,7 +474,7 @@ const Projects = () => {
               >
                 {[
                   { value: projects.length, label: "Projects", color: "text-blue-400" },
-                  { value: allTags.length - 1, label: "Technologies", color: "text-emerald-400" },
+                  { value: Math.max(0, allTags.length - 1), label: "Technologies", color: "text-emerald-400" },
                   { value: 100, label: "Open Source", color: "text-purple-400", suffix: "%" }
                 ].map((stat, index) => (
                   <motion.div 
@@ -474,8 +488,8 @@ const Projects = () => {
                       y: -2,
                       transition: { duration: 0.15 }
                     }}
-                    onMouseEnter={() => setCursorVariant("link")}
-                    onMouseLeave={() => setCursorVariant("default")}
+                    onMouseEnter={handleLinkCursor}
+                    onMouseLeave={handleDefaultCursor}
                   >
                     <div className={`text-2xl font-bold ${stat.color} mb-0.5`}>
                       {stat.value}{stat.suffix || ""}
@@ -511,8 +525,8 @@ const Projects = () => {
                     transition: { duration: 0.15 }
                   }}
                   whileTap={{ scale: 0.97 }}
-                  onMouseEnter={() => setCursorVariant("link")}
-                  onMouseLeave={() => setCursorVariant("default")}
+                  onMouseEnter={handleLinkCursor}
+                  onMouseLeave={handleDefaultCursor}
                 >
                   {activeFilter === tag && (
                     <motion.div
@@ -553,8 +567,8 @@ const Projects = () => {
                   className="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full font-semibold hover:shadow-md transition-all duration-200 cursor-pointer"
                   whileHover={{ scale: 1.03, y: -1 }}
                   whileTap={{ scale: 0.97 }}
-                  onMouseEnter={() => setCursorVariant("link")}
-                  onMouseLeave={() => setCursorVariant("default")}
+                  onMouseEnter={handleLinkCursor}
+                  onMouseLeave={handleDefaultCursor}
                 >
                   Show All Projects
                 </motion.button>
