@@ -383,9 +383,9 @@ const Projects = () => {
 
   return (
     <div className="overflow-y-auto overflow-x-hidden" ref={containerRef} style={{ scrollBehavior: 'smooth' }}>
-      {/* Enhanced Custom Cursor */}
+      {/* Enhanced Custom Cursor - Hide on mobile */}
       <motion.div
-        className="fixed top-0 left-0 pointer-events-none z-50 mix-blend-difference"
+        className="fixed top-0 left-0 pointer-events-none z-50 mix-blend-difference hidden md:block"
         style={{
           x: smoothMouseX,
           y: smoothMouseY,
@@ -429,7 +429,7 @@ const Projects = () => {
       />
       
       <AnimatedBackground>
-        <section className="w-full pt-20 px-4 mb-16" style={{ willChange: 'transform' }}>
+        <section className="w-full pt-24 md:pt-32 px-4 md:px-8 mb-12 md:mb-16" style={{ willChange: 'transform' }}>
           <div className="max-w-6xl mx-auto">
             {/* Optimized Hero Section */}
             <motion.div
@@ -438,10 +438,10 @@ const Projects = () => {
                 y: heroY,
                 opacity: heroOpacity,
               }}
-              className="text-center mb-12 will-change-transform"
+              className="text-center mb-8 md:mb-12 will-change-transform"
             >
               <motion.h1 
-                className="text-4xl md:text-6xl font-black text-white mb-4 relative leading-tight will-change-transform"
+                className="text-3xl md:text-4xl lg:text-6xl font-black text-white mb-3 md:mb-4 relative leading-tight will-change-transform"
                 initial={{ opacity: 0, y: -40, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
@@ -453,7 +453,7 @@ const Projects = () => {
               </motion.h1>
               
               <motion.p 
-                className="text-lg text-gray-300 max-w-2xl mx-auto leading-relaxed"
+                className="text-sm md:text-lg text-gray-300 max-w-2xl mx-auto leading-relaxed px-4"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2, duration: 0.6 }}
@@ -467,7 +467,7 @@ const Projects = () => {
               {/* Simplified Project Stats */}
               <motion.div 
                 ref={statsRef}
-                className="flex justify-center gap-6 mt-8"
+                className="flex justify-center gap-3 md:gap-6 mt-6 md:mt-8 flex-wrap"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4, duration: 0.6 }}
@@ -479,7 +479,7 @@ const Projects = () => {
                 ].map((stat, index) => (
                   <motion.div 
                     key={stat.label}
-                    className="text-center p-3 rounded-lg bg-black/15 border border-white/10 will-change-transform cursor-pointer"
+                    className="text-center p-2 md:p-3 rounded-lg bg-black/15 border border-white/10 will-change-transform cursor-pointer min-w-[80px] md:min-w-[100px]"
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.6 + index * 0.1, duration: 0.4 }}
@@ -491,7 +491,7 @@ const Projects = () => {
                     onMouseEnter={handleLinkCursor}
                     onMouseLeave={handleDefaultCursor}
                   >
-                    <div className={`text-2xl font-bold ${stat.color} mb-0.5`}>
+                    <div className={`text-lg md:text-2xl font-bold ${stat.color} mb-0.5`}>
                       {stat.value}{stat.suffix || ""}
                     </div>
                     <div className="text-xs text-gray-400 uppercase tracking-wide">{stat.label}</div>
@@ -502,7 +502,7 @@ const Projects = () => {
 
             {/* Simplified Filter Buttons */}
             <motion.div 
-              className="flex flex-wrap justify-center gap-2 mb-12"
+              className="flex flex-wrap justify-center gap-2 mb-8 md:mb-12 px-2"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8, duration: 0.5 }}
@@ -511,7 +511,7 @@ const Projects = () => {
                 <motion.button
                   key={tag}
                   onClick={() => setActiveFilter(tag)}
-                  className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 relative overflow-hidden backdrop-blur-md will-change-transform cursor-pointer ${
+                  className={`px-3 py-2 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-semibold transition-all duration-300 relative overflow-hidden backdrop-blur-md will-change-transform cursor-pointer touch-target ${
                     activeFilter === tag
                       ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md border border-white/20"
                       : "bg-black/15 text-gray-300 hover:bg-white/10 border border-white/10 hover:border-white/20"
@@ -542,7 +542,7 @@ const Projects = () => {
 
             {/* Optimized Projects Grid */}
             <motion.div 
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6"
               layout
               transition={{ duration: 0.3 }}
             >
@@ -554,17 +554,17 @@ const Projects = () => {
             {/* Simplified Empty State */}
             {filteredProjects.length === 0 && (
               <motion.div 
-                className="text-center py-16"
+                className="text-center py-12 md:py-16 px-4"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.4 }}
               >
-                <div className="text-5xl mb-4">🔍</div>
-                <h3 className="text-2xl font-bold text-white mb-2">No Projects Found</h3>
-                <p className="text-gray-300 mb-6">No projects match the selected filter.</p>
+                <div className="text-4xl md:text-5xl mb-4">🔍</div>
+                <h3 className="text-xl md:text-2xl font-bold text-white mb-2">No Projects Found</h3>
+                <p className="text-gray-300 mb-4 md:mb-6 text-sm md:text-base">No projects match the selected filter.</p>
                 <motion.button
                   onClick={() => setActiveFilter("All")}
-                  className="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full font-semibold hover:shadow-md transition-all duration-200 cursor-pointer"
+                  className="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full font-semibold hover:shadow-md transition-all duration-200 cursor-pointer text-sm md:text-base touch-target"
                   whileHover={{ scale: 1.03, y: -1 }}
                   whileTap={{ scale: 0.97 }}
                   onMouseEnter={handleLinkCursor}
@@ -577,7 +577,7 @@ const Projects = () => {
 
             {/* Simplified CTA Section */}
             <motion.div 
-              className="mt-20"
+              className="mt-16 md:mt-20"
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}

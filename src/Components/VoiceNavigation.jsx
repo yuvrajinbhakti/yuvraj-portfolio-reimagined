@@ -289,7 +289,7 @@ const VoiceNavigation = () => {
       {/* Voice Navigation Button */}
       <motion.button
         onClick={toggleListening}
-        className={`fixed bottom-6 right-6 z-50 w-16 h-16 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center ${
+        className={`fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 w-14 h-14 md:w-16 md:h-16 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center ${
           isListening 
             ? 'bg-red-500 hover:bg-red-600 animate-pulse' 
             : 'bg-blue-600 hover:bg-blue-700'
@@ -303,11 +303,12 @@ const VoiceNavigation = () => {
           <motion.div
             animate={{ scale: [1, 1.2, 1] }}
             transition={{ duration: 1, repeat: Infinity }}
+            className="text-xl md:text-2xl"
           >
             🎤
           </motion.div>
         ) : (
-          '🎙️'
+          <span className="text-xl md:text-2xl">🎙️</span>
         )}
       </motion.button>
 
@@ -318,9 +319,9 @@ const VoiceNavigation = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="fixed bottom-24 right-6 z-50 max-w-sm"
+            className="fixed bottom-20 right-4 md:bottom-24 md:right-6 z-50 max-w-xs md:max-w-sm"
           >
-            <div className="bg-black/90 backdrop-blur-sm text-white p-4 rounded-lg border border-white/20 shadow-xl relative">
+            <div className="bg-black/90 backdrop-blur-sm text-white p-3 md:p-4 rounded-lg border border-white/20 shadow-xl relative">
               {isListening && (
                 <div className="mb-2">
                   <div className="flex items-center gap-2 mb-2">
@@ -329,11 +330,11 @@ const VoiceNavigation = () => {
                       transition={{ duration: 0.5, repeat: Infinity }}
                       className="w-2 h-2 bg-red-500 rounded-full"
                     />
-                    <span className="text-sm font-medium">Listening...</span>
+                    <span className="text-xs md:text-sm font-medium">Listening...</span>
                   </div>
                   
                   {transcript && (
-                    <div className="text-sm text-gray-300 mb-2">
+                    <div className="text-xs md:text-sm text-gray-300 mb-2 break-words">
                       &ldquo;{transcript}&rdquo;
                     </div>
                   )}
@@ -347,7 +348,7 @@ const VoiceNavigation = () => {
               )}
               
               {showFeedback && lastCommand && (
-                <div className="text-sm text-green-400">
+                <div className="text-xs md:text-sm text-green-400 break-words">
                   {lastCommand}
                 </div>
               )}
@@ -370,8 +371,11 @@ const VoiceNavigation = () => {
                 </div>
               )}
               
-              <div className="text-xs text-gray-400 mt-2">
+              <div className="text-xs text-gray-400 mt-2 hidden md:block">
                 Try: &ldquo;go home&rdquo;, &ldquo;go projects&rdquo;, &ldquo;go playground&rdquo;, &ldquo;play music&rdquo;
+              </div>
+              <div className="text-xs text-gray-400 mt-2 md:hidden">
+                Try: &ldquo;go home&rdquo;, &ldquo;projects&rdquo;, &ldquo;help&rdquo;
               </div>
             </div>
           </motion.div>
@@ -385,19 +389,19 @@ const VoiceNavigation = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
             onClick={hideFeedback}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-md mx-4"
+              className="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-lg shadow-xl max-w-sm md:max-w-md w-full max-h-[90vh] overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                  Voice Navigation Commands
+                  Voice Commands
                 </h3>
                 <button
                   onClick={hideFeedback}
@@ -412,46 +416,37 @@ const VoiceNavigation = () => {
               <div className="space-y-3 text-sm text-gray-700 dark:text-gray-300">
                 <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
                   <p className="text-xs text-blue-600 dark:text-blue-400 mb-2">
-                    <strong>💡 Tip:</strong> Multiple patterns work for each page!
+                    <strong>💡 Tip:</strong> Multiple patterns work!
                   </p>
                   <p className="text-xs text-gray-600 dark:text-gray-400">
-                    Try: &ldquo;go [page]&rdquo;, &ldquo;go to [page]&rdquo;, &ldquo;show [page]&rdquo;, &ldquo;[page] page&rdquo;, or just &ldquo;[page]&rdquo;
+                    Try: &ldquo;go [page]&rdquo;, &ldquo;[page] page&rdquo;, or just &ldquo;[page]&rdquo;
                   </p>
                 </div>
                 
                 <div>
                   <strong>Navigation:</strong>
-                  <ul className="ml-4 mt-1 space-y-1">
-                    <li>• &ldquo;go home&rdquo; or &ldquo;home&rdquo;</li>
-                    <li>• &ldquo;go about&rdquo; or &ldquo;about&rdquo;</li>
-                    <li>• &ldquo;go projects&rdquo; or &ldquo;projects&rdquo;</li>
-                    <li>• &ldquo;go playground&rdquo; or &ldquo;playground&rdquo;</li>
-                    <li>• &ldquo;go contact&rdquo; or &ldquo;contact&rdquo;</li>
+                  <ul className="ml-4 mt-1 space-y-1 text-xs md:text-sm">
+                    <li>• &ldquo;home&rdquo; or &ldquo;go home&rdquo;</li>
+                    <li>• &ldquo;about&rdquo; or &ldquo;go about&rdquo;</li>
+                    <li>• &ldquo;projects&rdquo; or &ldquo;go projects&rdquo;</li>
+                    <li>• &ldquo;playground&rdquo; or &ldquo;go playground&rdquo;</li>
+                    <li>• &ldquo;contact&rdquo; or &ldquo;go contact&rdquo;</li>
                   </ul>
                 </div>
                 
                 <div>
-                  <strong>Scrolling:</strong>
-                  <ul className="ml-4 mt-1 space-y-1">
-                    <li>• &ldquo;scroll up&rdquo; or &ldquo;scroll down&rdquo;</li>
-                    <li>• &ldquo;go to top&rdquo; or &ldquo;scroll to bottom&rdquo;</li>
-                  </ul>
-                </div>
-                
-                <div>
-                  <strong>Accessibility:</strong>
-                  <ul className="ml-4 mt-1 space-y-1">
-                    <li>• &ldquo;increase text size&rdquo;</li>
-                    <li>• &ldquo;decrease text size&rdquo;</li>
-                    <li>• &ldquo;play music&rdquo; or &ldquo;stop music&rdquo;</li>
-                    <li>• &ldquo;toggle music&rdquo;</li>
+                  <strong>Actions:</strong>
+                  <ul className="ml-4 mt-1 space-y-1 text-xs md:text-sm">
+                    <li>• &ldquo;scroll up&rdquo; / &ldquo;scroll down&rdquo;</li>
+                    <li>• &ldquo;play music&rdquo; / &ldquo;stop music&rdquo;</li>
+                    <li>• &ldquo;help&rdquo; for this menu</li>
                   </ul>
                 </div>
               </div>
               
               <button
                 onClick={hideFeedback}
-                className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition-colors"
+                className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition-colors text-sm md:text-base"
               >
                 Got it!
               </button>

@@ -36,7 +36,13 @@ body {
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
+  }
+  
+  @media (min-width: 768px) {
+    ::-webkit-scrollbar {
+    width: 8px;
+    }
 }
 
 ::-webkit-scrollbar-track {
@@ -52,6 +58,85 @@ body {
   background: #2563eb;
 }
 
+/* Mobile-first responsive text sizes */
+.responsive-text-xs {
+  font-size: 0.75rem;
+}
+
+.responsive-text-sm {
+  font-size: 0.875rem;
+}
+
+.responsive-text-base {
+  font-size: 1rem;
+}
+
+.responsive-text-lg {
+  font-size: 1.125rem;
+}
+
+.responsive-text-xl {
+  font-size: 1.25rem;
+}
+
+.responsive-text-2xl {
+  font-size: 1.5rem;
+}
+
+.responsive-text-3xl {
+  font-size: 1.875rem;
+}
+
+.responsive-text-4xl {
+  font-size: 2.25rem;
+}
+
+@media (min-width: 768px) {
+  .responsive-text-xs {
+    font-size: 0.875rem;
+  }
+
+  .responsive-text-sm {
+    font-size: 1rem;
+  }
+
+  .responsive-text-base {
+    font-size: 1.125rem;
+  }
+
+  .responsive-text-lg {
+    font-size: 1.25rem;
+  }
+
+  .responsive-text-xl {
+    font-size: 1.5rem;
+  }
+
+  .responsive-text-2xl {
+    font-size: 2rem;
+  }
+
+  .responsive-text-3xl {
+    font-size: 2.5rem;
+  }
+
+  .responsive-text-4xl {
+    font-size: 3rem;
+  }
+}
+
+/* Mobile touch targets */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+@media (max-width: 767px) {
+  .touch-target {
+    min-height: 48px;
+    min-width: 48px;
+  }
+}
 /* Animations */
 @keyframes float {
 
@@ -95,6 +180,12 @@ body {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
+@media (max-width: 767px) {
+  .glass-effect {
+    backdrop-filter: blur(6px);
+    background: rgba(15, 23, 42, 0.8);
+  }
+}
 .text-gradient {
   background: linear-gradient(90deg, #3b82f6, #8b5cf6);
   -webkit-background-clip: text;
@@ -105,6 +196,28 @@ body {
 /* 3D perspective container */
 .perspective-container {
   perspective: 1000px;
+}
+/* Mobile-specific improvements */
+@media (max-width: 767px) {
+
+  /* Reduce motion for better mobile performance */
+  .reduce-motion {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* Better mobile spacing */
+  .mobile-padding {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  /* Mobile-friendly cards */
+  .mobile-card {
+    border-radius: 0.75rem;
+    padding: 1rem;
+  }
 }
 :root {
   --blue-rgb: 237 245 255;
@@ -125,15 +238,15 @@ body:has(.card[data-color="green"]:hover) {
 
 @layer utilities {
   .max-container {
-    @apply max-w-5xl mx-auto sm:p-16 pb-12 !pt-[126px] px-8 min-h-[calc(100vh-80px)];
+    @apply max-w-5xl mx-auto sm:p-16 pb-12 !pt-[126px] px-4 sm:px-8 min-h-[calc(100vh-80px)];
   }
 
   .head-text {
-    @apply sm:text-5xl text-3xl font-semibold sm:leading-snug font-poppins;
+    @apply text-2xl sm:text-3xl md:text-5xl font-semibold sm:leading-snug font-poppins;
   }
 
   .subhead-text {
-    @apply font-semibold sm:text-3xl text-xl relative font-poppins;
+    @apply font-semibold text-lg sm:text-xl md:text-3xl relative font-poppins;
   }
 
   .blue-gradient_text {
@@ -153,11 +266,11 @@ body:has(.card[data-color="green"]:hover) {
   }
 
   .header {
-    @apply flex justify-between items-center sm:px-16 px-8 py-4 max-w-5xl mx-auto absolute top-0 bg-transparent z-10 right-0 left-0;
+    @apply flex justify-between items-center px-4 sm:px-8 md:px-16 py-4 max-w-5xl mx-auto absolute top-0 bg-transparent z-10 right-0 left-0;
   }
 
   .footer {
-    @apply max-w-5xl mx-auto sm:px-16 pb-6 px-8 flex flex-col gap-7;
+    @apply max-w-5xl mx-auto px-4 sm:px-8 md:px-16 pb-6 flex flex-col gap-7;
   }
 
   .footer-container {
@@ -177,7 +290,7 @@ body:has(.card[data-color="green"]:hover) {
   }
 
   .cta-text {
-    @apply text-black-500 font-extrabold flex-1 text-3xl max-md:text-center;
+    @apply text-black-500 font-extrabold flex-1 text-2xl md:text-3xl max-md:text-center;
   }
 }
 
@@ -189,6 +302,13 @@ body:has(.card[data-color="green"]:hover) {
   border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
+@media (max-width: 767px) {
+  .glassmorphism {
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border-radius: 8px;
+  }
+}
 .logo {
   border-radius: 8.889px;
   background: #fff;
