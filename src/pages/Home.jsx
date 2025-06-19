@@ -112,7 +112,7 @@ const Home = () => {
             </div>
             
             {/* Content Overlay */}
-            <div className="relative z-20 container mx-auto px-4 bg-transparent">
+            <div className="relative z-20 container mx-auto px-2 bg-transparent pt-32 md:pt-40">
               <motion.div
                 className="text-center max-w-4xl mx-auto bg-transparent"
                 variants={containerVariants}

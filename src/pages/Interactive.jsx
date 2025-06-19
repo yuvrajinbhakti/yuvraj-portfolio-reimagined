@@ -91,7 +91,7 @@ const Interactive = () => {
         {/* <ARBusinessCard /> */}
 
         {/* Hero Section with Enhanced Animations */}
-        <section className="relative py-20 px-4 overflow-hidden">
+        <section className="relative pt-24 md:pt-32 pb-20 px-4 overflow-hidden">
           {/* Floating Background Elements */}
           <motion.div
             className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-xl"

@@ -49,7 +49,7 @@ const ARExperience = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white p-4">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white pt-24 md:pt-32 p-4">
       {/* AR Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}

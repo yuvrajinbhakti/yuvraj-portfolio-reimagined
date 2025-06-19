@@ -230,7 +230,7 @@ const NotFound = () => {
       </AnimatePresence>
 
       {/* Main Content */}
-      <div className="relative min-h-screen flex items-center justify-center px-4" style={{ zIndex: 1 }}>
+      <div className="relative min-h-screen flex items-center justify-center px-4 pt-24 md:pt-32" style={{ zIndex: 1 }}>
         <motion.div 
           className="text-center max-w-6xl mx-auto"
           variants={containerVariants}
