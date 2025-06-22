@@ -4,13 +4,173 @@ import GlassCard from "./GlassCard";
 import ScrollReveal from "./ScrollReveal";
 
 const CTA = () => {
-  // RESUME HANDLING OPTIONS:
-
-  // CURRENT METHOD: GitHub Releases (Now Active!)
-  const handleResumeDownload = () => {
-    const resumeUrl = "https://github.com/yuvrajinbhakti/yuvraj-portfolio-reimagined/releases/latest/download/Yuvraj_Rzp_Latest_Resume_5.pdf";
-    window.open(resumeUrl, '_blank');
+  // DYNAMIC RESUME DOWNLOAD - Automatically finds latest PDF from GitHub releases
+  const handleResumeDownload = async () => {
+    try {
+      // Your GitHub repository details
+      const owner = 'yuvrajinbhakti';
+      const repo = 'yuvraj-portfolio-reimagined';
+      
+      // Fetch latest release from GitHub API
+      const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/releases/latest`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch latest release');
+      }
+      
+      const releaseData = await response.json();
+      
+      // Find the first PDF file in the release assets
+      const pdfAsset = releaseData.assets.find(asset => 
+        asset.name.toLowerCase().endsWith('.pdf')
+      );
+      
+      if (pdfAsset) {
+        // Open the PDF download URL
+        window.open(pdfAsset.browser_download_url, '_blank');
+      } else {
+        // Fallback: If no PDF found, you can either show an alert or use a backup method
+        console.warn('No PDF file found in the latest release');
+        alert('Resume is currently being updated. Please try again in a few minutes or contact me directly.');
+      }
+    } catch (error) {
+      console.error('Error downloading resume:', error);
+      // Fallback: You could redirect to contact page or show an alert
+      alert('Unable to download resume at the moment. Please contact me directly for a copy.');
+    }
   };
+
+  // Enhanced Contact Icon Component
+  const ContactIcon = () => (
+    <motion.svg 
+      className="w-5 h-5 flex-shrink-0" 
+      fill="none" 
+      stroke="currentColor" 
+      viewBox="0 0 24 24"
+      whileHover={{ 
+        scale: 1.1,
+        rotate: [0, -10, 10, 0],
+        transition: { duration: 0.3 }
+      }}
+    >
+      <motion.path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 2, ease: "easeInOut" }}
+      />
+      {/* Animated dots */}
+      <motion.circle
+        cx="8"
+        cy="12"
+        r="1"
+        fill="currentColor"
+        animate={{ 
+          scale: [1, 1.3, 1],
+          opacity: [0.7, 1, 0.7]
+        }}
+        transition={{ 
+          duration: 2,
+          repeat: Infinity,
+          delay: 0
+        }}
+      />
+      <motion.circle
+        cx="12"
+        cy="12"
+        r="1"
+        fill="currentColor"
+        animate={{ 
+          scale: [1, 1.3, 1],
+          opacity: [0.7, 1, 0.7]
+        }}
+        transition={{ 
+          duration: 2,
+          repeat: Infinity,
+          delay: 0.3
+        }}
+      />
+      <motion.circle
+        cx="16"
+        cy="12"
+        r="1"
+        fill="currentColor"
+        animate={{ 
+          scale: [1, 1.3, 1],
+          opacity: [0.7, 1, 0.7]
+        }}
+        transition={{ 
+          duration: 2,
+          repeat: Infinity,
+          delay: 0.6
+        }}
+      />
+    </motion.svg>
+  );
+
+  // Enhanced Download Icon Component
+  const DownloadIcon = () => (
+    <motion.svg 
+      className="w-5 h-5 flex-shrink-0" 
+      fill="none" 
+      stroke="currentColor" 
+      viewBox="0 0 24 24"
+      whileHover={{ 
+        scale: 1.1,
+        y: [0, -2, 0],
+        transition: { duration: 0.3 }
+      }}
+    >
+      {/* Document outline */}
+      <motion.path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+        initial={{ pathLength: 0, opacity: 0 }}
+        animate={{ pathLength: 1, opacity: 1 }}
+        transition={{ duration: 1.5, ease: "easeInOut" }}
+      />
+      
+      {/* Animated download arrow */}
+      <motion.g
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5, duration: 0.5 }}
+      >
+        <motion.path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2.5}
+          d="M12 8v8m0 0l3-3m-3 3l-3-3"
+          stroke="currentColor"
+          animate={{
+            y: [0, 2, 0],
+            opacity: [0.8, 1, 0.8]
+          }}
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+      </motion.g>
+      
+      {/* Document corner fold */}
+      <motion.path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M13 3L18 8H13V3z"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1, duration: 0.5 }}
+      />
+    </motion.svg>
+  );
 
   // ALTERNATIVE METHODS (Replace above function with any of these):
 
@@ -66,9 +226,7 @@ const CTA = () => {
               className="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:translate-y-[-2px] hover:shadow-xl hover:shadow-blue-500/25 relative overflow-hidden group min-w-[180px] font-medium"
             >
               <span className="relative z-10 flex items-center justify-center gap-2">
-                <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
+                <ContactIcon />
                 <span>Contact Me</span>
               </span>
               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
@@ -81,9 +239,7 @@ const CTA = () => {
               className="inline-flex items-center justify-center px-8 py-4 bg-transparent border border-white/30 backdrop-blur-sm text-white rounded-lg hover:bg-white/10 hover:border-white/50 transition-all duration-300 transform hover:translate-y-[-2px] hover:shadow-xl hover:shadow-white/10 relative overflow-hidden group min-w-[180px] font-medium"
             >
               <span className="relative z-10 flex items-center justify-center gap-2">
-                <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+                <DownloadIcon />
                 <span>Download Resume</span>
               </span>
               <div className="absolute inset-0 bg-gradient-to-r from-blue-600/0 via-blue-600/20 to-blue-600/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
