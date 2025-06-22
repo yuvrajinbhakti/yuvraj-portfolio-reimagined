@@ -113,9 +113,9 @@ const Home = () => {
             </div>
             
             {/* Content Overlay */}
-            <div className="relative z-20 container mx-auto px-2 bg-transparent pt-32 md:pt-40">
+            <div className="relative z-20 container mx-auto px-4 sm:px-6 md:px-8 bg-transparent pt-32 md:pt-40">
               <motion.div
-                className="text-center max-w-4xl mx-auto bg-transparent"
+                className="text-center max-w-5xl mx-auto bg-transparent overflow-hidden"
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
@@ -126,26 +126,26 @@ const Home = () => {
                 </motion.div>
                 
                 {/* CTA Buttons */}
-                <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center mb-8 md:mb-10 px-4">
+                <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-4 justify-center mb-6 sm:mb-8 md:mb-10 px-2 sm:px-4">
                   <Link
                     to="/projects"
-                    className="px-6 py-3 md:px-8 md:py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 transform hover:translate-y-[-2px] hover:shadow-xl flex items-center justify-center gap-2 text-sm md:text-base"
+                    className="w-full sm:w-auto px-6 py-3 sm:px-7 md:px-8 sm:py-3 md:py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 transform hover:translate-y-[-2px] hover:shadow-xl flex items-center justify-center gap-2 text-sm sm:text-base font-medium"
                   >
                     <span>View Projects</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 md:h-5 md:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-4 sm:w-4 md:h-5 md:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>
                   </Link>
                   <Link
                     to="/contact"
-                    className="px-6 py-3 md:px-8 md:py-4 bg-transparent border border-white/30 text-white rounded-lg hover:bg-white/10 transition-all duration-300 transform hover:translate-y-[-2px] hover:shadow-xl text-sm md:text-base"
+                    className="w-full sm:w-auto px-6 py-3 sm:px-7 md:px-8 sm:py-3 md:py-4 bg-transparent border border-white/30 text-white rounded-lg hover:bg-white/10 transition-all duration-300 transform hover:translate-y-[-2px] hover:shadow-xl text-sm sm:text-base font-medium"
                   >
                     Contact Me
                   </Link>
                 </motion.div>
                 
                 {/* Social Links */}
-                <motion.div variants={itemVariants} className="flex justify-center gap-3 md:gap-4 flex-wrap mb-6 md:mb-8">
+                <motion.div variants={itemVariants} className="flex justify-center gap-2 sm:gap-3 md:gap-4 flex-wrap mb-8 sm:mb-10 md:mb-12 px-2">
                   {socialLinks.map((link, index) => {
                     // Enhanced Icon Components
                     const IconComponent = ({ name, className }) => {
@@ -303,22 +303,22 @@ const Home = () => {
                     };
 
                     return (
-                    <motion.a
-                      key={link.name}
-                      href={link.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                        className="group relative w-12 h-12 md:w-16 md:h-16 rounded-2xl flex items-center justify-center bg-gradient-to-br from-blue-600/10 via-purple-600/10 to-cyan-600/10 backdrop-blur-xl border border-white/20 transition-all duration-500 transform hover:scale-110 hover:rotate-3 hover:shadow-2xl hover:shadow-blue-500/30 hover:border-white/40 overflow-hidden"
-                      aria-label={link.name}
-                      whileHover={{ 
-                        scale: 1.15, 
-                        rotate: 5,
+                      <motion.a
+                        key={link.name}
+                        href={link.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group relative w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center bg-gradient-to-br from-blue-600/10 via-purple-600/10 to-cyan-600/10 backdrop-blur-xl border border-white/20 transition-all duration-500 transform hover:scale-110 hover:rotate-3 hover:shadow-2xl hover:shadow-blue-500/30 hover:border-white/40 overflow-hidden touch-manipulation"
+                        aria-label={link.name}
+                        whileHover={{ 
+                          scale: 1.15, 
+                          rotate: 5,
                           transition: { duration: 0.3, ease: "easeOut" }
-                      }}
-                      whileTap={{ 
-                        scale: 0.95,
-                        transition: { duration: 0.1 }
-                      }}
+                        }}
+                        whileTap={{ 
+                          scale: 0.95,
+                          transition: { duration: 0.1 }
+                        }}
                         initial={{ opacity: 0, y: 30, scale: 0.8 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         transition={{ 
@@ -330,7 +330,7 @@ const Home = () => {
                       >
                         {/* Animated background gradients */}
                         <motion.div 
-                          className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500 opacity-0 group-hover:opacity-20 transition-all duration-500"
+                          className="absolute inset-0 rounded-xl sm:rounded-2xl bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500 opacity-0 group-hover:opacity-20 transition-all duration-500"
                           animate={{
                             background: [
                               "linear-gradient(45deg, #3b82f6, #8b5cf6, #06b6d4)",
@@ -350,7 +350,7 @@ const Home = () => {
                         {[...Array(6)].map((_, i) => (
                           <motion.div
                             key={i}
-                            className="absolute w-1 h-1 bg-white/30 rounded-full"
+                            className="absolute w-0.5 h-0.5 sm:w-1 sm:h-1 bg-white/30 rounded-full"
                             style={{
                               left: `${20 + i * 10}%`,
                               top: `${10 + i * 15}%`,
@@ -371,7 +371,7 @@ const Home = () => {
                         
                         {/* Enhanced glow ring */}
                         <motion.div 
-                          className="absolute inset-1 rounded-xl border border-white/10 opacity-0 group-hover:opacity-100 transition-all duration-500"
+                          className="absolute inset-1 rounded-lg sm:rounded-xl border border-white/10 opacity-0 group-hover:opacity-100 transition-all duration-500"
                           animate={{
                             borderColor: [
                               "rgba(255,255,255,0.1)",
@@ -388,33 +388,33 @@ const Home = () => {
                           }}
                         />
                         
-                                                 {/* Icon container with enhanced styling */}
-                         <div className="relative z-10 w-6 h-6 md:w-8 md:h-8 transition-all duration-500 group-hover:scale-110">
-                          <div className="w-full h-full rounded-xl bg-black/20 backdrop-blur-sm flex items-center justify-center p-2 group-hover:bg-black/30 transition-all duration-500 border border-white/10 group-hover:border-white/20">
+                        {/* Icon container with enhanced styling */}
+                        <div className="relative z-10 w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 transition-all duration-500 group-hover:scale-110">
+                          <div className="w-full h-full rounded-lg sm:rounded-xl bg-black/20 backdrop-blur-sm flex items-center justify-center p-1 sm:p-1.5 md:p-2 group-hover:bg-black/30 transition-all duration-500 border border-white/10 group-hover:border-white/20">
                             <IconComponent 
                               name={link.name}
                               className="w-full h-full text-white/90 group-hover:text-white transition-all duration-500 drop-shadow-lg"
                             />
                           </div>
-                      </div>
-                      
+                        </div>
+                        
                         {/* Premium tooltip with animation */}
                         <motion.div 
-                          className="absolute -top-12 md:-top-14 left-1/2 transform -translate-x-1/2 bg-black/95 text-white text-xs px-3 py-2 md:px-4 md:py-2 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none backdrop-blur-sm border border-white/20 shadow-2xl whitespace-nowrap font-medium"
+                          className="absolute -top-10 sm:-top-12 md:-top-14 left-1/2 transform -translate-x-1/2 bg-black/95 text-white text-xs px-2 py-1 sm:px-3 sm:py-2 md:px-4 md:py-2 rounded-lg sm:rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none backdrop-blur-sm border border-white/20 shadow-2xl whitespace-nowrap font-medium"
                           initial={{ y: 10, opacity: 0 }}
                           whileHover={{ y: 0, opacity: 1 }}
                         >
-                        {link.name}
+                          {link.name}
                           {/* Enhanced arrow */}
-                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-6 border-transparent border-t-black/95"></div>
+                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-3 border-r-3 border-t-4 sm:border-l-4 sm:border-r-4 sm:border-t-6 border-transparent border-t-black/95"></div>
                           
                           {/* Glowing effect for tooltip */}
-                          <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500/20 to-purple-500/20 -z-10 blur-sm"></div>
+                          <div className="absolute inset-0 rounded-lg sm:rounded-xl bg-gradient-to-r from-blue-500/20 to-purple-500/20 -z-10 blur-sm"></div>
                         </motion.div>
                         
                         {/* Click ripple effect */}
                         <motion.div
-                          className="absolute inset-0 rounded-2xl bg-white/20"
+                          className="absolute inset-0 rounded-xl sm:rounded-2xl bg-white/20"
                           initial={{ scale: 0, opacity: 0 }}
                           whileTap={{ 
                             scale: 1.5, 
@@ -422,7 +422,7 @@ const Home = () => {
                             transition: { duration: 0.4 }
                           }}
                         />
-                    </motion.a>
+                      </motion.a>
                     );
                   })}
                 </motion.div>

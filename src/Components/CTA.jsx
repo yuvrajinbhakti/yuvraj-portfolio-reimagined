@@ -191,9 +191,9 @@ const CTA = () => {
 
   return (
     <ScrollReveal animation="fade">
-      <GlassCard className="p-8 text-center">
+      <GlassCard className="p-4 sm:p-6 md:p-8 text-center">
         <motion.h2 
-          className="text-3xl font-bold text-white mb-4"
+          className="text-2xl sm:text-3xl md:text-3xl font-bold text-white mb-3 sm:mb-4 md:mb-4"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
@@ -201,7 +201,7 @@ const CTA = () => {
           Let&apos;s Work <span className="text-blue-400">Together</span>
         </motion.h2>
         <motion.p 
-          className="text-gray-300 mb-6 max-w-2xl mx-auto"
+          className="text-gray-300 mb-4 sm:mb-6 md:mb-6 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed px-2 sm:px-4"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
@@ -210,7 +210,7 @@ const CTA = () => {
           If you&apos;re looking for a developer who can bring your ideas to life, let&apos;s talk!
         </motion.p>
         <motion.div 
-          className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+          className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-4 justify-center items-center px-2 sm:px-0"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
@@ -218,7 +218,7 @@ const CTA = () => {
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Link
               to="/contact"
-              className="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:translate-y-[-2px] hover:shadow-xl hover:shadow-blue-500/25 relative overflow-hidden group min-w-[180px] font-medium"
+              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 sm:px-7 md:px-8 sm:py-3 md:py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:translate-y-[-2px] hover:shadow-xl hover:shadow-blue-500/25 relative overflow-hidden group min-w-[160px] sm:min-w-[180px] font-medium text-sm sm:text-base"
             >
               <span className="relative z-10 flex items-center justify-center gap-2">
                 <ContactIcon />
@@ -231,7 +231,7 @@ const CTA = () => {
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <button
               onClick={handleResumeDownload}
-              className="inline-flex items-center justify-center px-8 py-4 bg-transparent border border-white/30 backdrop-blur-sm text-white rounded-lg hover:bg-white/10 hover:border-white/50 transition-all duration-300 transform hover:translate-y-[-2px] hover:shadow-xl hover:shadow-white/10 relative overflow-hidden group min-w-[180px] font-medium"
+              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 sm:px-7 md:px-8 sm:py-3 md:py-4 bg-transparent border border-white/30 backdrop-blur-sm text-white rounded-lg hover:bg-white/10 hover:border-white/50 transition-all duration-300 transform hover:translate-y-[-2px] hover:shadow-xl hover:shadow-white/10 relative overflow-hidden group min-w-[160px] sm:min-w-[180px] font-medium text-sm sm:text-base"
             >
               <span className="relative z-10 flex items-center justify-center gap-2">
                 <DownloadIcon />

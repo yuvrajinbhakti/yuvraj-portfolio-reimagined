@@ -195,21 +195,21 @@ const TextEffect = () => {
   
   return (
     <div className="text-effect-container relative z-30 bg-transparent">
-      <div className="mb-4 overflow-hidden bg-transparent">
+      <div className="mb-4 overflow-hidden bg-transparent px-2 sm:px-4">
         <AnimatedText 
           text="I'm Yuvraj Singh Nain" 
           type="character" 
-          className="text-4xl md:text-6xl font-bold text-white" 
+          className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-6xl font-bold text-white leading-tight" 
           delay={0.5}
           staggerDelay={0.05}
         />
       </div>
       
-      <div className="overflow-hidden bg-transparent">
+      <div className="overflow-hidden bg-transparent px-2 sm:px-4">
         <AnimatedText 
           text="Full Stack Developer & Software Engineer" 
           type="split-words" 
-          className="text-xl md:text-2xl text-blue-300 mb-4" 
+          className="text-base sm:text-lg md:text-xl lg:text-2xl text-blue-300 mb-4 leading-relaxed" 
           delay={1.5}
           duration={0.7}
           staggerDelay={0.06}
@@ -217,11 +217,11 @@ const TextEffect = () => {
       </div>
       
       {animate && (
-        <div className="mt-6 overflow-hidden bg-transparent">
+        <div className="mt-6 overflow-hidden bg-transparent px-2 sm:px-4">
           <AnimatedText 
             text="Building digital experiences that inspire!" 
             type="glitch" 
-            className="text-lg md:text-xl text-gray-300" 
+            className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300 leading-relaxed" 
             delay={2.5}
             duration={1}
           />
