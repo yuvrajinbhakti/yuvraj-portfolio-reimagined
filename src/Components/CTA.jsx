@@ -4,6 +4,7 @@ import GlassCard from "./GlassCard";
 import ScrollReveal from "./ScrollReveal";
 
 const CTA = () => {
+
   // DYNAMIC RESUME DOWNLOAD - Automatically finds latest PDF from GitHub releases
   const handleResumeDownload = async () => {
     try {
@@ -11,14 +12,44 @@ const CTA = () => {
       const owner = 'yuvrajinbhakti';
       const repo = 'yuvraj-portfolio-reimagined';
       
-      // Fetch latest release from GitHub API
-      const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/releases/latest`);
+      // Add cache-busting parameters and headers
+      const timestamp = Date.now();
+      const apiUrl = `https://api.github.com/repos/${owner}/${repo}/releases/latest?t=${timestamp}`;
+      
+      console.log('Fetching latest release from:', apiUrl);
+      
+      // Fetch latest release from GitHub API with cache-busting headers
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/vnd.github.v3+json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        },
+        cache: 'no-store' // Force no caching
+      });
       
       if (!response.ok) {
-        throw new Error('Failed to fetch latest release');
+        throw new Error(`GitHub API responded with status: ${response.status}`);
       }
       
       const releaseData = await response.json();
+      
+      console.log('Release data:', {
+        tag_name: releaseData.tag_name,
+        published_at: releaseData.published_at,
+        draft: releaseData.draft,
+        prerelease: releaseData.prerelease,
+        assets_count: releaseData.assets?.length || 0
+      });
+      
+      // Check if this is a draft or prerelease
+      if (releaseData.draft) {
+        console.warn('Latest release is a draft');
+        alert('The latest resume is still being prepared. Please try again shortly or contact me directly.');
+        return;
+      }
       
       // Find the first PDF file in the release assets
       const pdfAsset = releaseData.assets.find(asset => 
@@ -26,17 +57,36 @@ const CTA = () => {
       );
       
       if (pdfAsset) {
-        // Open the PDF download URL
-        window.open(pdfAsset.browser_download_url, '_blank');
+        console.log('Found PDF asset:', {
+          name: pdfAsset.name,
+          size: pdfAsset.size,
+          download_count: pdfAsset.download_count,
+          updated_at: pdfAsset.updated_at
+        });
+        
+        // Add cache-busting to the download URL
+        const downloadUrl = `${pdfAsset.browser_download_url}?t=${timestamp}&cb=${Math.random()}`;
+        console.log('Opening download URL:', downloadUrl);
+        
+        // Open the PDF download URL with cache busting
+        window.open(downloadUrl, '_blank');
+        
+        // Optional: Show success message
+        console.log('Resume download initiated successfully');
+        
       } else {
-        // Fallback: If no PDF found, you can either show an alert or use a backup method
-        console.warn('No PDF file found in the latest release');
-        alert('Resume is currently being updated. Please try again in a few minutes or contact me directly.');
+        console.warn('No PDF file found in release assets:', releaseData.assets?.map(asset => asset.name));
+        alert('Resume file not found in the latest release. Please contact me directly for a copy.');
       }
     } catch (error) {
       console.error('Error downloading resume:', error);
-      // Fallback: You could redirect to contact page or show an alert
-      alert('Unable to download resume at the moment. Please contact me directly for a copy.');
+      console.error('Full error details:', {
+        message: error.message,
+        stack: error.stack
+      });
+      
+      // More helpful error message
+      alert(`Unable to download resume: ${error.message}. Please try refreshing the page or contact me directly.`);
     }
   };
 

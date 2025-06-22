@@ -303,22 +303,22 @@ const Home = () => {
                     };
 
                     return (
-                      <motion.a
-                        key={link.name}
-                        href={link.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                    <motion.a
+                      key={link.name}
+                      href={link.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
                         className="group relative w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center bg-gradient-to-br from-blue-600/10 via-purple-600/10 to-cyan-600/10 backdrop-blur-xl border border-white/20 transition-all duration-500 transform hover:scale-110 hover:rotate-3 hover:shadow-2xl hover:shadow-blue-500/30 hover:border-white/40 overflow-hidden"
-                        aria-label={link.name}
-                        whileHover={{ 
-                          scale: 1.15, 
-                          rotate: 5,
+                      aria-label={link.name}
+                      whileHover={{ 
+                        scale: 1.15, 
+                        rotate: 5,
                           transition: { duration: 0.3, ease: "easeOut" }
-                        }}
-                        whileTap={{ 
-                          scale: 0.95,
-                          transition: { duration: 0.1 }
-                        }}
+                      }}
+                      whileTap={{ 
+                        scale: 0.95,
+                        transition: { duration: 0.1 }
+                      }}
                         initial={{ opacity: 0, y: 30, scale: 0.8 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         transition={{ 
@@ -396,15 +396,15 @@ const Home = () => {
                               className="w-full h-full text-white/90 group-hover:text-white transition-all duration-500 drop-shadow-lg"
                             />
                           </div>
-                        </div>
-                        
+                      </div>
+                      
                         {/* Premium tooltip with animation */}
                         <motion.div 
                           className="absolute -top-12 md:-top-14 left-1/2 transform -translate-x-1/2 bg-black/95 text-white text-xs px-3 py-2 md:px-4 md:py-2 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none backdrop-blur-sm border border-white/20 shadow-2xl whitespace-nowrap font-medium"
                           initial={{ y: 10, opacity: 0 }}
                           whileHover={{ y: 0, opacity: 1 }}
                         >
-                          {link.name}
+                        {link.name}
                           {/* Enhanced arrow */}
                           <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-6 border-transparent border-t-black/95"></div>
                           
@@ -422,7 +422,7 @@ const Home = () => {
                             transition: { duration: 0.4 }
                           }}
                         />
-                      </motion.a>
+                    </motion.a>
                     );
                   })}
                 </motion.div>
