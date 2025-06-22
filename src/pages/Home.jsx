@@ -1,6 +1,7 @@
 import { useState, useEffect, Suspense, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion, useScroll, useTransform } from "framer-motion";
+import PropTypes from 'prop-types';
 
 // New components
 import HeroAnimation from "../Components/HeroAnimation";
@@ -145,51 +146,285 @@ const Home = () => {
                 
                 {/* Social Links */}
                 <motion.div variants={itemVariants} className="flex justify-center gap-4 md:gap-6 flex-wrap">
-                  {socialLinks.map((link, index) => (
-                    <motion.a
-                      key={link.name}
-                      href={link.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group relative w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-600/20 to-purple-600/20 backdrop-blur-sm border border-white/10 transition-all duration-300 transform hover:scale-110 hover:rotate-3 hover:shadow-xl hover:shadow-blue-500/25 hover:border-white/20"
-                      aria-label={link.name}
-                      whileHover={{ 
-                        scale: 1.15, 
-                        rotate: 5,
-                        transition: { duration: 0.2 }
-                      }}
-                      whileTap={{ 
-                        scale: 0.95,
-                        transition: { duration: 0.1 }
-                      }}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.1 * index, duration: 0.3 }}
-                    >
-                      {/* Enhanced glow effect */}
-                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur-sm"></div>
-                      
-                      {/* Icon background for better contrast */}
-                      <div className="absolute inset-2 rounded-lg bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      
-                      {/* Icon with consistent styling */}
-                      <div className="relative z-10 w-6 h-6 md:w-8 md:h-8 transition-all duration-300 group-hover:scale-110">
-                        <div className="w-full h-full rounded-lg bg-black/20 backdrop-blur-sm flex items-center justify-center p-1 group-hover:bg-black/30 transition-all duration-300 border border-white/10">
-                          <img 
-                            src={link.iconUrl} 
-                            alt={link.name} 
-                            className="w-full h-full object-contain opacity-90 group-hover:opacity-100 transition-all duration-300 group-hover:drop-shadow-lg"
+                  {socialLinks.map((link, index) => {
+                    // Enhanced Icon Components
+                    const IconComponent = ({ name, className }) => {
+                      IconComponent.propTypes = {
+                        name: PropTypes.string.isRequired,
+                        className: PropTypes.string
+                      };
+                      switch(name) {
+                        case 'Email':
+                          return (
+                            <motion.svg 
+                              className={className}
+                              fill="none" 
+                              stroke="currentColor" 
+                              viewBox="0 0 24 24"
+                              whileHover={{ rotate: [0, -10, 10, 0] }}
+                              transition={{ duration: 0.5 }}
+                            >
+                              <motion.path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                                initial={{ pathLength: 0 }}
+                                animate={{ pathLength: 1 }}
+                                transition={{ duration: 2, ease: "easeInOut", delay: index * 0.2 }}
+                              />
+                              {/* Animated @ symbol */}
+                              <motion.circle
+                                cx="12"
+                                cy="12"
+                                r="2"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth={1.5}
+                                initial={{ scale: 0, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                transition={{ delay: 1 + index * 0.2, duration: 0.5 }}
+                              />
+                              <motion.path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={1}
+                                d="M12 10v4"
+                                initial={{ pathLength: 0 }}
+                                animate={{ pathLength: 1 }}
+                                transition={{ delay: 1.3 + index * 0.2, duration: 0.3 }}
+                              />
+                            </motion.svg>
+                          );
+                        
+                        case 'GitHub':
+                          return (
+                            <motion.svg 
+                              className={className}
+                              fill="currentColor" 
+                              viewBox="0 0 24 24"
+                              whileHover={{ 
+                                scale: 1.1,
+                                rotate: 360 
+                              }}
+                              transition={{ duration: 0.6, ease: "easeInOut" }}
+                            >
+                              <motion.path
+                                d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
+                                initial={{ pathLength: 0, opacity: 0 }}
+                                animate={{ pathLength: 1, opacity: 1 }}
+                                transition={{ duration: 2, ease: "easeInOut", delay: index * 0.2 }}
+                              />
+                              {/* Animated stars around GitHub logo */}
+                              {[...Array(3)].map((_, i) => (
+                                <motion.circle
+                                  key={i}
+                                  cx={8 + i * 4}
+                                  cy={4 + i * 2}
+                                  r="0.5"
+                                  fill="currentColor"
+                                  initial={{ scale: 0, opacity: 0 }}
+                                  animate={{ 
+                                    scale: [0, 1, 0],
+                                    opacity: [0, 1, 0]
+                                  }}
+                                  transition={{
+                                    duration: 2,
+                                    repeat: Infinity,
+                                    delay: i * 0.3 + index * 0.2
+                                  }}
+                                />
+                              ))}
+                            </motion.svg>
+                          );
+                        
+                        case 'LinkedIn':
+                          return (
+                            <motion.svg 
+                              className={className}
+                              fill="currentColor" 
+                              viewBox="0 0 24 24"
+                              whileHover={{ 
+                                scale: 1.1,
+                                y: [-2, 0, -2]
+                              }}
+                              transition={{ duration: 0.5 }}
+                            >
+                              <motion.path
+                                d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
+                                initial={{ pathLength: 0, opacity: 0 }}
+                                animate={{ pathLength: 1, opacity: 1 }}
+                                transition={{ duration: 2, ease: "easeInOut", delay: index * 0.2 }}
+                              />
+                              {/* Animated connection dots */}
+                              <motion.g>
+                                <motion.circle
+                                  cx="6"
+                                  cy="6"
+                                  r="1"
+                                  fill="currentColor"
+                                  initial={{ scale: 0 }}
+                                  animate={{ 
+                                    scale: [0, 1.2, 1],
+                                    opacity: [0, 1, 1]
+                                  }}
+                                  transition={{ delay: 1 + index * 0.2, duration: 0.5 }}
+                                />
+                                <motion.circle
+                                  cx="18"
+                                  cy="6"
+                                  r="1"
+                                  fill="currentColor"
+                                  initial={{ scale: 0 }}
+                                  animate={{ 
+                                    scale: [0, 1.2, 1],
+                                    opacity: [0, 1, 1]
+                                  }}
+                                  transition={{ delay: 1.2 + index * 0.2, duration: 0.5 }}
+                                />
+                                <motion.line
+                                  x1="6"
+                                  y1="6"
+                                  x2="18"
+                                  y2="6"
+                                  stroke="currentColor"
+                                  strokeWidth="0.5"
+                                  initial={{ pathLength: 0, opacity: 0 }}
+                                  animate={{ pathLength: 1, opacity: 0.6 }}
+                                  transition={{ delay: 1.4 + index * 0.2, duration: 0.8 }}
+                                />
+                              </motion.g>
+                            </motion.svg>
+                          );
+                        
+                        default:
+                          return null;
+                      }
+                    };
+
+                    return (
+                      <motion.a
+                        key={link.name}
+                        href={link.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group relative w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center bg-gradient-to-br from-blue-600/10 via-purple-600/10 to-cyan-600/10 backdrop-blur-xl border border-white/20 transition-all duration-500 transform hover:scale-110 hover:rotate-3 hover:shadow-2xl hover:shadow-blue-500/30 hover:border-white/40 overflow-hidden"
+                        aria-label={link.name}
+                        whileHover={{ 
+                          scale: 1.15, 
+                          rotate: 5,
+                          transition: { duration: 0.3, ease: "easeOut" }
+                        }}
+                        whileTap={{ 
+                          scale: 0.95,
+                          transition: { duration: 0.1 }
+                        }}
+                        initial={{ opacity: 0, y: 30, scale: 0.8 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        transition={{ 
+                          delay: 0.1 * index, 
+                          duration: 0.5,
+                          type: "spring",
+                          stiffness: 100
+                        }}
+                      >
+                        {/* Animated background gradients */}
+                        <motion.div 
+                          className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500 opacity-0 group-hover:opacity-20 transition-all duration-500"
+                          animate={{
+                            background: [
+                              "linear-gradient(45deg, #3b82f6, #8b5cf6, #06b6d4)",
+                              "linear-gradient(90deg, #8b5cf6, #06b6d4, #3b82f6)",
+                              "linear-gradient(135deg, #06b6d4, #3b82f6, #8b5cf6)",
+                              "linear-gradient(45deg, #3b82f6, #8b5cf6, #06b6d4)"
+                            ]
+                          }}
+                          transition={{
+                            duration: 4,
+                            repeat: Infinity,
+                            ease: "linear"
+                          }}
+                        />
+                        
+                        {/* Floating particles effect */}
+                        {[...Array(6)].map((_, i) => (
+                          <motion.div
+                            key={i}
+                            className="absolute w-1 h-1 bg-white/30 rounded-full"
+                            style={{
+                              left: `${20 + i * 10}%`,
+                              top: `${10 + i * 15}%`,
+                            }}
+                            animate={{
+                              y: [-10, 10, -10],
+                              x: [-5, 5, -5],
+                              opacity: [0.3, 1, 0.3],
+                            }}
+                            transition={{
+                              duration: 3 + i * 0.5,
+                              repeat: Infinity,
+                              ease: "easeInOut",
+                              delay: i * 0.2,
+                            }}
                           />
+                        ))}
+                        
+                        {/* Enhanced glow ring */}
+                        <motion.div 
+                          className="absolute inset-1 rounded-xl border border-white/10 opacity-0 group-hover:opacity-100 transition-all duration-500"
+                          animate={{
+                            borderColor: [
+                              "rgba(255,255,255,0.1)",
+                              "rgba(59,130,246,0.3)",
+                              "rgba(139,92,246,0.3)",
+                              "rgba(6,182,212,0.3)",
+                              "rgba(255,255,255,0.1)"
+                            ]
+                          }}
+                          transition={{
+                            duration: 3,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                          }}
+                        />
+                        
+                        {/* Icon container with enhanced styling */}
+                        <div className="relative z-10 w-8 h-8 md:w-10 md:h-10 transition-all duration-500 group-hover:scale-110">
+                          <div className="w-full h-full rounded-xl bg-black/20 backdrop-blur-sm flex items-center justify-center p-2 group-hover:bg-black/30 transition-all duration-500 border border-white/10 group-hover:border-white/20">
+                            <IconComponent 
+                              name={link.name}
+                              className="w-full h-full text-white/90 group-hover:text-white transition-all duration-500 drop-shadow-lg"
+                            />
+                          </div>
                         </div>
-                      </div>
-                      
-                      {/* Enhanced tooltip */}
-                      <div className="absolute -top-10 md:-top-12 left-1/2 transform -translate-x-1/2 bg-black/90 text-white text-xs px-2 py-1 md:px-3 md:py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none backdrop-blur-sm border border-white/20 shadow-lg whitespace-nowrap">
-                        {link.name}
-                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-black/90"></div>
-                      </div>
-                    </motion.a>
-                  ))}
+                        
+                        {/* Premium tooltip with animation */}
+                        <motion.div 
+                          className="absolute -top-12 md:-top-14 left-1/2 transform -translate-x-1/2 bg-black/95 text-white text-xs px-3 py-2 md:px-4 md:py-2 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none backdrop-blur-sm border border-white/20 shadow-2xl whitespace-nowrap font-medium"
+                          initial={{ y: 10, opacity: 0 }}
+                          whileHover={{ y: 0, opacity: 1 }}
+                        >
+                          {link.name}
+                          {/* Enhanced arrow */}
+                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-6 border-transparent border-t-black/95"></div>
+                          
+                          {/* Glowing effect for tooltip */}
+                          <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500/20 to-purple-500/20 -z-10 blur-sm"></div>
+                        </motion.div>
+                        
+                        {/* Click ripple effect */}
+                        <motion.div
+                          className="absolute inset-0 rounded-2xl bg-white/20"
+                          initial={{ scale: 0, opacity: 0 }}
+                          whileTap={{ 
+                            scale: 1.5, 
+                            opacity: [0, 0.5, 0],
+                            transition: { duration: 0.4 }
+                          }}
+                        />
+                      </motion.a>
+                    );
+                  })}
                 </motion.div>
               </motion.div>
             </div>
