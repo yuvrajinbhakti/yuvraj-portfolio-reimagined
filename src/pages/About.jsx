@@ -333,7 +333,7 @@ const About = () => {
                     GitHub
                   </a>
                   <a
-                    href="https://drive.google.com/uc?id=1DB4Z1-gKTDQ6Q1_l-BkJhRXuBo1LOs15&export=download"
+                    href="https://drive.google.com/uc?id=1_dzEZhGuwzkkuKOPu-0xiafFrqLfB2Wg&export=download"
                     download
                     className="flex items-center gap-2 text-green-400 hover:text-green-300 transition-colors"
                   >
