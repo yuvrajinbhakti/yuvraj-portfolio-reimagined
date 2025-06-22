@@ -5,88 +5,33 @@ import ScrollReveal from "./ScrollReveal";
 
 const CTA = () => {
 
-  // DYNAMIC RESUME DOWNLOAD - Automatically finds latest PDF from GitHub releases
-  const handleResumeDownload = async () => {
+  // SIMPLE GOOGLE DRIVE RESUME DOWNLOAD - Easy to update, no caching issues!
+  const handleResumeDownload = () => {
     try {
-      // Your GitHub repository details
-      const owner = 'yuvrajinbhakti';
-      const repo = 'yuvraj-portfolio-reimagined';
+      // 🔗 SETUP INSTRUCTIONS:
+      // 1. Upload your resume to Google Drive
+      // 2. Right-click → Share → "Anyone with the link can view"
+      // 3. Copy the sharing link (looks like: https://drive.google.com/file/d/FILE_ID/view?usp=sharing)
+      // 4. Extract the FILE_ID from the URL
+      // 5. Replace YOUR_FILE_ID below with your actual file ID
       
-      // Add cache-busting parameters and headers
-      const timestamp = Date.now();
-      const apiUrl = `https://api.github.com/repos/${owner}/${repo}/releases/latest?t=${timestamp}`;
+             // 📝 Your Google Drive file ID (extracted from the sharing link)
+       const GOOGLE_DRIVE_FILE_ID = '1_dzEZhGuwzkkuKOPu-0xiafFrqLfB2Wg'; 
       
-      console.log('Fetching latest release from:', apiUrl);
+      // 🚀 Direct download URL format
+      const downloadUrl = `https://drive.google.com/uc?export=download&id=${GOOGLE_DRIVE_FILE_ID}`;
       
-      // Fetch latest release from GitHub API with cache-busting headers
-      const response = await fetch(apiUrl, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/vnd.github.v3+json',
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
-        },
-        cache: 'no-store' // Force no caching
-      });
+      console.log('Opening resume download:', downloadUrl);
       
-      if (!response.ok) {
-        throw new Error(`GitHub API responded with status: ${response.status}`);
-      }
+      // Open download in new tab
+      window.open(downloadUrl, '_blank');
       
-      const releaseData = await response.json();
+      // Optional: Show success message
+      console.log('Resume download initiated successfully');
       
-      console.log('Release data:', {
-        tag_name: releaseData.tag_name,
-        published_at: releaseData.published_at,
-        draft: releaseData.draft,
-        prerelease: releaseData.prerelease,
-        assets_count: releaseData.assets?.length || 0
-      });
-      
-      // Check if this is a draft or prerelease
-      if (releaseData.draft) {
-        console.warn('Latest release is a draft');
-        alert('The latest resume is still being prepared. Please try again shortly or contact me directly.');
-        return;
-      }
-      
-      // Find the first PDF file in the release assets
-      const pdfAsset = releaseData.assets.find(asset => 
-        asset.name.toLowerCase().endsWith('.pdf')
-      );
-      
-      if (pdfAsset) {
-        console.log('Found PDF asset:', {
-          name: pdfAsset.name,
-          size: pdfAsset.size,
-          download_count: pdfAsset.download_count,
-          updated_at: pdfAsset.updated_at
-        });
-        
-        // Add cache-busting to the download URL
-        const downloadUrl = `${pdfAsset.browser_download_url}?t=${timestamp}&cb=${Math.random()}`;
-        console.log('Opening download URL:', downloadUrl);
-        
-        // Open the PDF download URL with cache busting
-        window.open(downloadUrl, '_blank');
-        
-        // Optional: Show success message
-        console.log('Resume download initiated successfully');
-        
-      } else {
-        console.warn('No PDF file found in release assets:', releaseData.assets?.map(asset => asset.name));
-        alert('Resume file not found in the latest release. Please contact me directly for a copy.');
-      }
     } catch (error) {
       console.error('Error downloading resume:', error);
-      console.error('Full error details:', {
-        message: error.message,
-        stack: error.stack
-      });
-      
-      // More helpful error message
-      alert(`Unable to download resume: ${error.message}. Please try refreshing the page or contact me directly.`);
+      alert('Unable to download resume at the moment. Please contact me directly for a copy.');
     }
   };
 

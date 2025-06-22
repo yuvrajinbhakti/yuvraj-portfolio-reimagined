@@ -145,7 +145,7 @@ const Home = () => {
                 </motion.div>
                 
                 {/* Social Links */}
-                <motion.div variants={itemVariants} className="flex justify-center gap-4 md:gap-6 flex-wrap">
+                <motion.div variants={itemVariants} className="flex justify-center gap-3 md:gap-4 flex-wrap mb-6 md:mb-8">
                   {socialLinks.map((link, index) => {
                     // Enhanced Icon Components
                     const IconComponent = ({ name, className }) => {
@@ -308,7 +308,7 @@ const Home = () => {
                       href={link.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                        className="group relative w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center bg-gradient-to-br from-blue-600/10 via-purple-600/10 to-cyan-600/10 backdrop-blur-xl border border-white/20 transition-all duration-500 transform hover:scale-110 hover:rotate-3 hover:shadow-2xl hover:shadow-blue-500/30 hover:border-white/40 overflow-hidden"
+                        className="group relative w-12 h-12 md:w-16 md:h-16 rounded-2xl flex items-center justify-center bg-gradient-to-br from-blue-600/10 via-purple-600/10 to-cyan-600/10 backdrop-blur-xl border border-white/20 transition-all duration-500 transform hover:scale-110 hover:rotate-3 hover:shadow-2xl hover:shadow-blue-500/30 hover:border-white/40 overflow-hidden"
                       aria-label={link.name}
                       whileHover={{ 
                         scale: 1.15, 
@@ -388,8 +388,8 @@ const Home = () => {
                           }}
                         />
                         
-                        {/* Icon container with enhanced styling */}
-                        <div className="relative z-10 w-8 h-8 md:w-10 md:h-10 transition-all duration-500 group-hover:scale-110">
+                                                 {/* Icon container with enhanced styling */}
+                         <div className="relative z-10 w-6 h-6 md:w-8 md:h-8 transition-all duration-500 group-hover:scale-110">
                           <div className="w-full h-full rounded-xl bg-black/20 backdrop-blur-sm flex items-center justify-center p-2 group-hover:bg-black/30 transition-all duration-500 border border-white/10 group-hover:border-white/20">
                             <IconComponent 
                               name={link.name}
