@@ -89,7 +89,7 @@ const Contact = () => {
   };
 
   return (
-    <div className="overflow-y-auto overflow-x-hidden">
+    <div className="w-full">
       <AnimatedBackground>
         <section className="w-full pt-24 md:pt-32 px-4 md:px-8 mb-12 md:mb-20">
           <div className="max-w-6xl mx-auto">

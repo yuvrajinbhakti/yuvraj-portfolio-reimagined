@@ -382,7 +382,7 @@ const Projects = () => {
   );
 
   return (
-    <div className="overflow-y-auto overflow-x-hidden" ref={containerRef} style={{ scrollBehavior: 'smooth' }}>
+    <div className="w-full" ref={containerRef} style={{ scrollBehavior: 'smooth' }}>
       {/* Enhanced Custom Cursor - Hide on mobile */}
       <motion.div
         className="fixed top-0 left-0 pointer-events-none z-50 mix-blend-difference hidden md:block"

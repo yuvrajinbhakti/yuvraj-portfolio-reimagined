@@ -33,7 +33,7 @@ const PageTransition = ({ children }) => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
-      className="w-full h-full"
+      className="w-full"
     >
       {children}
     </motion.div>
@@ -54,6 +54,13 @@ const ScrollToTop = () => {
       left: 0,
       behavior: 'smooth'
     });
+    
+    // Refresh ScrollTriggers after page transitions
+    const timer = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 600);
+    
+    return () => clearTimeout(timer);
   }, [pathname]);
   
   return null;
@@ -72,7 +79,7 @@ const App = () => {
   }, []);
   
   return (
-    <main className="bg-[#020617] text-white relative min-h-screen overflow-hidden">
+    <main className="bg-[#020617] text-white relative min-h-screen">
       {isLoading ? (
         <InitialLoader />
       ) : (

@@ -386,14 +386,11 @@ const AnimatedBackground = ({ children }) => {
     };
   }, []);
   
-  // Apply subtle parallax effect to container based on mouse position
-  const parallaxStyle = {
-    transform: `perspective(1000px) rotateX(${mousePosition.y * -2}deg) rotateY(${mousePosition.x * 2}deg)`,
-    transition: 'transform 0.2s ease-out'
-  };
+  // NOTE: 3D perspective transform removed — it was creating a stacking context
+  // that prevented native vertical scrolling on the page.
   
   return (
-    <div ref={containerRef} className="relative w-full min-h-screen bg-[#020617] overflow-hidden">
+    <div ref={containerRef} className="relative w-full min-h-screen bg-[#020617]">
       <canvas 
         ref={canvasRef} 
         className="fixed top-0 left-0 w-full h-screen pointer-events-none"
@@ -406,11 +403,8 @@ const AnimatedBackground = ({ children }) => {
       />
       
       <div 
-        className="relative w-full overflow-visible"
-        style={{
-          ...parallaxStyle,
-          zIndex: 1
-        }}
+        className="relative w-full"
+        style={{ zIndex: 1 }}
       >
         {children}
       </div>

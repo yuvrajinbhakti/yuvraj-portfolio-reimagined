@@ -90,7 +90,7 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden bg-transparent text-white">
+    <div className="min-h-screen w-full bg-transparent text-white">
       <AnimatedBackground>
         <div ref={containerRef} className="relative w-full bg-transparent">
           {/* Hero Section */}
