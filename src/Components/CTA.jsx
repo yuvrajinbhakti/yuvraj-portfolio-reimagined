@@ -15,21 +15,22 @@ const CTA = () => {
       // 3. Copy the sharing link (looks like: https://drive.google.com/file/d/FILE_ID/view?usp=sharing)
       // 4. Extract the FILE_ID from the URL
       // 5. Replace YOUR_FILE_ID below with your actual file ID
-      
-             // 📝 Your Google Drive file ID (extracted from the sharing link)
-       const GOOGLE_DRIVE_FILE_ID = '1_dzEZhGuwzkkuKOPu-0xiafFrqLfB2Wg'; 
-      
+
+      // 📝 Your Google Drive file ID (extracted from the sharing link)
+      //  const GOOGLE_DRIVE_FILE_ID = '1_dzEZhGuwzkkuKOPu-0xiafFrqLfB2Wg'; 
+      const GOOGLE_DRIVE_FILE_ID = '1HQLXSGKhlacfSghWZpHeRbGrJcDDLRLo';
+
       // 🚀 Direct download URL format
       const downloadUrl = `https://drive.google.com/uc?export=download&id=${GOOGLE_DRIVE_FILE_ID}`;
-      
+
       console.log('Opening resume download:', downloadUrl);
-      
+
       // Open download in new tab
       window.open(downloadUrl, '_blank');
-      
+
       // Optional: Show success message
       console.log('Resume download initiated successfully');
-      
+
     } catch (error) {
       console.error('Error downloading resume:', error);
       alert('Unable to download resume at the moment. Please contact me directly for a copy.');
@@ -38,12 +39,12 @@ const CTA = () => {
 
   // Enhanced Contact Icon Component
   const ContactIcon = () => (
-    <motion.svg 
-      className="w-5 h-5 flex-shrink-0" 
-      fill="none" 
-      stroke="currentColor" 
+    <motion.svg
+      className="w-5 h-5 flex-shrink-0"
+      fill="none"
+      stroke="currentColor"
       viewBox="0 0 24 24"
-      whileHover={{ 
+      whileHover={{
         scale: 1.1,
         rotate: [0, -10, 10, 0],
         transition: { duration: 0.3 }
@@ -64,11 +65,11 @@ const CTA = () => {
         cy="12"
         r="1"
         fill="currentColor"
-        animate={{ 
+        animate={{
           scale: [1, 1.3, 1],
           opacity: [0.7, 1, 0.7]
         }}
-        transition={{ 
+        transition={{
           duration: 2,
           repeat: Infinity,
           delay: 0
@@ -79,11 +80,11 @@ const CTA = () => {
         cy="12"
         r="1"
         fill="currentColor"
-        animate={{ 
+        animate={{
           scale: [1, 1.3, 1],
           opacity: [0.7, 1, 0.7]
         }}
-        transition={{ 
+        transition={{
           duration: 2,
           repeat: Infinity,
           delay: 0.3
@@ -94,11 +95,11 @@ const CTA = () => {
         cy="12"
         r="1"
         fill="currentColor"
-        animate={{ 
+        animate={{
           scale: [1, 1.3, 1],
           opacity: [0.7, 1, 0.7]
         }}
-        transition={{ 
+        transition={{
           duration: 2,
           repeat: Infinity,
           delay: 0.6
@@ -109,12 +110,12 @@ const CTA = () => {
 
   // Enhanced Download Icon Component
   const DownloadIcon = () => (
-    <motion.svg 
-      className="w-5 h-5 flex-shrink-0" 
-      fill="none" 
-      stroke="currentColor" 
+    <motion.svg
+      className="w-5 h-5 flex-shrink-0"
+      fill="none"
+      stroke="currentColor"
       viewBox="0 0 24 24"
-      whileHover={{ 
+      whileHover={{
         scale: 1.1,
         y: [0, -2, 0],
         transition: { duration: 0.3 }
@@ -130,7 +131,7 @@ const CTA = () => {
         animate={{ pathLength: 1, opacity: 1 }}
         transition={{ duration: 1.5, ease: "easeInOut" }}
       />
-      
+
       {/* Animated download arrow */}
       <motion.g
         initial={{ opacity: 0, y: -10 }}
@@ -154,7 +155,7 @@ const CTA = () => {
           }}
         />
       </motion.g>
-      
+
       {/* Document corner fold */}
       <motion.path
         strokeLinecap="round"
@@ -195,55 +196,55 @@ const CTA = () => {
       <GlassCard className="p-4 sm:p-6 md:p-8 text-center relative overflow-hidden">
         <CTA3D />
         <div className="relative z-10 w-full flex flex-col items-center py-8 sm:py-12 md:py-16">
-          <motion.h2 
-          className="text-2xl sm:text-3xl md:text-3xl font-bold text-white mb-3 sm:mb-4 md:mb-4"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          Let&apos;s Work <span className="text-blue-400">Together</span>
-        </motion.h2>
-        <motion.p 
-          className="text-gray-300 mb-4 sm:mb-6 md:mb-6 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed px-2 sm:px-4"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-        >
-          I&apos;m currently available for freelance work or full-time opportunities.
-          If you&apos;re looking for a developer who can bring your ideas to life, let&apos;s talk!
-        </motion.p>
-        <motion.div 
-          className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-4 justify-center items-center px-2 sm:px-0"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-        >
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Link
-              to="/contact"
-              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 sm:px-7 md:px-8 sm:py-3 md:py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:translate-y-[-2px] hover:shadow-xl hover:shadow-blue-500/25 relative overflow-hidden group min-w-[160px] sm:min-w-[180px] font-medium text-sm sm:text-base"
-            >
-              <span className="relative z-10 flex items-center justify-center gap-2">
-                <ContactIcon />
-                <span>Contact Me</span>
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-            </Link>
+          <motion.h2
+            className="text-2xl sm:text-3xl md:text-3xl font-bold text-white mb-3 sm:mb-4 md:mb-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            Let&apos;s Work <span className="text-blue-400">Together</span>
+          </motion.h2>
+          <motion.p
+            className="text-gray-300 mb-4 sm:mb-6 md:mb-6 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed px-2 sm:px-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            I&apos;m currently available for freelance work or full-time opportunities.
+            If you&apos;re looking for a developer who can bring your ideas to life, let&apos;s talk!
+          </motion.p>
+          <motion.div
+            className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-4 justify-center items-center px-2 sm:px-0"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+          >
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Link
+                to="/contact"
+                className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 sm:px-7 md:px-8 sm:py-3 md:py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:translate-y-[-2px] hover:shadow-xl hover:shadow-blue-500/25 relative overflow-hidden group min-w-[160px] sm:min-w-[180px] font-medium text-sm sm:text-base"
+              >
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  <ContactIcon />
+                  <span>Contact Me</span>
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+              </Link>
+            </motion.div>
+
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <button
+                onClick={handleResumeDownload}
+                className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 sm:px-7 md:px-8 sm:py-3 md:py-4 bg-transparent border border-white/30 backdrop-blur-sm text-white rounded-lg hover:bg-white/10 hover:border-white/50 transition-all duration-300 transform hover:translate-y-[-2px] hover:shadow-xl hover:shadow-white/10 relative overflow-hidden group min-w-[160px] sm:min-w-[180px] font-medium text-sm sm:text-base"
+              >
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  <DownloadIcon />
+                  <span>Download Resume</span>
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/0 via-blue-600/20 to-blue-600/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+              </button>
+            </motion.div>
           </motion.div>
-          
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <button
-              onClick={handleResumeDownload}
-              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 sm:px-7 md:px-8 sm:py-3 md:py-4 bg-transparent border border-white/30 backdrop-blur-sm text-white rounded-lg hover:bg-white/10 hover:border-white/50 transition-all duration-300 transform hover:translate-y-[-2px] hover:shadow-xl hover:shadow-white/10 relative overflow-hidden group min-w-[160px] sm:min-w-[180px] font-medium text-sm sm:text-base"
-            >
-              <span className="relative z-10 flex items-center justify-center gap-2">
-                <DownloadIcon />
-                <span>Download Resume</span>
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-600/0 via-blue-600/20 to-blue-600/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-            </button>
-          </motion.div>
-        </motion.div>
         </div>
       </GlassCard>
     </ScrollReveal>
