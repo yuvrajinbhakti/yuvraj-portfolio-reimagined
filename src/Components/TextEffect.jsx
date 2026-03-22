@@ -6,66 +6,66 @@ import { SplitText } from 'gsap/SplitText';
 // Register plugins
 gsap.registerPlugin(TextPlugin, SplitText);
 
-const AnimatedText = ({ 
-  text, 
-  delay = 0, 
-  duration = 0.5, 
-  type = 'fade', 
-  className = '', 
+const AnimatedText = ({
+  text,
+  delay = 0,
+  duration = 0.5,
+  type = 'fade',
+  className = '',
   staggerDelay = 0.03,
-  onComplete = () => {} 
+  onComplete = () => { }
 }) => {
   const textRef = useRef(null);
   // Declare glitchInterval in component scope
   const glitchIntervalRef = useRef(null);
-  
+
   useEffect(() => {
     const element = textRef.current;
     if (!element) return;
-    
-    let tl = gsap.timeline({ 
-      delay, 
-      onComplete 
+
+    let tl = gsap.timeline({
+      delay,
+      onComplete
     });
-    
+
     switch (type) {
       case 'fade':
-        tl.from(element, { 
-          opacity: 0, 
-          y: 20, 
-          duration, 
-          ease: 'power2.out' 
+        tl.from(element, {
+          opacity: 0,
+          y: 20,
+          duration,
+          ease: 'power2.out'
         });
         break;
-        
+
       case 'reveal':
         // First hide the text container
         gsap.set(element, { overflow: 'hidden' });
-        
+
         // Create a wrapper for the text
         const wrapper = document.createElement('div');
         wrapper.innerHTML = element.innerHTML;
         element.innerHTML = '';
         element.appendChild(wrapper);
-        
+
         // Create the animation
-        tl.from(wrapper, { 
-          y: '100%', 
-          duration, 
-          ease: 'power4.out' 
+        tl.from(wrapper, {
+          y: '100%',
+          duration,
+          ease: 'power4.out'
         });
         break;
-        
+
       case 'typewriter':
         const originalText = element.textContent;
         gsap.set(element, { text: '' });
-        tl.to(element, { 
-          duration: duration * 2, 
-          text: originalText, 
-          ease: 'none' 
+        tl.to(element, {
+          duration: duration * 2,
+          text: originalText,
+          ease: 'none'
         });
         break;
-        
+
       case 'character':
         // Create a span for each character
         const chars = Array.from(element.textContent).map(char => {
@@ -73,24 +73,24 @@ const AnimatedText = ({
           span.textContent = char === ' ' ? '\u00A0' : char; // Use non-breaking space for spaces
           return span;
         });
-        
+
         element.textContent = '';
         chars.forEach(char => element.appendChild(char));
-        
+
         // Animate each character
-        tl.from(chars, { 
-          opacity: 0, 
-          y: 20, 
-          rotationX: 90, 
-          stagger: staggerDelay, 
-          duration: duration / 2, 
-          ease: 'back.out(1.7)' 
+        tl.from(chars, {
+          opacity: 0,
+          y: 20,
+          rotationX: 90,
+          stagger: staggerDelay,
+          duration: duration / 2,
+          ease: 'back.out(1.7)'
         });
         break;
-        
+
       case 'gradient':
         // Animate background position for gradient text
-        gsap.set(element, { 
+        gsap.set(element, {
           backgroundImage: 'linear-gradient(90deg, #4169e1, #8a2be2, #4169e1)',
           backgroundSize: '200% 100%',
           backgroundClip: 'text',
@@ -98,23 +98,23 @@ const AnimatedText = ({
           color: 'transparent',
           backgroundPosition: '0% 0%'
         });
-        
-        tl.to(element, { 
-          backgroundPosition: '100% 0%', 
-          duration: duration * 4, 
+
+        tl.to(element, {
+          backgroundPosition: '100% 0%',
+          duration: duration * 4,
           ease: 'none',
           repeat: -1,
           yoyo: true
         });
         break;
-        
+
       case 'glitch':
         // First make a copy of the original text
         const originalGlitchText = element.textContent;
         const glitchChars = "!<>-_\\/[]{}—=+*^?#@%$&~".split('');
-        
+
         let iteration = 0;
-        
+
         // Create the glitch animation
         tl.set(element, { opacity: 1 })
           .call(() => {
@@ -128,24 +128,24 @@ const AnimatedText = ({
                   return glitchChars[Math.floor(Math.random() * glitchChars.length)];
                 })
                 .join('');
-              
-              if(iteration >= originalGlitchText.length) { 
+
+              if (iteration >= originalGlitchText.length) {
                 clearInterval(glitchIntervalRef.current);
                 element.textContent = originalGlitchText;
               }
-              iteration += 1/3;
+              iteration += 1 / 3;
             }, 30);
           });
         break;
-        
+
       case 'split-words':
         // Create a SplitText instance for words
         const splitText = new SplitText(element, { type: "words" });
         const words = splitText.words;
-        
+
         // Set initial state
         gsap.set(words, { opacity: 0, y: 20 });
-        
+
         // Animate each word
         tl.to(words, {
           opacity: 1,
@@ -155,16 +155,16 @@ const AnimatedText = ({
           ease: "power2.out"
         });
         break;
-        
+
       default:
-        tl.from(element, { 
-          opacity: 0, 
-          y: 20, 
-          duration, 
-          ease: 'power2.out' 
+        tl.from(element, {
+          opacity: 0,
+          y: 20,
+          duration,
+          ease: 'power2.out'
         });
     }
-    
+
     return () => {
       tl.kill();
       if (glitchIntervalRef.current) {
@@ -173,7 +173,7 @@ const AnimatedText = ({
       }
     };
   }, [text, delay, duration, type, staggerDelay, onComplete]);
-  
+
   return (
     <div ref={textRef} className={`bg-transparent ${className}`}>
       {text}
@@ -183,56 +183,57 @@ const AnimatedText = ({
 
 const TextEffect = () => {
   const [animate, setAnimate] = useState(false);
-  
+
   useEffect(() => {
     // Trigger animation after component mounts
     const timer = setTimeout(() => {
       setAnimate(true);
     }, 500);
-    
+
     return () => clearTimeout(timer);
   }, []);
-  
+
   return (
     <div className="text-effect-container relative z-30 bg-transparent">
-      <div className="mb-4 overflow-hidden bg-transparent px-2 sm:px-4">
-        <AnimatedText 
-          text="I'm Yuvraj Singh Nain" 
-          type="character" 
-          className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-6xl font-bold text-white leading-tight" 
+      {/* <div className="mb-4 overflow-hidden bg-transparent px-2 sm:px-4"> */}
+      <div className="mb-4 overflow-hidden px-2 sm:px-4 pb-4">
+        <AnimatedText
+          text="I'm Yuvraj Singh Nain"
+          type="character"
+          className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-6xl font-bold text-white leading-[1.3] tracking-wide"
           delay={0.5}
           staggerDelay={0.05}
         />
       </div>
-      
+
       <div className="overflow-hidden bg-transparent px-2 sm:px-4">
-        <AnimatedText 
-          text="Full Stack Developer & Software Engineer" 
-          type="split-words" 
-          className="text-base sm:text-lg md:text-xl lg:text-2xl text-blue-300 mb-4 leading-relaxed" 
+        <AnimatedText
+          text="Full Stack Developer & Software Engineer"
+          type="split-words"
+          className="text-base sm:text-lg md:text-xl lg:text-2xl text-blue-300 mb-4 leading-relaxed"
           delay={1.5}
           duration={0.7}
           staggerDelay={0.06}
         />
       </div>
-      
+
       {animate && (
         <div className="mt-6 overflow-hidden bg-transparent px-2 sm:px-4">
-          <AnimatedText 
-            text="Building digital experiences that inspire!" 
-            type="glitch" 
-            className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300 leading-relaxed" 
+          <AnimatedText
+            text="Building digital experiences that inspire!"
+            type="glitch"
+            className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300 leading-relaxed"
             delay={2.5}
             duration={1}
           />
         </div>
       )}
-      
+
       {/* Floating particles */}
       {animate && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           {[...Array(20)].map((_, i) => (
-            <div 
+            <div
               key={i}
               className="absolute w-1 h-1 rounded-full bg-blue-400/30"
               style={{
@@ -244,7 +245,7 @@ const TextEffect = () => {
           ))}
         </div>
       )}
-      
+
       <style jsx="true">{`
         @keyframes float {
           0%, 100% { transform: translateY(0) translateX(0); }

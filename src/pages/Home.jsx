@@ -9,12 +9,41 @@ import TextEffect from "../Components/TextEffect";
 import AnimatedBackground from "../Components/AnimatedBackground";
 import ScrollReveal from "../Components/ScrollReveal";
 import GlassCard from "../Components/GlassCard";
+import ServiceIcon3D from "../Components/Service3DIcons";
 
 // Icons and media
 import { socialLinks } from "../constants";
 import sakura from '../assets/sakura.mp3';
 import { soundoff, soundon } from "../assets/icons";
 import realtimeCodeEditorImage from '../assets/images/realtime-code-editor.svg';
+
+const ServiceCard = ({ service }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  
+  return (
+    <div 
+      className="h-full cursor-pointer"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <GlassCard className="h-full p-6 md:p-8 transform transition-all duration-500 hover:scale-105 hover:shadow-blue-500/20 hover:shadow-lg group">
+        <div className="mb-2 -mt-4 relative z-0">
+          <ServiceIcon3D type={service.type} isHovered={isHovered} />
+        </div>
+        <h3 className="text-lg md:text-xl font-bold text-white mb-3 md:mb-4 group-hover:text-blue-400 transition-colors duration-300 relative z-10 text-center">{service.title}</h3>
+        <p className="text-white/70 text-sm md:text-base leading-relaxed relative z-10 text-center">{service.description}</p>
+      </GlassCard>
+    </div>
+  );
+};
+
+ServiceCard.propTypes = {
+  service: PropTypes.shape({
+    title: PropTypes.string.isRequired,
+    description: PropTypes.string.isRequired,
+    type: PropTypes.oneOf(['frontend', 'backend', 'ml']).isRequired,
+  }).isRequired,
+};
 
 const Home = () => {
   const [isPlayingMusic, setIsPlayingMusic] = useState(false);
@@ -476,17 +505,17 @@ const Home = () => {
                   {
                     title: "Frontend Development",
                     description: "Creating responsive, performant user interfaces with React, Next.js, and modern CSS frameworks.",
-                    icon: "🎨"
+                    type: "frontend"
                   },
                   {
                     title: "Backend Engineering",
                     description: "Building scalable APIs and server-side applications using Node.js, Express, and cloud technologies.",
-                    icon: "⚙️"
+                    type: "backend"
                   },
                   {
-                    title: "Machine Learning",
+                    title: "AI",
                     description: "Implementing data-driven solutions with Python and modern ML frameworks for real-world applications.",
-                    icon: "🧠"
+                    type: "ml"
                   }
                 ].map((service, index) => (
                   <ScrollReveal
@@ -495,11 +524,7 @@ const Home = () => {
                     direction={["left", "up", "right"][index]}
                     delay={index * 0.1}
                   >
-                    <GlassCard className="h-full p-6 md:p-8 transform transition-all duration-500 hover:scale-105 hover:shadow-blue-500/20 hover:shadow-lg group">
-                      <div className="text-3xl md:text-4xl mb-3 md:mb-4 transition-transform duration-700 transform group-hover:scale-110 group-hover:rotate-12">{service.icon}</div>
-                      <h3 className="text-lg md:text-xl font-bold text-white mb-3 md:mb-4 group-hover:text-blue-400 transition-colors duration-300">{service.title}</h3>
-                      <p className="text-white/70 text-sm md:text-base leading-relaxed">{service.description}</p>
-                    </GlassCard>
+                    <ServiceCard service={service} />
                   </ScrollReveal>
                 ))}
               </div>
