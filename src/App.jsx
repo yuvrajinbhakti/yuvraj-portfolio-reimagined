@@ -25,18 +25,43 @@ const InitialLoader = () => {
   );
 };
 
-// Page transition component
+// Curtain wipe transition variants
+const curtainVariants = {
+  initial:  { scaleX: 0, originX: 0 },
+  enter:    { scaleX: 1, originX: 0, transition: { duration: 0.4, ease: [0.76, 0, 0.24, 1] } },
+  exit:     { scaleX: 0, originX: 1, transition: { duration: 0.4, ease: [0.76, 0, 0.24, 1], delay: 0.05 } },
+};
+
+const contentVariants = {
+  initial:  { opacity: 0 },
+  animate:  { opacity: 1, transition: { duration: 0.3, delay: 0.35 } },
+  exit:     { opacity: 0, transition: { duration: 0.15 } },
+};
+
+// Page transition component — blue curtain wipe
 const PageTransition = ({ children }) => {
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.5 }}
-      className="w-full"
-    >
-      {children}
-    </motion.div>
+    <div className="relative w-full">
+      {/* Blue curtain panel */}
+      <motion.div
+        className="fixed inset-0 z-[100] pointer-events-none"
+        style={{ background: 'linear-gradient(135deg, #1d4ed8 0%, #7c3aed 100%)' }}
+        variants={curtainVariants}
+        initial="initial"
+        animate="exit"
+        exit="enter"
+      />
+      {/* Page content */}
+      <motion.div
+        className="w-full"
+        variants={contentVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+      >
+        {children}
+      </motion.div>
+    </div>
   );
 };
 

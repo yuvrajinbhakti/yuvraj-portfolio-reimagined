@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { skills, experiences } from "../constants";
 import {
   VerticalTimeline,
@@ -9,7 +9,62 @@ import CTA from "../Components/CTA";
 import AnimatedBackground from "../Components/AnimatedBackground";
 import ScrollReveal from "../Components/ScrollReveal";
 import GlassCard from "../Components/GlassCard";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
+
+// Self-drawing animated SVG timeline accent line
+const AnimatedTimelineLine = ({ itemCount = 4 }) => {
+  const svgRef = useRef(null);
+  const lineRef = useRef(null);
+
+  useEffect(() => {
+    const line = lineRef.current;
+    if (!line) return;
+    const length = line.getTotalLength();
+    line.style.strokeDasharray = length;
+    line.style.strokeDashoffset = length;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          line.style.transition = 'stroke-dashoffset 2.5s cubic-bezier(0.4, 0, 0.2, 1)';
+          line.style.strokeDashoffset = '0';
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    if (svgRef.current) observer.observe(svgRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  const height = itemCount * 180;
+  return (
+    <svg
+      ref={svgRef}
+      width="4"
+      height={height}
+      viewBox={`0 0 4 ${height}`}
+      className="absolute left-1/2 -translate-x-1/2 pointer-events-none"
+      style={{ zIndex: 2, top: 0 }}
+    >
+      <defs>
+        <linearGradient id="timelineGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"  stopColor="#3b82f6" stopOpacity="0.9" />
+          <stop offset="50%" stopColor="#7c3aed" stopOpacity="0.9" />
+          <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.9" />
+        </linearGradient>
+      </defs>
+      <path
+        ref={lineRef}
+        d={`M 2 0 L 2 ${height}`}
+        stroke="url(#timelineGrad)"
+        strokeWidth="3"
+        fill="none"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+};
 
 const About = () => {
   const [activeTab, setActiveTab] = useState("experience");
@@ -59,7 +114,9 @@ const About = () => {
     switch(activeTab) {
       case "experience":
         return (
-          <div className="mt-12">
+          <div className="mt-12 relative">
+            {/* Animated self-drawing SVG connector behind the timeline */}
+            <AnimatedTimelineLine itemCount={experiences.length} />
             <VerticalTimeline animate={true} lineColor="rgba(74, 144, 226, 0.3)">
               {experiences.map((experience) => (
                 <VerticalTimelineElement

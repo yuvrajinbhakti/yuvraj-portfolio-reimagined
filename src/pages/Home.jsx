@@ -19,15 +19,17 @@ import realtimeCodeEditorImage from '../assets/images/realtime-code-editor.svg';
 const Home = () => {
   const [isPlayingMusic, setIsPlayingMusic] = useState(false);
   const [audioElement] = useState(new Audio(sakura));
-  const containerRef = useRef(null);
+  const heroRef = useRef(null);
   const { scrollYProgress } = useScroll({
-    target: containerRef,
+    target: heroRef,
     offset: ["start start", "end start"]
   });
   
-  // Parallax effect for hero section
-  const y = useTransform(scrollYProgress, [0, 1], [0, 300]);
-  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  // Layered parallax — each layer moves at a different speed
+  const bgY       = useTransform(scrollYProgress, [0, 1], [0, 120]);   // slow: background
+  const midY      = useTransform(scrollYProgress, [0, 1], [0, 220]);   // medium: subtitle
+  const y         = useTransform(scrollYProgress, [0, 1], [0, 320]);   // fast: headline
+  const opacity   = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
   // Handle music playback
   useEffect(() => {
@@ -92,14 +94,13 @@ const Home = () => {
   return (
     <div className="min-h-screen w-full bg-transparent text-white">
       <AnimatedBackground>
-        <div ref={containerRef} className="relative w-full bg-transparent">
+        <div ref={heroRef} className="relative w-full bg-transparent">
           {/* Hero Section */}
           <motion.section 
             className="relative h-screen flex flex-col items-center justify-center px-4 md:px-8 bg-transparent"
-            style={{ y, opacity }}
           >
             {/* 3D Animation */}
-            <div className="absolute inset-0 w-full h-full z-10">
+            <motion.div className="absolute inset-0 w-full h-full z-10" style={{ y: bgY }}>
               <Suspense fallback={
                 <div className="w-full h-full flex items-center justify-center">
                   <div className="text-white flex flex-col items-center">
@@ -110,10 +111,13 @@ const Home = () => {
               }>
                 <HeroAnimation />
               </Suspense>
-            </div>
+            </motion.div>
             
-            {/* Content Overlay */}
-            <div className="relative z-20 container mx-auto px-4 sm:px-6 md:px-8 bg-transparent pt-32 md:pt-40">
+            {/* Content Overlay — parallax foreground (moves fast) */}
+            <motion.div
+              className="relative z-20 container mx-auto px-4 sm:px-6 md:px-8 bg-transparent pt-32 md:pt-40"
+              style={{ y, opacity }}
+            >
               <motion.div
                 className="text-center max-w-5xl mx-auto bg-transparent overflow-hidden"
                 variants={containerVariants}
@@ -125,8 +129,8 @@ const Home = () => {
                   <TextEffect />
                 </motion.div>
                 
-                {/* CTA Buttons */}
-                <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-4 justify-center mb-6 sm:mb-8 md:mb-10 px-2 sm:px-4">
+                {/* CTA Buttons — mid-speed parallax layer */}
+                <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-4 justify-center mb-6 sm:mb-8 md:mb-10 px-2 sm:px-4" style={{ y: midY }}>
                   <Link
                     to="/projects"
                     className="w-full sm:w-auto px-6 py-3 sm:px-7 md:px-8 sm:py-3 md:py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 transform hover:translate-y-[-2px] hover:shadow-xl flex items-center justify-center gap-2 text-sm sm:text-base font-medium"
@@ -427,7 +431,7 @@ const Home = () => {
                   })}
                 </motion.div>
               </motion.div>
-            </div>
+            </motion.div>
 
             {/* Scroll Indicator */}
             <motion.div 

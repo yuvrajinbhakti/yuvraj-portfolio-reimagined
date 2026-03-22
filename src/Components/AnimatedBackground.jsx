@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
+import AmbientOrbs from './AmbientOrbs';
 
 const AnimatedBackground = ({ children }) => {
   const canvasRef = useRef(null);
@@ -391,6 +392,9 @@ const AnimatedBackground = ({ children }) => {
   
   return (
     <div ref={containerRef} className="relative w-full min-h-screen bg-[#020617]">
+      {/* Ambient floating orbs */}
+      <AmbientOrbs />
+
       <canvas 
         ref={canvasRef} 
         className="fixed top-0 left-0 w-full h-screen pointer-events-none"
