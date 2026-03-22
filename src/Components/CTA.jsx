@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import GlassCard from "./GlassCard";
 import ScrollReveal from "./ScrollReveal";
+import CTA3D from "./CTA3D";
 
 const CTA = () => {
 
@@ -191,8 +192,10 @@ const CTA = () => {
 
   return (
     <ScrollReveal animation="fade">
-      <GlassCard className="p-4 sm:p-6 md:p-8 text-center">
-        <motion.h2 
+      <GlassCard className="p-4 sm:p-6 md:p-8 text-center relative overflow-hidden">
+        <CTA3D />
+        <div className="relative z-10 w-full flex flex-col items-center py-8 sm:py-12 md:py-16">
+          <motion.h2 
           className="text-2xl sm:text-3xl md:text-3xl font-bold text-white mb-3 sm:mb-4 md:mb-4"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -241,7 +244,7 @@ const CTA = () => {
             </button>
           </motion.div>
         </motion.div>
-        
+        </div>
       </GlassCard>
     </ScrollReveal>
   );
