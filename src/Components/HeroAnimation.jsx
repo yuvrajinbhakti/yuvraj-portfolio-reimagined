@@ -1,21 +1,24 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Float, Sphere, MeshDistortMaterial, Stars } from '@react-three/drei';
+import { Float, Sphere, MeshDistortMaterial } from '@react-three/drei';
 import * as THREE from 'three';
 
-const OrganicShape = () => {
+const OrganicShape = ({ mouse }) => {
   const meshRef = useRef();
   const wireRef = useRef();
 
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
+    const mx = mouse.current.x;
+    const my = mouse.current.y;
+
     if (meshRef.current) {
-      meshRef.current.rotation.x = t * 0.1;
-      meshRef.current.rotation.y = t * 0.15;
+      meshRef.current.rotation.x = t * 0.1 + my * 0.3;
+      meshRef.current.rotation.y = t * 0.15 + mx * 0.3;
     }
     if (wireRef.current) {
-      wireRef.current.rotation.x = t * 0.15;
-      wireRef.current.rotation.y = -t * 0.1;
+      wireRef.current.rotation.x = t * 0.15 - my * 0.2;
+      wireRef.current.rotation.y = -t * 0.1 + mx * 0.2;
     }
   });
 
@@ -36,7 +39,7 @@ const OrganicShape = () => {
           />
         </Sphere>
       </mesh>
-      
+
       {/* Wireframe shell */}
       <mesh ref={wireRef}>
         <Sphere args={[2.5, 32, 32]}>
@@ -51,7 +54,7 @@ const OrganicShape = () => {
           />
         </Sphere>
       </mesh>
-      
+
       {/* Inner glowing solid core */}
       <mesh>
         <Sphere args={[1.2, 32, 32]}>
@@ -62,9 +65,9 @@ const OrganicShape = () => {
   );
 };
 
-const OrbitingParticles = ({ count = 150 }) => {
+const OrbitingParticles = ({ count = 150, mouse }) => {
   const groupRef = useRef();
-  
+
   const particles = useMemo(() => {
     return Array.from({ length: count }).map(() => ({
       position: [
@@ -81,6 +84,13 @@ const OrbitingParticles = ({ count = 150 }) => {
     if (groupRef.current) {
       groupRef.current.rotation.y = clock.getElapsedTime() * 0.05;
       groupRef.current.rotation.z = clock.getElapsedTime() * 0.02;
+      // Subtle push away from cursor
+      groupRef.current.position.x = THREE.MathUtils.lerp(
+        groupRef.current.position.x, -mouse.current.x * 0.5, 0.05
+      );
+      groupRef.current.position.y = THREE.MathUtils.lerp(
+        groupRef.current.position.y, -mouse.current.y * 0.5, 0.05
+      );
     }
   });
 
@@ -97,19 +107,30 @@ const OrbitingParticles = ({ count = 150 }) => {
 };
 
 const HeroAnimation = () => {
+  const mouse = useRef({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMove = (e) => {
+      mouse.current.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.current.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    };
+    window.addEventListener('mousemove', handleMove, { passive: true });
+    return () => window.removeEventListener('mousemove', handleMove);
+  }, []);
+
   return (
     <div className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 0 }}>
       {/* Subtle overlay to ensure text readability */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#020617]/20 to-[#020617]/80 z-10"></div>
-      
+
       <Canvas camera={{ position: [0, 0, 7], fov: 45 }} dpr={[1, 1.5]} gl={{ alpha: true }}>
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 5]} intensity={1.5} color="#3b82f6" />
         <directionalLight position={[-10, -10, -5]} intensity={1} color="#8b5cf6" />
-        
-        <OrganicShape />
-        <OrbitingParticles count={150} />
-        
+
+        <OrganicShape mouse={mouse} />
+        <OrbitingParticles count={150} mouse={mouse} />
+
         <fog attach="fog" args={['#020617', 5, 15]} />
       </Canvas>
     </div>

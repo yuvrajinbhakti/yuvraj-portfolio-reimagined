@@ -431,73 +431,114 @@ const Projects = () => {
       <AnimatedBackground>
         <section className="w-full pt-24 md:pt-32 px-4 md:px-8 mb-12 md:mb-16" style={{ willChange: 'transform' }}>
           <div className="max-w-6xl mx-auto">
-            {/* Optimized Hero Section */}
+            {/* Hero Section */}
             <motion.div
               ref={heroRef}
-              style={{
-                y: heroY,
-                opacity: heroOpacity,
-              }}
-              className="text-center mb-8 md:mb-12 will-change-transform"
+              style={{ y: heroY, opacity: heroOpacity }}
+              className="relative mb-12 md:mb-16 will-change-transform overflow-hidden"
             >
-              <motion.h1 
-                className="text-3xl md:text-4xl lg:text-6xl font-black text-white mb-3 md:mb-4 relative leading-tight will-change-transform"
-                initial={{ opacity: 0, y: -40, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
-              >
-                <span className="block">My</span>
-                <span className="block bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                  Projects
-                </span>
-              </motion.h1>
-              
-              <motion.p 
-                className="text-sm md:text-lg text-gray-300 max-w-2xl mx-auto leading-relaxed px-4"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.6 }}
-              >
-                Explore my portfolio of <span className="font-semibold text-white">innovative web applications</span>, 
-                <span className="font-semibold text-white"> mobile apps</span>, and 
-                <span className="font-semibold text-white"> development tools</span>. 
-                Each project showcases cutting-edge technologies and creative problem-solving.
-              </motion.p>
-              
-              {/* Simplified Project Stats */}
-              <motion.div 
-                ref={statsRef}
-                className="flex justify-center gap-3 md:gap-6 mt-6 md:mt-8 flex-wrap"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.6 }}
-              >
-                {[
-                  { value: projects.length, label: "Projects", color: "text-blue-400" },
-                  { value: Math.max(0, allTags.length - 1), label: "Technologies", color: "text-emerald-400" },
-                  { value: 100, label: "Open Source", color: "text-purple-400", suffix: "%" }
-                ].map((stat, index) => (
-                  <motion.div 
-                    key={stat.label}
-                    className="text-center p-2 md:p-3 rounded-lg bg-black/15 border border-white/10 will-change-transform cursor-pointer min-w-[80px] md:min-w-[100px]"
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.6 + index * 0.1, duration: 0.4 }}
-                    whileHover={{ 
-                      scale: 1.03, 
-                      y: -2,
-                      transition: { duration: 0.15 }
-                    }}
-                    onMouseEnter={handleLinkCursor}
-                    onMouseLeave={handleDefaultCursor}
+              {/* Decorative grid lines */}
+              <div className="absolute inset-0 pointer-events-none opacity-[0.03]"
+                style={{
+                  backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)',
+                  backgroundSize: '60px 60px',
+                }}
+              />
+
+              {/* Floating geometric accents */}
+              <motion.div
+                className="absolute top-8 left-[10%] w-20 h-20 border border-blue-500/20 rounded-full"
+                animate={{ y: [0, -15, 0], rotate: [0, 90, 0] }}
+                transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+              />
+              <motion.div
+                className="absolute top-16 right-[12%] w-12 h-12 border border-purple-500/20 rotate-45"
+                animate={{ y: [0, 12, 0], rotate: [45, 135, 45] }}
+                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+              />
+              <motion.div
+                className="absolute bottom-4 left-[20%] w-8 h-8 bg-blue-500/5 rounded-full"
+                animate={{ scale: [1, 1.4, 1], opacity: [0.3, 0.6, 0.3] }}
+                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+              />
+
+              <div className="relative z-10 text-center py-12 md:py-20">
+                {/* Label chip */}
+                <motion.div
+                  className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 mb-6"
+                  initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+                  <span className="text-xs md:text-sm text-blue-300 font-medium tracking-wide uppercase">Portfolio</span>
+                </motion.div>
+
+                {/* Title with character stagger */}
+                <div className="overflow-hidden mb-4">
+                  <motion.h1
+                    className="text-5xl md:text-7xl lg:text-8xl font-black leading-[0.9] tracking-tight"
+                    initial={{ y: 80 }}
+                    animate={{ y: 0 }}
+                    transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
                   >
-                    <div className={`text-lg md:text-2xl font-bold ${stat.color} mb-0.5`}>
-                      {stat.value}{stat.suffix || ""}
-                    </div>
-                    <div className="text-xs text-gray-400 uppercase tracking-wide">{stat.label}</div>
-                  </motion.div>
-                ))}
-              </motion.div>
+                    <span className="text-white">My </span>
+                    <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                      Projects
+                    </span>
+                  </motion.h1>
+                </div>
+
+                {/* Animated underline */}
+                <motion.div
+                  className="mx-auto h-1 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 mb-6"
+                  initial={{ width: 0 }}
+                  animate={{ width: 120 }}
+                  transition={{ delay: 0.4, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                />
+
+                <motion.p
+                  className="text-sm md:text-lg text-white/50 max-w-xl mx-auto leading-relaxed px-4"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3, duration: 0.6 }}
+                >
+                  Crafted with modern technologies — from real-time apps to AI-powered tools.
+                </motion.p>
+
+                {/* Stats row */}
+                <motion.div
+                  ref={statsRef}
+                  className="flex justify-center gap-8 md:gap-12 mt-10"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.6, duration: 0.5 }}
+                >
+                  {[
+                    { value: projects.length, label: "Projects", color: "from-blue-400 to-blue-600" },
+                    { value: Math.max(0, allTags.length - 1), label: "Technologies", color: "from-emerald-400 to-emerald-600" },
+                    { value: 100, label: "Open Source", color: "from-purple-400 to-purple-600", suffix: "%" }
+                  ].map((stat, index) => (
+                    <motion.div
+                      key={stat.label}
+                      className="text-center group cursor-pointer"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.7 + index * 0.1, duration: 0.4 }}
+                      whileHover={{ y: -3, transition: { duration: 0.2 } }}
+                      onMouseEnter={handleLinkCursor}
+                      onMouseLeave={handleDefaultCursor}
+                    >
+                      <div className={`text-3xl md:text-5xl font-black bg-gradient-to-b ${stat.color} bg-clip-text text-transparent mb-1`}>
+                        {stat.value}{stat.suffix || ""}
+                      </div>
+                      <div className="text-[10px] md:text-xs text-white/30 uppercase tracking-[0.2em] font-medium">
+                        {stat.label}
+                      </div>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              </div>
             </motion.div>
 
             {/* Simplified Filter Buttons */}

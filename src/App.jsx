@@ -3,7 +3,8 @@ import { Home, About, Contact, Projects, NotFound } from './pages';
 import Interactive from './pages/Interactive';
 import Navbar from './Components/Navbar';
 import VoiceNavigation from './Components/VoiceNavigation';
-import { useEffect, useState, Suspense } from 'react';
+import Footer from './Components/Footer';
+import { useEffect, Suspense } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -25,43 +26,17 @@ const InitialLoader = () => {
   );
 };
 
-// Curtain wipe transition variants
-const curtainVariants = {
-  initial:  { scaleX: 0, originX: 0 },
-  enter:    { scaleX: 1, originX: 0, transition: { duration: 0.4, ease: [0.76, 0, 0.24, 1] } },
-  exit:     { scaleX: 0, originX: 1, transition: { duration: 0.4, ease: [0.76, 0, 0.24, 1], delay: 0.05 } },
-};
-
-const contentVariants = {
-  initial:  { opacity: 0 },
-  animate:  { opacity: 1, transition: { duration: 0.3, delay: 0.35 } },
-  exit:     { opacity: 0, transition: { duration: 0.15 } },
-};
-
-// Page transition component — blue curtain wipe
+// Page transition — fade with subtle upward slide
 const PageTransition = ({ children }) => {
   return (
-    <div className="relative w-full">
-      {/* Blue curtain panel */}
-      <motion.div
-        className="fixed inset-0 z-[100] pointer-events-none"
-        style={{ background: 'linear-gradient(135deg, #1d4ed8 0%, #7c3aed 100%)' }}
-        variants={curtainVariants}
-        initial="initial"
-        animate="exit"
-        exit="enter"
-      />
-      {/* Page content */}
-      <motion.div
-        className="w-full"
-        variants={contentVariants}
-        initial="initial"
-        animate="animate"
-        exit="exit"
-      >
-        {children}
-      </motion.div>
-    </div>
+    <motion.div
+      className="w-full"
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] } }}
+      exit={{ opacity: 0, y: -12, transition: { duration: 0.2, ease: [0.55, 0, 1, 0.45] } }}
+    >
+      {children}
+    </motion.div>
   );
 };
 
@@ -91,65 +66,35 @@ const ScrollToTop = () => {
   return null;
 };
 
+// Animated routes with location-keyed transitions
+const AnimatedRoutes = () => {
+  const location = useLocation();
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<PageTransition><Home /></PageTransition>} />
+        <Route path="/about" element={<PageTransition><About /></PageTransition>} />
+        <Route path="/projects" element={<PageTransition><Projects /></PageTransition>} />
+        <Route path="/playground" element={<PageTransition><Interactive /></PageTransition>} />
+        <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
+        <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
+      </Routes>
+    </AnimatePresence>
+  );
+};
+
 const App = () => {
-  const [isLoading, setIsLoading] = useState(true);
-  
-  useEffect(() => {
-    // Simulate initial loading
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
-    
-    return () => clearTimeout(timer);
-  }, []);
-  
   return (
     <main className="bg-[#020617] text-white relative min-h-screen">
-      {isLoading ? (
-        <InitialLoader />
-      ) : (
-        <Router>
-          <Navbar />
-          <VoiceNavigation />
-          <ScrollToTop />
-          <Suspense fallback={<InitialLoader />}>
-            <AnimatePresence mode="wait">
-              <Routes>
-                <Route path="/" element={
-                  <PageTransition>
-                    <Home />
-                  </PageTransition>
-                } />
-                <Route path="/about" element={
-                  <PageTransition>
-                    <About />
-                  </PageTransition>
-                } />
-                <Route path="/projects" element={
-                  <PageTransition>
-                    <Projects />
-                  </PageTransition>
-                } />
-                <Route path="/playground" element={
-                  <PageTransition>
-                    <Interactive />
-                  </PageTransition>
-                } />
-                <Route path="/contact" element={
-                  <PageTransition>
-                    <Contact />
-                  </PageTransition>
-                } />
-                <Route path="*" element={
-                  <PageTransition>
-                    <NotFound />
-                  </PageTransition>
-                } />
-              </Routes>
-            </AnimatePresence>
-          </Suspense>
-        </Router>
-      )}
+      <Router>
+        <Navbar />
+        <VoiceNavigation />
+        <ScrollToTop />
+        <Suspense fallback={<InitialLoader />}>
+          <AnimatedRoutes />
+        </Suspense>
+        <Footer />
+      </Router>
     </main>
   );
 };
