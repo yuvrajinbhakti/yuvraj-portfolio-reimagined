@@ -1,17 +1,23 @@
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
+import { useReducedMotion } from 'framer-motion';
 import AmbientOrbs from './AmbientOrbs';
 
 const AnimatedBackground = ({ children }) => {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  
+  const reduce = useReducedMotion();
+
   useEffect(() => {
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
     let width, height, stars = [], meteors = [];
     let mouseX = 0, mouseY = 0;
+    // Tracked so the loop and the meteor scheduler can actually be torn down —
+    // previously neither was cancelled on unmount.
+    let rafId = null;
+    let meteorTimeoutId = null;
     let isMouseMoving = false;
     let mouseTimeout;
     
@@ -251,7 +257,7 @@ const AnimatedBackground = ({ children }) => {
       }
       
       // Schedule next meteor
-      setTimeout(createMeteor, Math.random() * 5000 + 2000);
+      meteorTimeoutId = setTimeout(createMeteor, Math.random() * 5000 + 2000);
     };
     
     // Fill canvas with initial gradient
@@ -316,8 +322,12 @@ const AnimatedBackground = ({ children }) => {
       
       // Draw nebula
       drawNebula(context, width, height, scrollY);
-      
-      requestAnimationFrame(animate);
+
+      // Under reduced motion the scene is painted once and left static: the
+      // starfield still reads as a backdrop, but nothing drifts or streaks.
+      if (!reduce) {
+        rafId = requestAnimationFrame(animate);
+      }
     };
     
     // Draw a nebula effect
@@ -375,17 +385,22 @@ const AnimatedBackground = ({ children }) => {
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('scroll', handleScroll);
     
-    // Start animation and meteors
+    // Start animation and meteors. `animate` paints one frame either way; only
+    // the repeat is conditional. Meteors are skipped entirely under reduced
+    // motion — objects streaking across the viewport are the most aggressive
+    // movement on the page.
     animate();
-    createMeteor();
-    
+    if (!reduce) createMeteor();
+
     // Cleanup
     return () => {
       window.removeEventListener('resize', updateDimensions);
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('scroll', handleScroll);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      if (meteorTimeoutId !== null) clearTimeout(meteorTimeoutId);
     };
-  }, []);
+  }, [reduce]);
   
   // NOTE: 3D perspective transform removed — it was creating a stacking context
   // that prevented native vertical scrolling on the page.

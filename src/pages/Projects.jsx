@@ -5,6 +5,7 @@ import CTA from "../Components/CTA";
 import { motion, useScroll, useTransform, useInView, useMotionValue, useSpring } from "framer-motion";
 import AnimatedBackground from "../Components/AnimatedBackground";
 import GlassCard from "../Components/GlassCard";
+import useDocumentMeta from '../hooks/useDocumentMeta';
 
 // Pre-generate particle positions outside component to avoid recalculation
 const PARTICLE_POSITIONS = Array.from({ length: 3 }, (_, i) => ({
@@ -195,7 +196,7 @@ const ProjectCard = ({ project, index, setCursorVariant }) => {
                     </span>
                   ))}
                   {project.tags && project.tags.length > 3 && (
-                    <span className="text-xs text-white/60">
+                    <span className="text-sm text-white/60">
                       +{project.tags.length - 3}
                     </span>
                   )}
@@ -274,7 +275,7 @@ const ProjectCard = ({ project, index, setCursorVariant }) => {
               )}
               
               {!project.demo_link && (
-                <span className="text-gray-500 text-xs italic">
+                <span className="text-gray-400 text-sm italic">
                   Demo soon
                 </span>
               )}
@@ -305,6 +306,12 @@ ProjectCard.propTypes = {
 };
 
 const Projects = () => {
+  useDocumentMeta({
+    title: 'Projects | Yuvraj Singh Nain',
+    description: 'Selected engineering work — a real-time collaborative code editor, a secure file-sharing service, a Flutter finance app, and more. Source code for each.',
+    path: '/projects',
+  });
+
   const [activeFilter, setActiveFilter] = useState("All");
   const [filteredProjects, setFilteredProjects] = useState(projects);
   const [cursorVariant, setCursorVariant] = useState("default");
@@ -532,7 +539,7 @@ const Projects = () => {
                       <div className={`text-3xl md:text-5xl font-black bg-gradient-to-b ${stat.color} bg-clip-text text-transparent mb-1`}>
                         {stat.value}{stat.suffix || ""}
                       </div>
-                      <div className="text-[10px] md:text-xs text-white/30 uppercase tracking-[0.2em] font-medium">
+                      <div className="text-xs md:text-sm text-white/50 uppercase tracking-[0.2em] font-medium">
                         {stat.label}
                       </div>
                     </motion.div>
@@ -552,7 +559,7 @@ const Projects = () => {
                 <motion.button
                   key={tag}
                   onClick={() => setActiveFilter(tag)}
-                  className={`px-3 py-2 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-semibold transition-all duration-300 relative overflow-hidden backdrop-blur-md will-change-transform cursor-pointer touch-target ${
+                  className={`px-3 py-2 md:px-4 md:py-2 rounded-full text-sm font-semibold transition-all duration-300 relative overflow-hidden backdrop-blur-md will-change-transform cursor-pointer touch-target ${
                     activeFilter === tag
                       ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md border border-white/20"
                       : "bg-black/15 text-gray-300 hover:bg-white/10 border border-white/10 hover:border-white/20"

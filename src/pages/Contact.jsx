@@ -4,8 +4,15 @@ import AnimatedBackground from "../Components/AnimatedBackground";
 import ScrollReveal from "../Components/ScrollReveal";
 import GlassCard from "../Components/GlassCard";
 import { sendContactEmail, isEmailJSConfigured, createMailtoLink } from "../utils/emailService";
+import useDocumentMeta from '../hooks/useDocumentMeta';
 
 const Contact = () => {
+  useDocumentMeta({
+    title: 'Contact | Yuvraj Singh Nain',
+    description: 'Get in touch about roles, freelance work or collaboration. Based in Chandigarh, India.',
+    path: '/contact',
+  });
+
   const formRef = useRef(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -28,10 +35,8 @@ const Contact = () => {
     try {
       if (isEmailJSConfigured()) {
         // Use EmailJS service
-        const result = await sendContactEmail(formData);
-        
-        console.log('Email sent successfully:', result.response);
-        
+        await sendContactEmail(formData);
+
         // Reset form
         setFormData({ name: "", email: "", message: "" });
         setSubmitStatus({

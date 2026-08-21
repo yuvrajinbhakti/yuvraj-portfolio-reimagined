@@ -10,6 +10,7 @@ import AnimatedBackground from "../Components/AnimatedBackground";
 import ScrollReveal from "../Components/ScrollReveal";
 import GlassCard from "../Components/GlassCard";
 import { motion, useScroll, useTransform } from "framer-motion";
+import useDocumentMeta from '../hooks/useDocumentMeta';
 
 // Self-drawing animated SVG timeline accent line
 const AnimatedTimelineLine = ({ itemCount = 4 }) => {
@@ -67,44 +68,56 @@ const AnimatedTimelineLine = ({ itemCount = 4 }) => {
 };
 
 const About = () => {
+  useDocumentMeta({
+    title: 'About | Yuvraj Singh Nain',
+    description: 'Frontend Engineer at Razorpay and Amazon ML Summer School alumnus. My experience, engineering background and the technologies I build with.',
+    path: '/about',
+  });
+
   const [activeTab, setActiveTab] = useState("experience");
 
-  // Education data
+  // Education data — kept in sync with resume.tex
   const education = [
     {
-      degree: "Bachelor of Technology in Computer Science",
-      institution: "Chitkara University, Punjab",
-      date: "2021 - 2025",
-      description: "Focused on machine learning, data structures, and full-stack development. Maintained a strong academic record with an 9.26 CGPA.",
+      degree: "Bachelor of Engineering in Computer Science",
+      institution: "Chitkara University, Rajpura, Punjab",
+      date: "June 2021 - July 2025",
+      description: "Focused on machine learning, data structures, and full-stack development. Graduated with a 9.24/10 CGPA.",
       iconBg: "#e6f0ff"
     },
     {
       degree: "Machine Learning Specialization",
       institution: "Amazon Machine Learning Summer School",
       date: "July 2024",
-      description: "Selected among top 5% of 85,000 applicants. Gained expertise in deep learning and reinforcement learning algorithms.",
+      description: "Selected from 91,000+ applicants — the top 0.2%. Gained expertise in deep learning and reinforcement learning algorithms.",
       iconBg: "#ffeee6"
     }
   ];
 
-  // Achievements data
+  // Achievements data — kept in sync with resume.tex
   const achievements = [
     {
-      title: "First Position in College Hackathon",
-      date: "2023",
-      description: "Developed an AI-powered solution for healthcare diagnostics, winning first place among 50+ teams.",
+      title: "Top 5 Percentile — Adobe GenSolve Hackathon",
+      date: "2024",
+      description: "Placed in the top 5 percentile among thousands of participants nationwide.",
       iconBg: "#e6fff0"
     },
     {
-      title: "Google Cloud Certification",
-      date: "2022",
-      description: "Achieved professional-level certification in Google Cloud Platform, demonstrating expertise in cloud architecture and deployment.",
+      title: "Amazon ML Summer School — Top 0.2%",
+      date: "2024",
+      description: "Selected out of 91,000+ applicants for Amazon's Machine Learning Summer School.",
+      iconBg: "#ffeee6"
+    },
+    {
+      title: "National Semi-Finalist — Tata Imagination Challenge",
+      date: "2024",
+      description: "National semi-finalist at the Tata Imagination Challenge, and part of a Top 10 team at Smart India Hackathon (SIH) 2024.",
       iconBg: "#f0e6ff"
     },
     {
-      title: "Open Source Contributor",
-      date: "2021 - Present",
-      description: "Active contributor to multiple open-source projects with over 50+ contributions on GitHub.",
+      title: "Competitive Programming",
+      date: "Ongoing",
+      description: "LeetCode rating 1661, CodeChef rank 131 (Starters 138), 5-star HackerRank in C++ and SQL, and 500+ problems solved across platforms.",
       iconBg: "#ffe6e6"
     }
   ];

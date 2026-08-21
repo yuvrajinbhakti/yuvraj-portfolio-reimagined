@@ -400,3 +400,60 @@ body:has(.card[data-color="green"]:hover) {
   box-shadow: 0.6vmin 0.6vmin #fff, 1vmin 1vmin #d2e4ff, 1vmin 1vmin #d2e4ff,
     0.65vmin 1vmin #d2e4ff, 1vmin 0.65vmin #d2e4ff;
 }
+/* ---------------------------------------------------------------------------
+   Reduced motion (WCAG 2.1 SC 2.3.3)
+
+   This site is built almost entirely out of movement — parallax, scroll-driven
+   reveals, a canvas starfield, 3D rotation. For a visitor with a vestibular
+   disorder that is not just unpleasant, it is unusable.
+
+   This block is the broad net for CSS-driven motion. Animation that runs in JS
+   (GSAP timelines, framer-motion, requestAnimationFrame canvas loops, r3f
+   useFrame) cannot be reached from CSS and is disabled separately in the
+   components via framer-motion's useReducedMotion().
+
+   Motion is reduced, not removed: opacity fades are retained because they carry
+   no movement and keep the interface feeling responsive.
+--------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  html {
+    scroll-behavior: auto !important;
+  }
+
+  /* Tailwind's motion utilities are the loudest offenders on this site. */
+  .animate-spin,
+  .animate-ping,
+  .animate-bounce,
+  .animate-pulse {
+    animation: none !important;
+  }
+
+  /* Keep the spinner legible as a static ring rather than a frozen arc. */
+  .animate-spin {
+    border-color: rgba(59, 130, 246, 0.35) !important;
+    border-top-color: #3b82f6 !important;
+  }
+
+  /* Local keyframe animations declared above. */
+  .float-animation,
+  .pulse-glow,
+  .shimmer {
+    animation: none !important;
+  }
+
+  /* Neutralise hover lifts and scale-ups. */
+  .hover\:scale-105:hover,
+  .hover\:scale-110:hover,
+  .group:hover .group-hover\:scale-110 {
+    transform: none !important;
+  }
+}

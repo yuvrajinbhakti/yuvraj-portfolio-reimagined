@@ -1,8 +1,14 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useCallback } from 'react';
+import useDocumentMeta from '../hooks/useDocumentMeta';
 
 const NotFound = () => {
+  useDocumentMeta({
+    title: 'Page not found | Yuvraj Singh Nain',
+    description: 'That page does not exist. Head back to the portfolio home page.',
+  });
+
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
   const [particles, setParticles] = useState([]);

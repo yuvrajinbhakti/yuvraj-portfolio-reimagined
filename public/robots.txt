@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://yuvraj-portfolio-reimagined.vercel.app/sitemap.xml

@@ -3,10 +3,16 @@ import { useRef } from 'react';
 import InteractiveTerminal from '../Components/InteractiveTerminal';
 import CodePlayground from '../Components/CodePlayground';
 // import VoiceNavigation from '../Components/VoiceNavigation';
-// import ARBusinessCard from '../Components/ARBusinessCard';
 import AnimatedBackground from '../Components/AnimatedBackground';
+import useDocumentMeta from '../hooks/useDocumentMeta';
 
 const Interactive = () => {
+  useDocumentMeta({
+    title: 'Playground | Yuvraj Singh Nain',
+    description: 'An interactive terminal and live code playground — explore my background through commands, or run code directly in the browser.',
+    path: '/playground',
+  });
+
   const containerRef = useRef(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -86,10 +92,6 @@ const Interactive = () => {
   return (
     <div className="min-h-screen bg-transparent text-white" ref={containerRef}>
       <AnimatedBackground>
-        {/* Commented out components */}
-        {/* <VoiceNavigation /> */}
-        {/* <ARBusinessCard /> */}
-
         {/* Hero Section with Enhanced Animations */}
         <section className="relative pt-24 md:pt-32 pb-20 px-4 overflow-hidden">
           {/* Floating Background Elements */}

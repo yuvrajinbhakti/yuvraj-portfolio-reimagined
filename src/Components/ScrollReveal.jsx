@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useReducedMotion } from 'framer-motion';
 
 // Register ScrollTrigger plugin
 gsap.registerPlugin(ScrollTrigger);
@@ -20,11 +21,24 @@ const ScrollReveal = ({
 }) => {
   const ref = useRef(null);
   const childrenRef = useRef([]);
-  
+  const reduce = useReducedMotion();
+
   useEffect(() => {
     const element = ref.current;
     if (!element) return;
-    
+
+    // GSAP is driven imperatively, so neither the CSS media query nor
+    // MotionConfig can reach it. Skip the timeline entirely and make sure the
+    // content is left visible — without this the gsap.set() initial states
+    // would never be animated away and the page would render blank.
+    if (reduce) {
+      gsap.set(element, { clearProps: 'all', opacity: 1, x: 0, y: 0, scale: 1, rotation: 0 });
+      if (childrenRef.current.length) {
+        gsap.set(childrenRef.current, { clearProps: 'all', opacity: 1, x: 0, y: 0 });
+      }
+      return;
+    }
+
     let tl = gsap.timeline({
       scrollTrigger: {
         trigger: element,
@@ -106,7 +120,7 @@ const ScrollReveal = ({
         }
       });
     };
-  }, [animation, direction, duration, delay, ease, staggerDelay, distance, threshold, once]);
+  }, [animation, direction, duration, delay, ease, staggerDelay, distance, threshold, once, reduce]);
   
   // Set refs for children if stagger animation
   const setChildRefs = element => {
