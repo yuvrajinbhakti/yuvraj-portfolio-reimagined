@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { TextPlugin } from 'gsap/TextPlugin';
 import { SplitText } from 'gsap/SplitText';
+import { useReducedMotion } from 'framer-motion';
+import PropTypes from 'prop-types';
 
 // Register plugins
 gsap.registerPlugin(TextPlugin, SplitText);
@@ -13,15 +15,26 @@ const AnimatedText = ({
   type = 'fade',
   className = '',
   staggerDelay = 0.03,
-  onComplete = () => { }
+  onComplete = () => { },
+  as: Tag = 'div'
 }) => {
   const textRef = useRef(null);
   // Declare glitchInterval in component scope
   const glitchIntervalRef = useRef(null);
+  const reduce = useReducedMotion();
 
   useEffect(() => {
     const element = textRef.current;
     if (!element) return;
+
+    // Character-by-character reveals and the glitch effect are pure motion.
+    // Render the text plainly and fire onComplete so any dependent state still
+    // advances.
+    if (reduce) {
+      gsap.set(element, { clearProps: 'all', opacity: 1, x: 0, y: 0 });
+      onComplete();
+      return;
+    }
 
     let tl = gsap.timeline({
       delay,
@@ -172,13 +185,24 @@ const AnimatedText = ({
         glitchIntervalRef.current = null;
       }
     };
-  }, [text, delay, duration, type, staggerDelay, onComplete]);
+  }, [text, delay, duration, type, staggerDelay, onComplete, reduce]);
 
   return (
-    <div ref={textRef} className={`bg-transparent ${className}`}>
+    <Tag ref={textRef} className={`bg-transparent ${className}`}>
       {text}
-    </div>
+    </Tag>
   );
+};
+
+AnimatedText.propTypes = {
+  text: PropTypes.string.isRequired,
+  delay: PropTypes.number,
+  duration: PropTypes.number,
+  type: PropTypes.string,
+  className: PropTypes.string,
+  staggerDelay: PropTypes.number,
+  onComplete: PropTypes.func,
+  as: PropTypes.elementType,
 };
 
 const TextEffect = () => {
@@ -197,7 +221,10 @@ const TextEffect = () => {
     <div className="text-effect-container relative z-30 bg-transparent">
       {/* <div className="mb-4 overflow-hidden bg-transparent px-2 sm:px-4"> */}
       <div className="mb-4 overflow-hidden px-2 sm:px-4 pb-4">
+        {/* The page's h1 — Home previously had no level-1 heading, so its
+            document outline started at h2. */}
         <AnimatedText
+          as="h1"
           text="I'm Yuvraj Singh Nain"
           type="character"
           className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-6xl font-bold text-white leading-[1.3] tracking-wide"

@@ -1,8 +1,12 @@
+import { Suspense, lazy } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import GlassCard from "./GlassCard";
 import ScrollReveal from "./ScrollReveal";
-import CTA3D from "./CTA3D";
+
+// Purely decorative 3D backdrop — deferred so three.js stays off the critical
+// path for /about and /projects, which are the only pages rendering this.
+const CTA3D = lazy(() => import("./CTA3D"));
 
 const CTA = () => {
 
@@ -23,13 +27,8 @@ const CTA = () => {
       // 🚀 Direct download URL format
       const downloadUrl = `https://drive.google.com/uc?export=download&id=${GOOGLE_DRIVE_FILE_ID}`;
 
-      console.log('Opening resume download:', downloadUrl);
-
       // Open download in new tab
       window.open(downloadUrl, '_blank');
-
-      // Optional: Show success message
-      console.log('Resume download initiated successfully');
 
     } catch (error) {
       console.error('Error downloading resume:', error);
@@ -194,7 +193,11 @@ const CTA = () => {
   return (
     <ScrollReveal animation="fade">
       <GlassCard className="p-4 sm:p-6 md:p-8 text-center relative overflow-hidden">
-        <CTA3D />
+        {/* Absolutely positioned, so no fallback is needed — the card just
+            renders without its backdrop until the chunk lands. */}
+        <Suspense fallback={null}>
+          <CTA3D />
+        </Suspense>
         <div className="relative z-10 w-full flex flex-col items-center py-8 sm:py-12 md:py-16">
           <motion.h2
             className="text-2xl sm:text-3xl md:text-3xl font-bold text-white mb-3 sm:mb-4 md:mb-4"

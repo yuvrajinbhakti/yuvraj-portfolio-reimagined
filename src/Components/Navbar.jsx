@@ -1,11 +1,56 @@
 import { NavLink } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import PropTypes from 'prop-types'
+
+const navItems = [
+  { to: '/about', label: 'About', gradient: 'from-blue-600/0 via-blue-600/20 to-blue-600/0' },
+  { to: '/projects', label: 'Projects', gradient: 'from-purple-600/0 via-purple-600/20 to-purple-600/0' },
+  { to: '/playground', label: 'Playground', gradient: 'from-pink-600/0 via-pink-600/20 to-pink-600/0' },
+  { to: '/contact', label: 'Contact', gradient: 'from-green-600/0 via-green-600/20 to-green-600/0' }
+]
+
+// Declared at module scope, not inside Navbar. Defining a component inside
+// another component gives it a new type on every render, so React unmounts and
+// remounts the whole nav on each state change — which restarts animations and,
+// critically here, throws away keyboard focus and breaks the focus trap.
+const NavItem = ({ to, label, gradient, onClick }) => (
+  // tabIndex={-1}: framer-motion makes a motion.div focusable once it has tap
+  // handlers, which put a second, role-less tab stop in front of every link.
+  // The anchor inside is the real control, so the wrapper is taken out of the
+  // tab order.
+  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} tabIndex={-1}>
+    <NavLink
+      to={to}
+      onClick={onClick}
+      className={({ isActive }) => `
+        px-4 py-3 md:py-2 rounded-lg backdrop-blur-sm border border-transparent transition-all duration-300 relative overflow-hidden group block text-center md:text-left
+        ${isActive
+          ? 'text-blue-400 bg-blue-500/20 border-blue-400/30 shadow-lg shadow-blue-500/25'
+          : 'text-white hover:text-blue-300 hover:bg-white/10 hover:border-white/20 hover:shadow-lg hover:shadow-white/10'
+        }
+      `}
+    >
+      <span className="relative z-10">{label}</span>
+      <div className={`absolute inset-0 bg-gradient-to-r ${gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+    </NavLink>
+  </motion.div>
+)
+
+NavItem.propTypes = {
+  to: PropTypes.string.isRequired,
+  label: PropTypes.string.isRequired,
+  gradient: PropTypes.string.isRequired,
+  onClick: PropTypes.func
+}
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const menuRef = useRef(null)
+  const triggerRef = useRef(null)
+
+  const closeMenu = useCallback(() => setIsMenuOpen(false), [])
 
   // Check if device is mobile
   useEffect(() => {
@@ -44,38 +89,57 @@ const Navbar = () => {
     }
   }, [isMenuOpen, isMobile])
 
-  const navItems = [
-    { to: '/about', label: 'About', gradient: 'from-blue-600/0 via-blue-600/20 to-blue-600/0' },
-    { to: '/projects', label: 'Projects', gradient: 'from-purple-600/0 via-purple-600/20 to-purple-600/0' },
-    { to: '/playground', label: 'Playground', gradient: 'from-pink-600/0 via-pink-600/20 to-pink-600/0' },
-    { to: '/contact', label: 'Contact', gradient: 'from-green-600/0 via-green-600/20 to-green-600/0' }
-  ]
+  // Close the menu if the viewport grows past the mobile breakpoint while it is
+  // open — otherwise state stays open behind a hidden panel and the next
+  // hamburger press appears to do nothing.
+  useEffect(() => {
+    if (!isMobile && isMenuOpen) closeMenu()
+  }, [isMobile, isMenuOpen, closeMenu])
 
-  const NavItem = ({ to, label, gradient, onClick }) => (
-    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-      <NavLink 
-        to={to}
-        onClick={onClick}
-        className={({isActive}) => `
-          px-4 py-3 md:py-2 rounded-lg backdrop-blur-sm border border-transparent transition-all duration-300 relative overflow-hidden group block text-center md:text-left
-          ${isActive 
-            ? 'text-blue-400 bg-blue-500/20 border-blue-400/30 shadow-lg shadow-blue-500/25' 
-            : 'text-white hover:text-blue-300 hover:bg-white/10 hover:border-white/20 hover:shadow-lg hover:shadow-white/10'
-          }
-        `}
-      >
-        <span className="relative z-10">{label}</span>
-        <div className={`absolute inset-0 bg-gradient-to-r ${gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
-      </NavLink>
-    </motion.div>
-  )
+  // Modal behaviour: Escape to dismiss, focus moved into the panel on open and
+  // returned to the hamburger on close, and Tab cycled within the panel so
+  // keyboard users can't wander into the inert page behind it.
+  useEffect(() => {
+    if (!isMenuOpen || !isMobile) return
 
-  NavItem.propTypes = {
-    to: PropTypes.string.isRequired,
-    label: PropTypes.string.isRequired,
-    gradient: PropTypes.string.isRequired,
-    onClick: PropTypes.func
-  }
+    const panel = menuRef.current
+    if (!panel) return
+
+    const FOCUSABLE = 'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    const firstLink = panel.querySelector(FOCUSABLE)
+    if (firstLink) firstLink.focus()
+
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        closeMenu()
+        return
+      }
+
+      if (event.key !== 'Tab') return
+
+      const focusable = Array.from(panel.querySelectorAll(FOCUSABLE))
+      if (!focusable.length) return
+
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault()
+        first.focus()
+      }
+    }
+
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('keydown', onKeyDown)
+      // Send focus back to the control that opened the panel.
+      if (triggerRef.current) triggerRef.current.focus()
+    }
+  }, [isMenuOpen, isMobile, closeMenu])
 
   return (
     <motion.div
@@ -107,11 +171,14 @@ const Navbar = () => {
 
         {/* Mobile Hamburger Button */}
         <motion.button
+          ref={triggerRef}
           className="hamburger-button md:hidden w-12 h-12 rounded-xl bg-gradient-to-br from-white/20 to-white/10 backdrop-blur-md border border-white/20 items-center justify-center flex font-bold shadow-lg hover:shadow-blue-500/25 transition-all duration-300 hover:border-blue-400/50"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          aria-label="Toggle mobile menu"
+          aria-label={isMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+          aria-expanded={isMenuOpen}
+          aria-controls="mobile-menu"
         >
           <motion.div
             animate={isMenuOpen ? { rotate: 180 } : { rotate: 0 }}
@@ -157,11 +224,17 @@ const Navbar = () => {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
               className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
-              onClick={() => setIsMenuOpen(false)}
+              onClick={closeMenu}
+              aria-hidden="true"
             />
             
             {/* Mobile Menu */}
             <motion.div
+              ref={menuRef}
+              id="mobile-menu"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="mobile-menu-heading"
               initial={{ x: '100%', opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: '100%', opacity: 0 }}
@@ -170,7 +243,7 @@ const Navbar = () => {
             >
               <div className="p-6 space-y-4">
                 <div className="text-center mb-8">
-                  <h2 className="text-xl font-bold text-white mb-2">Navigation</h2>
+                  <h2 id="mobile-menu-heading" className="text-xl font-bold text-white mb-2">Navigation</h2>
                   <div className="w-12 h-0.5 bg-blue-500 mx-auto rounded-full"></div>
                 </div>
                 
@@ -196,7 +269,7 @@ const Navbar = () => {
                   className="pt-8 mt-8 border-t border-white/10"
                 >
                   <p className="text-center text-sm text-white/60">
-                    Swipe right or tap outside to close
+                    Tap outside or press Esc to close
                   </p>
                   <div className="flex justify-center mt-4">
                     <button
