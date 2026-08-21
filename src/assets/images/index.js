@@ -1,22 +1,10 @@
-import hero from './hero.jpg'
-import meta from './meta.png'
-import shopify from './shopify.png'
-import starbucks from './starbucks.png'
-import tesla from './tesla.png'
-import logo from './logo.svg'
+// Only import what is actually rendered. Every `import x from './x.png'` here
+// makes Vite emit that file into dist/, even if nothing consumes the export —
+// so unused entries ship dead bytes to production.
 import razorpay from './razorpay.png'
 import amazon from './amazon.jpeg'
-import personalProjectIcon from './personalProjectIcon.png'
-
 
 export {
-    hero,
-    meta,
-    shopify,
-    starbucks,
-    tesla,
-    logo,
     amazon,
-    razorpay,
-    personalProjectIcon
+    razorpay
 }

@@ -1,4 +1,5 @@
 import { useRef, useMemo, useEffect } from 'react';
+import { useReducedMotion } from 'framer-motion';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Float, Sphere, MeshDistortMaterial } from '@react-three/drei';
 import * as THREE from 'three';
@@ -108,6 +109,8 @@ const OrbitingParticles = ({ count = 150, mouse }) => {
 
 const HeroAnimation = () => {
   const mouse = useRef({ x: 0, y: 0 });
+  // frameloop="demand" paints one frame and stops, freezing the rotating globe.
+  const reduce = useReducedMotion();
 
   useEffect(() => {
     const handleMove = (e) => {
@@ -123,7 +126,7 @@ const HeroAnimation = () => {
       {/* Subtle overlay to ensure text readability */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#020617]/20 to-[#020617]/80 z-10"></div>
 
-      <Canvas camera={{ position: [0, 0, 7], fov: 45 }} dpr={[1, 1.5]} gl={{ alpha: true }}>
+      <Canvas camera={{ position: [0, 0, 7], fov: 45 }} dpr={[1, 1.5]} gl={{ alpha: true }} frameloop={reduce ? 'demand' : 'always'}>
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 5]} intensity={1.5} color="#3b82f6" />
         <directionalLight position={[-10, -10, -5]} intensity={1} color="#8b5cf6" />

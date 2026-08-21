@@ -12,6 +12,13 @@ dist
 dist-ssr
 *.local
 
+# Environment / secrets
+# `*.local` above only catches .env.local — plain `.env` was committable, and
+# ENV_SETUP_GUIDE.md instructs creating exactly that with the EmailJS keys.
+.env
+.env.*
+!.env.example
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -1,4 +1,5 @@
 import { useRef, useMemo } from 'react';
+import { useReducedMotion } from 'framer-motion';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Float, Sphere, MeshDistortMaterial, Stars } from '@react-three/drei';
 import * as THREE from 'three';
@@ -97,12 +98,15 @@ const OrbitingParticles = ({ count = 60 }) => {
 };
 
 const CTA3D = () => {
+  // frameloop="demand" paints one frame and stops.
+  const reduce = useReducedMotion();
+
   return (
     <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden rounded-2xl" style={{ zIndex: 0 }}>
       {/* Dark gradient overlay to blend 3D with card better */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/30 z-10"></div>
       
-      <Canvas camera={{ position: [0, 0, 5], fov: 45 }} dpr={[1, 1.5]} gl={{ alpha: true }}>
+      <Canvas camera={{ position: [0, 0, 5], fov: 45 }} dpr={[1, 1.5]} gl={{ alpha: true }} frameloop={reduce ? 'demand' : 'always'}>
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 5]} intensity={1.5} color="#3b82f6" />
         <directionalLight position={[-10, -10, -5]} intensity={1} color="#8b5cf6" />

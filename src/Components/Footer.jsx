@@ -93,7 +93,7 @@ const Footer = () => {
           </div>
 
           {/* Copyright */}
-          <div className="mt-8 pt-6 border-t border-white/10 text-center text-white/30 text-sm">
+          <div className="mt-8 pt-6 border-t border-white/10 text-center text-white/50 text-sm">
             &copy; {currentYear} Yuvraj Singh Nain. All rights reserved.
           </div>
         </div>

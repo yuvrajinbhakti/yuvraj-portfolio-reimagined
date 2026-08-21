@@ -1,22 +1,29 @@
-import { useState, useEffect, Suspense, useRef } from "react";
+import { useState, useEffect, Suspense, useRef, lazy } from "react";
 import { Link } from "react-router-dom";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import PropTypes from 'prop-types';
 
 // New components
-import HeroAnimation from "../Components/HeroAnimation";
 import TextEffect from "../Components/TextEffect";
 import AnimatedBackground from "../Components/AnimatedBackground";
 import ScrollReveal from "../Components/ScrollReveal";
 import GlassCard from "../Components/GlassCard";
-import ServiceIcon3D from "../Components/Service3DIcons";
 import SocialIcon from "../Components/SocialIcon";
 import HorizontalProjectScroll from "../Components/HorizontalProjectScroll";
+// Plain SVG — imported directly because it is a couple of hundred bytes and
+// carries no WebGL context, unlike the three.js version it replaced.
+import ServiceIcon from "../Components/ServiceIcon";
+
+// Deferred: the hero is now the only thing on this page pulling in three.js
+// (~227kB gzip). Loading it lazily keeps three off the critical path so the
+// headline and CTAs paint first.
+const HeroAnimation = lazy(() => import("../Components/HeroAnimation"));
 
 // Icons and media
 import { socialLinks } from "../constants";
 import sakura from '../assets/sakura.mp3';
 import { soundoff, soundon } from "../assets/icons";
+import useDocumentMeta from '../hooks/useDocumentMeta';
 
 const ServiceCard = ({ service }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -29,7 +36,7 @@ const ServiceCard = ({ service }) => {
     >
       <GlassCard className="h-full p-6 md:p-8 transform transition-all duration-500 hover:scale-105 hover:shadow-blue-500/20 hover:shadow-lg group">
         <div className="mb-2 -mt-4 relative z-0">
-          <ServiceIcon3D type={service.type} isHovered={isHovered} />
+          <ServiceIcon type={service.type} isHovered={isHovered} />
         </div>
         <h3 className="text-lg md:text-xl font-bold text-white mb-3 md:mb-4 group-hover:text-blue-400 transition-colors duration-300 relative z-10 text-center">{service.title}</h3>
         <p className="text-white/70 text-sm md:text-base leading-relaxed relative z-10 text-center">{service.description}</p>
@@ -47,55 +54,93 @@ ServiceCard.propTypes = {
 };
 
 const Home = () => {
+  useDocumentMeta({
+    title: 'Yuvraj Singh Nain | Full Stack Developer & Software Engineer',
+    description: 'Full Stack Developer and Software Engineer building fast, accessible web applications with React, Node.js, TypeScript and Go. Frontend Engineer at Razorpay.',
+    path: '/',
+  });
+
   const [isPlayingMusic, setIsPlayingMusic] = useState(false);
-  const [audioElement] = useState(new Audio(sakura));
+  const audioRef = useRef(null);
   const heroRef = useRef(null);
   const { scrollYProgress } = useScroll({
     target: heroRef,
     offset: ["start start", "end start"]
   });
   
-  // Layered parallax — each layer moves at a different speed
-  const bgY       = useTransform(scrollYProgress, [0, 1], [0, 120]);   // slow: background
-  const midY      = useTransform(scrollYProgress, [0, 1], [0, 220]);   // medium: subtitle
-  const y         = useTransform(scrollYProgress, [0, 1], [0, 320]);   // fast: headline
-  const opacity   = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  // Layered parallax — each layer moves at a different speed.
+  // Parallax is a scroll-bound style binding rather than an animation, so
+  // MotionConfig can't switch it off; the ranges are flattened to 0 instead.
+  // Decoupled scroll movement is a classic vestibular trigger.
+  const reduce    = useReducedMotion();
+  const p         = (distance) => (reduce ? 0 : distance);
+  const bgY       = useTransform(scrollYProgress, [0, 1], [0, p(120)]);  // slow: background
+  const midY      = useTransform(scrollYProgress, [0, 1], [0, p(220)]);  // medium: subtitle
+  const y         = useTransform(scrollYProgress, [0, 1], [0, p(320)]);  // fast: headline
+  const opacity   = useTransform(scrollYProgress, [0, 0.5], [1, 0]);     // fade only — kept
+
+  // Build the audio element on first use. `new Audio(src)` defaults to
+  // preload="auto", which would pull the whole track down on mount even for the
+  // majority of visitors who never turn music on.
+  const getAudio = () => {
+    if (!audioRef.current) {
+      const el = new Audio();
+      el.preload = 'none';
+      el.loop = true;
+      el.src = sakura;
+      audioRef.current = el;
+    }
+    return audioRef.current;
+  };
 
   // Handle music playback
   useEffect(() => {
-    audioElement.loop = true;
-    
+    // Nothing to fade until the visitor has actually asked for audio once.
+    if (!isPlayingMusic && !audioRef.current) return;
+
+    const audio = getAudio();
+    let fade;
+
     if (isPlayingMusic) {
-      audioElement.volume = 0;
-      audioElement.play().then(() => {
+      audio.volume = 0;
+      audio.play().then(() => {
         // Fade in audio
-        const fadeIn = setInterval(() => {
-          if (audioElement.volume < 0.4) {
-            audioElement.volume += 0.02;
+        fade = setInterval(() => {
+          if (audio.volume < 0.4) {
+            // Clamp: assigning outside 0..1 throws IndexSizeError.
+            audio.volume = Math.min(0.4, audio.volume + 0.02);
           } else {
-            clearInterval(fadeIn);
+            clearInterval(fade);
           }
         }, 100);
       }).catch(error => {
         console.error("Audio play failed:", error);
+        setIsPlayingMusic(false);
       });
-    } else if (!isPlayingMusic && audioElement.played.length > 0) {
-      // Fade out audio
-      const fadeOut = setInterval(() => {
-        if (audioElement.volume > 0.02) {
-          audioElement.volume -= 0.02;
     } else {
-          audioElement.pause();
-          clearInterval(fadeOut);
+      // Fade out audio
+      fade = setInterval(() => {
+        if (audio.volume > 0.02) {
+          audio.volume = Math.max(0, audio.volume - 0.02);
+        } else {
+          audio.pause();
+          clearInterval(fade);
         }
       }, 100);
     }
 
+    // Clear only the interval here — pausing on every toggle would cut the
+    // fade-out short. Teardown on unmount is handled separately below.
+    return () => clearInterval(fade);
+  }, [isPlayingMusic]);
+
+  // Stop playback when leaving the page.
+  useEffect(() => {
     return () => {
-      audioElement.pause();
+      if (audioRef.current) audioRef.current.pause();
     };
-  }, [isPlayingMusic, audioElement]);
-  
+  }, []);
+
   // Hero section variants for staggered animation
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -217,7 +262,7 @@ const Home = () => {
               style={{ zIndex: 20 }}
             >
               <div className="flex flex-col items-center">
-                <p className="text-white/70 mb-2 text-xs md:text-sm">Scroll to explore</p>
+                <p className="text-white/70 mb-2 text-sm">Scroll to explore</p>
                 <svg 
                   xmlns="http://www.w3.org/2000/svg"
                   width="20" 

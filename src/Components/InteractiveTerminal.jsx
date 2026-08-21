@@ -14,29 +14,32 @@ const InteractiveTerminal = () => {
   const terminalData = {
     about: {
       name: "Yuvraj Singh Nain",
-      role: "Frontend Engineering Intern @ Razorpay",
-      location: "India",
-      email: "yuvraj@example.com",
-      bio: "Passionate full-stack developer with expertise in React, Node.js, and modern web technologies."
+      role: "Frontend Engineer @ Razorpay",
+      location: "Chandigarh, India",
+      email: "yuvrajsinghnain03@gmail.com",
+      bio: "Frontend engineer at Razorpay, working on analytics and internal platforms. React, TypeScript, Node.js and Go."
     },
     education: [
       {
-        degree: "Bachelor of Technology",
-        field: "Computer Science Engineering",
-        institution: "Your University",
+        degree: "Bachelor of Engineering",
+        field: "Computer Science",
+        institution: "Chitkara University, Rajpura, Punjab",
         year: "2021-2025",
-        gpa: "8.5/10"
+        gpa: "9.24/10"
       }
     ],
     experience: [
       {
-        role: "Frontend Engineering Intern",
+        role: "Frontend Engineer",
         company: "Razorpay",
-        duration: "July 2023 - Present",
+        duration: "July 2024 - Present",
+        // Outcomes only — see the note in constants/index.js.
         achievements: [
-          "Reduced database load by 30% by eliminating unnecessary API requests",
-          "Fixed multiple critical bugs, improving system stability by 20%",
-          "Boosted user satisfaction by 30% through user-centric design"
+          "Joined as an intern (Jul 2024 - Jul 2025), converted to full-time in July 2025",
+          "Built merchant-facing analytics dashboards, +25% platform adoption",
+          "Replaced a legacy reporting stack with a modern ops platform: 40% faster",
+          "Built a self-serve data onboarding pipeline: 2 weeks down to 24 hours",
+          "Top 30 of 500+ teams at the RBI Hackathon for an ML-powered fraud detection system"
         ]
       }
     ],

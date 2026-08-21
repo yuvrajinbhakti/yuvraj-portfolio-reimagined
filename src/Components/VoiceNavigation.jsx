@@ -73,22 +73,14 @@ const VoiceNavigation = () => {
     
     // Interaction commands
     'play music': () => {
+      // No button means it's already playing — nothing to do.
       const musicButton = document.querySelector('[aria-label="Play music"]');
-      if (musicButton) {
-        musicButton.click();
-      } else {
-        // If already playing, don't do anything
-        console.log('Music is already playing');
-      }
+      if (musicButton) musicButton.click();
     },
     'stop music': () => {
+      // No button means it's already stopped — nothing to do.
       const musicButton = document.querySelector('[aria-label="Mute"]');
-      if (musicButton) {
-        musicButton.click();
-      } else {
-        // If already stopped, don't do anything
-        console.log('Music is already stopped');
-      }
+      if (musicButton) musicButton.click();
     },
     'toggle music': () => {
       // This will always work regardless of state
@@ -181,8 +173,6 @@ const VoiceNavigation = () => {
 
   // Process voice command
   const processCommand = (command) => {
-    console.log('Processing command:', command);
-    
     // Find matching command
     const matchedCommand = Object.keys(commands).find(cmd => 
       command.includes(cmd) || 
