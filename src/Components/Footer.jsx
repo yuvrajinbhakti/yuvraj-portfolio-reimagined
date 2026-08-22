@@ -58,7 +58,7 @@ const Footer = () => {
 
             {/* Quick Links */}
             <div>
-              <h4 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">Quick Links</h4>
+              <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">Quick Links</h3>
               <nav className="flex flex-col gap-2">
                 {navLinks.map((link) => (
                   <Link
@@ -74,7 +74,7 @@ const Footer = () => {
 
             {/* Social */}
             <div>
-              <h4 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">Connect</h4>
+              <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">Connect</h3>
               <div className="flex gap-3">
                 {footerSocials.map((social) => (
                   <a

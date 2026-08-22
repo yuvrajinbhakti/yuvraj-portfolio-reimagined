@@ -10,8 +10,12 @@ const orbs = [
 
 const AmbientOrbs = () => {
   return (
+    // overflow-hidden matters: several orbs are positioned past 50% and are
+    // 350-600px wide, so on narrower viewports they pushed the document wider
+    // than the screen and produced a horizontal scrollbar on every page.
+    // They're blurred decoration, so clipping them costs nothing visually.
     <div
-      className="fixed inset-0 pointer-events-none"
+      className="fixed inset-0 overflow-hidden pointer-events-none"
       style={{ zIndex: 0 }}
       aria-hidden="true"
     >
