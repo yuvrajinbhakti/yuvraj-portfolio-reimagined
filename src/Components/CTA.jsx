@@ -1,12 +1,7 @@
-import { Suspense, lazy } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import GlassCard from "./GlassCard";
 import ScrollReveal from "./ScrollReveal";
-
-// Purely decorative 3D backdrop — deferred so three.js stays off the critical
-// path for /about and /projects, which are the only pages rendering this.
-const CTA3D = lazy(() => import("./CTA3D"));
 
 const CTA = () => {
 
@@ -193,11 +188,11 @@ const CTA = () => {
   return (
     <ScrollReveal animation="fade">
       <GlassCard className="p-4 sm:p-6 md:p-8 text-center relative overflow-hidden">
-        {/* Absolutely positioned, so no fallback is needed — the card just
-            renders without its backdrop until the chunk lands. */}
-        <Suspense fallback={null}>
-          <CTA3D />
-        </Suspense>
+        {/* Was a three.js canvas (distorted spheres + drei <Stars/>) that
+            duplicated the hero globe and dragged the whole 218kB three chunk
+            onto /about and /projects — the only two pages rendering this CTA.
+            Two gradients read the same at this size and cost nothing. */}
+        <div className="cta-glow" aria-hidden="true" />
         <div className="relative z-10 w-full flex flex-col items-center py-8 sm:py-12 md:py-16">
           <motion.h2
             className="text-2xl sm:text-3xl md:text-3xl font-bold text-white mb-3 sm:mb-4 md:mb-4"
