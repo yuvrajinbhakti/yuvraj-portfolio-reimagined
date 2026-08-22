@@ -840,3 +840,66 @@ body:has(.card[data-color="green"]:hover) {
   0%, 100% { opacity: 0.55; transform: scale(0.92); }
   45%      { opacity: 1;    transform: scale(1.06); }
 }
+
+/* ---------------------------------------------------------------------------
+   CTA backdrop
+
+   Replaces the three.js canvas that used to sit behind the "Let's Work
+   Together" card. That canvas rendered distorted spheres plus a drei <Stars>
+   field — a near-duplicate of the hero globe, behind a text card, on the two
+   pages (/about, /projects) that had no other reason to load three.js.
+
+   Two radial gradients and a slow drift read the same at this scale. The
+   drift is a transform on a decorative layer, so the reduced-motion block
+   above switches it off along with everything else.
+--------------------------------------------------------------------------- */
+.cta-glow {
+  position: absolute;
+  inset: -30%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(38% 46% at 28% 34%, rgba(59, 130, 246, 0.22), transparent 70%),
+    radial-gradient(34% 42% at 74% 66%, rgba(139, 92, 246, 0.18), transparent 70%);
+  filter: blur(40px);
+  animation: cta-glow-drift 24s var(--ease-in-out) infinite;
+}
+
+@keyframes cta-glow-drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50%      { transform: translate3d(3%, -2%, 0) scale(1.06); }
+}
+
+/* ---------------------------------------------------------------------------
+   Skip link
+
+   Visually hidden until focused, then pinned over the navbar. Deliberately not
+   `display: none` — that would remove it from the tab order, which is the one
+   thing it exists for.
+--------------------------------------------------------------------------- */
+.skip-link {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  z-index: 100;
+  padding: 0.75rem 1.25rem;
+  background: #1d4ed8;
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 0 0 0.5rem 0.5rem;
+  /* Parked above the viewport rather than hidden, so it can slide in. */
+  transform: translate(-50%, -120%);
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+.skip-link:focus-visible {
+  transform: translate(-50%, 0);
+  outline-offset: -4px;
+}
+
+/* The routed page owns its own focus ring; the landmark itself should not
+   flash one when the skip link sends focus into it. */
+#main-content:focus {
+  outline: none;
+}

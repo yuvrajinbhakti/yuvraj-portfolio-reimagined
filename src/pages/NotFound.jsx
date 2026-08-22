@@ -1,7 +1,15 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useCallback } from 'react';
 import useDocumentMeta from '../hooks/useDocumentMeta';
+
+// Ordered by what a lost visitor most likely wanted.
+const SUGGESTED = [
+  { to: '/projects', label: 'Projects', icon: '🗂️' },
+  { to: '/about', label: 'About', icon: '👤' },
+  { to: '/playground', label: 'Playground', icon: '🕹️' },
+  { to: '/contact', label: 'Contact', icon: '✉️' },
+];
 
 const NotFound = () => {
   useDocumentMeta({
@@ -12,10 +20,7 @@ const NotFound = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
   const [particles, setParticles] = useState([]);
-  const [countdown, setCountdown] = useState(30);
-  const [showPortal, setShowPortal] = useState(false);
   const [ripples, setRipples] = useState([]);
-  const navigate = useNavigate();
 
   // Generate dynamic floating particles with enhanced physics
   useEffect(() => {
@@ -82,20 +87,11 @@ const NotFound = () => {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, [handleMouseMove]);
 
-  // Auto redirect with portal effect
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCountdown(prev => {
-        if (prev <= 1) {
-          setShowPortal(true);
-          setTimeout(() => navigate('/'), 2000);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [navigate]);
+  // There used to be a 30-second countdown here that navigated to "/" on its
+  // own, with no way to pause, extend or cancel it — a WCAG 2.2.1 (Timing
+  // Adjustable, Level A) failure, and hostile to anyone reading slowly or with
+  // a screen reader. The visitor decides when to leave; the links below are
+  // how they do it.
 
   // Clean up ripples
   useEffect(() => {
@@ -418,44 +414,28 @@ const NotFound = () => {
             ))}
           </motion.div>
 
-          {/* Enhanced Countdown Timer with Portal Effect */}
-          <motion.div
+          {/* Where they probably meant to go. A dead end that only says "not
+              found" makes the visitor's next move their problem. */}
+          <motion.nav
             variants={itemVariants}
+            aria-label="Suggested destinations"
             className="text-center relative"
           >
-            <AnimatePresence>
-              {!showPortal ? (
-                <motion.div
-                  exit={{ scale: 0, opacity: 0 }}
-                  className="inline-flex items-center gap-4 px-8 py-4 rounded-full bg-black/40 backdrop-blur-lg border border-white/20"
-                >
-                  <motion.div 
-                    className="w-4 h-4 bg-gradient-to-r from-green-400 to-blue-400 rounded-full"
-                    animate={{ scale: [1, 1.2, 1] }}
-                    transition={{ duration: 1, repeat: Infinity }}
-                  />
-                  <span className="text-gray-300 text-lg">
-                    Quantum portal opens in{' '}
-                    <motion.span 
-                      className="font-bold text-blue-400 text-xl"
-                      animate={{ scale: [1, 1.1, 1] }}
-                      transition={{ duration: 1, repeat: Infinity }}
-                    >
-                      {countdown}s
-                    </motion.span>
-                  </span>
-                </motion.div>
-              ) : (
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: [0, 1.5, 1] }}
-                  className="text-6xl"
-                >
-                  🌀 Portal Opening...
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
+            <p className="text-gray-400 text-sm mb-4">Or try one of these:</p>
+            <ul className="flex flex-wrap justify-center gap-2.5">
+              {SUGGESTED.map((item) => (
+                <li key={item.to}>
+                  <Link
+                    to={item.to}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-black/40 backdrop-blur-lg border border-white/20 text-gray-200 hover:text-white hover:border-blue-400/50 hover:bg-blue-500/10 transition-colors duration-300 text-sm font-medium"
+                  >
+                    <span aria-hidden="true">{item.icon}</span>
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </motion.nav>
 
           {/* Floating Elements */}
           <motion.div

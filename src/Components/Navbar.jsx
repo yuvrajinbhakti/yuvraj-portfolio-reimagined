@@ -150,9 +150,13 @@ const Navbar = () => {
     >
       <header className="header backdrop-blur-lg bg-white/5 border-b border-white/10 shadow-lg shadow-black/20">
         {/* Logo */}
+        {/* tabIndex={-1} for the same reason as NavItem above: the tap handlers
+            make this wrapper focusable, so the logo was costing two tab stops
+            — a role-less div, then the actual link. */}
         <motion.div
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
+          tabIndex={-1}
         >
           <NavLink 
             to="/" 
