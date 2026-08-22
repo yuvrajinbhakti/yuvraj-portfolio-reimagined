@@ -574,7 +574,7 @@ const Projects = () => {
                       <div className={`text-3xl md:text-5xl font-black bg-gradient-to-b ${stat.color} bg-clip-text text-transparent mb-1`}>
                         {stat.value}{stat.suffix || ""}
                       </div>
-                      <div className="text-xs md:text-sm text-white/50 uppercase tracking-[0.2em] font-medium">
+                      <div className="text-xs md:text-sm text-white/50 uppercase tracking-label font-medium">
                         {stat.label}
                       </div>
                     </motion.div>
