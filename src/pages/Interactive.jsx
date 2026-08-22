@@ -2,7 +2,6 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
 import InteractiveTerminal from '../Components/InteractiveTerminal';
 import CodePlayground from '../Components/CodePlayground';
-// import VoiceNavigation from '../Components/VoiceNavigation';
 import AnimatedBackground from '../Components/AnimatedBackground';
 import useDocumentMeta from '../hooks/useDocumentMeta';
 
