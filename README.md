@@ -155,8 +155,12 @@ it. Luminance spread across the six covers: 185 → 96.
 Rerun after changing an icon:
 
 ```bash
-python3 scripts/make-covers.py
+python3 scripts/make-covers.py src/assets/icons src/assets/covers
 ```
+
+Requires Pillow. The mark is sized by `tile_px` in that script rather than
+padded in CSS — the card renders the cover full-bleed, so padding it at the
+render layer leaves the cover's own background showing as a hard-edged square.
 
 ## Stack
 
