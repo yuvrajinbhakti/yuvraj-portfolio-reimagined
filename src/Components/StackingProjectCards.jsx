@@ -25,20 +25,28 @@ import GlassCard from './GlassCard';
 const ProjectCard = ({ project }) => {
   const study = caseStudyForProject(project.id);
 
+  // No h-full on the card. It is sized by min-height now, and a percentage
+  // height does not resolve against that — worse, specifying any height at all
+  // opts the element out of flex stretch, so the glass surface sat 45px short
+  // of the card it was meant to fill. Leaving it auto lets stretch do the work.
   return (
-    <GlassCard className="h-full overflow-hidden">
+    <GlassCard className="overflow-hidden">
       <div className="grid md:grid-cols-2 h-full">
         {/* Visual */}
         <div
           className="relative min-h-[200px] md:min-h-0 overflow-hidden"
         >
           {project.image ? (
+            /* Absolutely positioned so the cover fills the column without
+               contributing to layout height. Left in flow with h-full against
+               a now auto-height card, it fell back to its intrinsic aspect
+               ratio and drove the card ~180px taller than its copy needed. */
             <img
               src={project.image}
               alt={project.name}
               loading="lazy"
               decoding="async"
-              className="w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-cover"
             />
           ) : (
             <span className="text-5xl">💻</span>
@@ -61,13 +69,16 @@ const ProjectCard = ({ project }) => {
         </div>
 
         {/* Copy */}
-        <div className="p-6 md:p-8 flex flex-col justify-center">
-          <h3 className="text-xl md:text-2xl font-bold text-white mb-3">{project.name}</h3>
-          <p className="text-white/70 text-sm md:text-base leading-relaxed mb-5 line-clamp-4">
+        <div className="p-5 md:p-7 flex flex-col justify-center">
+          <h3 className="text-xl md:text-2xl font-bold text-white mb-2">{project.name}</h3>
+          {/* Three lines, not four. The card is a teaser for the case study —
+              the fourth line was buying almost no information and costing a
+              row of card height on every card in the stack. */}
+          <p className="text-white/70 text-sm md:text-base leading-relaxed mb-4 line-clamp-3">
             {project.description}
           </p>
 
-          <div className="flex flex-wrap gap-1.5 mb-6">
+          <div className="flex flex-wrap gap-1.5 mb-4">
             {project.tags.slice(0, 4).map((tag) => (
               <span
                 key={tag}
@@ -78,7 +89,7 @@ const ProjectCard = ({ project }) => {
             ))}
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-white/10">
+          <div className="flex flex-wrap items-center gap-4 pt-3 border-t border-white/10">
             {study && (
               <Link
                 to={`/work/${study.slug}`}

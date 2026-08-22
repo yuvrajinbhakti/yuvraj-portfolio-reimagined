@@ -606,7 +606,12 @@ body:has(.card[data-color="green"]:hover) {
      deliberate rather than broken.
 --------------------------------------------------------------------------- */
 .card-stack {
-  --card-height: 52vh;
+  /* A floor and a ceiling, not a bare 52vh. On a short laptop window 52vh is
+     less than the copy needs, and because the card also clips its overflow the
+     result was the last row of the card — the "Read case study" / "Code" links
+     — sliced in half. The px floor means a short viewport gets a card that
+     extends past the fold rather than a card that eats its own content. */
+  --card-height: clamp(19.5rem, 42vh, 26rem);
   --card-top-offset: 1.25em;
   --stack-gap: 1.75rem;
   /* Cards pin below the fixed navbar (81px) rather than at viewport 0, where
@@ -616,7 +621,9 @@ body:has(.card[data-color="green"]:hover) {
   list-style: none;
   margin: 0;
   padding: 0 0 calc(var(--numcards) * var(--card-top-offset)) 0;
-  grid-template-rows: repeat(var(--numcards), var(--card-height));
+  /* minmax, so a card whose copy runs long grows its row instead of
+     overlapping the next one. */
+  grid-template-rows: repeat(var(--numcards), minmax(var(--card-height), auto));
   gap: var(--stack-gap);
   view-timeline-name: --card-stack-scroll;
 }
@@ -628,8 +635,11 @@ body:has(.card[data-color="green"]:hover) {
   padding-top: calc(var(--index) * var(--card-top-offset));
 }
 
+/* min-height rather than height. A fixed-height box with overflow: hidden
+   wrapped around variable-length prose is always one long description away
+   from truncating itself, and it fails silently — the text is simply gone. */
 .card-stack__card {
-  height: var(--card-height);
+  min-height: var(--card-height);
 }
 
 @supports (animation-timeline: view()) {
@@ -678,6 +688,7 @@ body:has(.card[data-color="green"]:hover) {
     animation: none !important;
     transform: none !important;
     height: auto;
+    min-height: 0;
   }
 }
 
@@ -691,14 +702,29 @@ body:has(.card[data-color="green"]:hover) {
 
    Scoped to the stack so the glass treatment is untouched everywhere else.
 --------------------------------------------------------------------------- */
+/* Flex, so the glass surface still fills the card now that the card's height
+   is min-height rather than a fixed value — `height: 100%` against an
+   auto-height parent resolves to auto and would leave the card short of its
+   own floor. */
 .card-stack__card {
   overflow: hidden;
   border-radius: 0.75rem;
+  display: flex;
 }
 
 .card-stack__card .glass-card {
-  height: 100%;
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
+
+  /* Column flex so the stretch carries all the way down to the card's own
+     two-column grid. GlassCard wraps its children in a plain relative div, and
+     without this that wrapper stays at content height — leaving the cover
+     image stopping short of the card's bottom edge with a band of bare glass
+     under it. The glare and edge layers are absolutely positioned, so they sit
+     outside this flow. */
+  display: flex;
+  flex-direction: column;
 
   /* Occlusion by blur, not by opacity.
      A solid card fixed the text bleed-through but killed the theme: the rest
@@ -721,6 +747,13 @@ body:has(.card[data-color="green"]:hover) {
     0 -1px 0 rgba(255, 255, 255, 0.04) inset,
     0 -30px 60px rgba(0, 0, 0, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* The content wrapper — everything that is not one of the two decorative
+   absolute layers — takes the remaining height. */
+.card-stack__card .glass-card > *:not(.glass-card__glare):not(.glass-card__edge) {
+  flex: 1;
+  min-height: 0;
 }
 
 /* Safari and older engines without backdrop-filter would show raw
