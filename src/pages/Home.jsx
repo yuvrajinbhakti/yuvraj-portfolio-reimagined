@@ -66,17 +66,21 @@ const ServiceCard = ({ service }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
+      {/* Left-aligned throughout. Centred body copy is measurably harder to
+          read — every line starts at a different x, so the eye has to hunt for
+          it — and centring three lines of prose inside an otherwise
+          left-aligned page is the strongest template tell on the site. */}
       <GlassCard className="h-full p-6 md:p-8 flex flex-col group">
-        <div className="mb-2 -mt-4 relative z-0">
+        <div className="mb-3 relative z-0">
           <ServiceIcon type={service.type} isHovered={isHovered} />
         </div>
-        <h3 className="text-lg md:text-xl font-bold text-white mb-3 group-hover:text-blue-400 transition-colors duration-300 relative z-10 text-center">
+        <h3 className="text-lg md:text-xl font-bold text-white mb-3 group-hover:text-blue-400 transition-colors duration-300 relative z-10">
           {service.title}
         </h3>
-        <p className="text-white/70 text-sm md:text-base leading-relaxed relative z-10 text-center flex-1">
+        <p className="text-white/70 text-sm md:text-base leading-relaxed relative z-10 flex-1">
           {service.description}
         </p>
-        <div className="relative z-10 mt-5 pt-4 border-t border-white/10 text-center">
+        <div className="relative z-10 mt-5 pt-4 border-t border-white/10">
           <span className="text-sm font-semibold text-blue-300">{service.proof}</span>
         </div>
       </GlassCard>
@@ -396,22 +400,29 @@ const Home = () => {
           <StackingProjectCards />
         </div>
         
-        {/* Sound Control */}
+        {/* Sound control — the only persistent floating element left, and
+            deliberately quiet about it. It used to be a solid blue disc when
+            playing, which made a secondary control the loudest thing on the
+            page. Now it recedes until you look for it.
+            alt="" because the button already carries the accessible name;
+            labelling the image too made screen readers announce it twice. */}
         <div className="fixed bottom-4 left-4 md:bottom-6 md:left-6 z-50">
           <button
             onClick={() => setIsPlayingMusic(!isPlayingMusic)}
-            className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
-              isPlayingMusic ? 'bg-blue-600' : 'bg-black/20'
-            } hover:shadow-lg hover:shadow-blue-500/20`}
-            aria-label={isPlayingMusic ? "Mute" : "Play music"}
+            className={`w-9 h-9 rounded-full flex items-center justify-center border backdrop-blur-md transition-all duration-300 ${
+              isPlayingMusic
+                ? 'bg-white/10 border-white/25 opacity-90'
+                : 'bg-white/5 border-white/10 opacity-40 hover:opacity-90 hover:border-white/25'
+            }`}
+            aria-label={isPlayingMusic ? 'Mute background music' : 'Play background music'}
+            aria-pressed={isPlayingMusic}
           >
-        <img
-          src={!isPlayingMusic ? soundoff : soundon}
-              alt="Sound control"
-              className={`w-5 h-5 md:w-6 md:h-6 object-contain transition-transform ${
-                isPlayingMusic ? 'rotate-180 filter-white' : ''
-          }`}
-        />
+            <img
+              src={!isPlayingMusic ? soundoff : soundon}
+              alt=""
+              aria-hidden="true"
+              className="w-4 h-4 object-contain"
+            />
           </button>
         </div>
       </AnimatedBackground>
