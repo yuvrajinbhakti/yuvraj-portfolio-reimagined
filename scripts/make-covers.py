@@ -244,7 +244,17 @@ for slug, filename, accent_a, accent_b in PROJECTS:
     if filename == "dockerNodeAppIcon.png":
         icon = strip_checkerboard(icon)
 
-    tile_px = int(SIZE * 0.52)
+    # 34% of the canvas, not 52%. The card renders these full-bleed and crops
+    # the square to a landscape panel, so the mark was arriving oversized and
+    # crowding the panel edges. Shrinking it here rather than padding it in CSS
+    # keeps the background full-bleed — an object-contain fallback turned the
+    # cover into a visible square pasted onto the card.
+    #
+    # Geometry check: at a 511x376 panel, object-cover scales by width (0.511)
+    # and keeps the middle 73.6% of the height — y from 13.2% to 86.8%. A 34%
+    # tile centred spans 33% to 67%, so it clears the crop comfortably at both
+    # the desktop and the 341x200 mobile panel. It renders ~174px.
+    tile_px = int(SIZE * 0.34)
     tile = make_tile(icon, tile_px, accent_a)
     pos = ((SIZE - tile_px) // 2, (SIZE - tile_px) // 2)
 
