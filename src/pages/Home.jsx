@@ -9,7 +9,7 @@ import AnimatedBackground from "../Components/AnimatedBackground";
 import ScrollReveal from "../Components/ScrollReveal";
 import GlassCard from "../Components/GlassCard";
 import SocialIcon from "../Components/SocialIcon";
-import HorizontalProjectScroll from "../Components/HorizontalProjectScroll";
+import StackingProjectCards from "../Components/StackingProjectCards";
 // Plain SVG — imported directly because it is a couple of hundred bytes and
 // carries no WebGL context, unlike the three.js version it replaced.
 import ServiceIcon from "../Components/ServiceIcon";
@@ -25,21 +25,60 @@ import sakura from '../assets/sakura.mp3';
 import { soundoff, soundon } from "../assets/icons";
 import useDocumentMeta from '../hooks/useDocumentMeta';
 
+// Each card carries a concrete proof point rather than a capability claim.
+// "Creating responsive, performant user interfaces" is something anyone can
+// write; "+25% platform adoption" is not.
+const SERVICES = [
+  {
+    type: 'frontend',
+    title: 'Frontend Engineering',
+    description:
+      'React and TypeScript in production at Razorpay — merchant-facing analytics dashboards and an A/B testing framework with client-side caching.',
+    proof: '+25% platform adoption',
+  },
+  {
+    type: 'backend',
+    title: 'Backend & Infrastructure',
+    description:
+      'Node.js and Go services, change-data-capture pipelines, and containerised deploys on Docker and Kubernetes.',
+    proof: 'Onboarding: 2 weeks → 24 hours',
+  },
+  {
+    type: 'ml',
+    title: 'Machine Learning',
+    description:
+      'Amazon ML Summer School alumnus. Built an ML-powered fraud detection system for real-time transaction monitoring.',
+    proof: 'Top 0.2% of 91,000 applicants',
+  },
+];
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] } },
+};
+
 const ServiceCard = ({ service }) => {
   const [isHovered, setIsHovered] = useState(false);
-  
+
   return (
-    <div 
-      className="h-full cursor-pointer"
+    <div
+      className="h-full"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <GlassCard className="h-full p-6 md:p-8 transform transition-all duration-500 hover:scale-105 hover:shadow-blue-500/20 hover:shadow-lg group">
+      <GlassCard className="h-full p-6 md:p-8 flex flex-col group">
         <div className="mb-2 -mt-4 relative z-0">
           <ServiceIcon type={service.type} isHovered={isHovered} />
         </div>
-        <h3 className="text-lg md:text-xl font-bold text-white mb-3 md:mb-4 group-hover:text-blue-400 transition-colors duration-300 relative z-10 text-center">{service.title}</h3>
-        <p className="text-white/70 text-sm md:text-base leading-relaxed relative z-10 text-center">{service.description}</p>
+        <h3 className="text-lg md:text-xl font-bold text-white mb-3 group-hover:text-blue-400 transition-colors duration-300 relative z-10 text-center">
+          {service.title}
+        </h3>
+        <p className="text-white/70 text-sm md:text-base leading-relaxed relative z-10 text-center flex-1">
+          {service.description}
+        </p>
+        <div className="relative z-10 mt-5 pt-4 border-t border-white/10 text-center">
+          <span className="text-sm font-semibold text-blue-300">{service.proof}</span>
+        </div>
       </GlassCard>
     </div>
   );
@@ -49,6 +88,7 @@ ServiceCard.propTypes = {
   service: PropTypes.shape({
     title: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
+    proof: PropTypes.string.isRequired,
     type: PropTypes.oneOf(['frontend', 'backend', 'ml']).isRequired,
   }).isRequired,
 };
@@ -63,8 +103,17 @@ const Home = () => {
   const [isPlayingMusic, setIsPlayingMusic] = useState(false);
   const audioRef = useRef(null);
   const heroRef = useRef(null);
+  const heroSectionRef = useRef(null);
   const { scrollYProgress } = useScroll({
     target: heroRef,
+    offset: ["start start", "end start"]
+  });
+
+  // Measured against the hero *section* rather than the whole content block, so
+  // progress 0 -> 1 spans exactly one viewport of scroll. Using heroRef here
+  // would stretch the journey across four screens.
+  const { scrollYProgress: heroProgress } = useScroll({
+    target: heroSectionRef,
     offset: ["start start", "end start"]
   });
   
@@ -74,10 +123,23 @@ const Home = () => {
   // Decoupled scroll movement is a classic vestibular trigger.
   const reduce    = useReducedMotion();
   const p         = (distance) => (reduce ? 0 : distance);
-  const bgY       = useTransform(scrollYProgress, [0, 1], [0, p(120)]);  // slow: background
   const midY      = useTransform(scrollYProgress, [0, 1], [0, p(220)]);  // medium: subtitle
   const y         = useTransform(scrollYProgress, [0, 1], [0, p(320)]);  // fast: headline
   const opacity   = useTransform(scrollYProgress, [0, 0.5], [1, 0]);     // fade only — kept
+
+  // Globe journey: centre-stage in the hero, then shrinks into the bottom-right
+  // and holds there. useTransform clamps outside the input range, so once the
+  // hero has scrolled past, the globe simply stays put.
+  const globeScale = useTransform(heroProgress, [0, 1], [1, reduce ? 1 : 0.32]);
+  const globeX = useTransform(heroProgress, [0, 1], ['0vw', reduce ? '0vw' : '30vw']);
+  const globeY = useTransform(heroProgress, [0, 1], ['0vh', reduce ? '0vh' : '28vh']);
+  // Under reduced motion nothing moves, so the globe is faded out instead of
+  // being left sitting behind the page content.
+  const globeOpacity = useTransform(
+    heroProgress,
+    reduce ? [0, 0.6] : [0, 0.85, 1],
+    reduce ? [1, 0] : [1, 0.6, 0.5]
+  );
 
   // Build the audio element on first use. `new Audio(src)` defaults to
   // preload="auto", which would pull the whole track down on mount even for the
@@ -170,12 +232,25 @@ const Home = () => {
     <div className="min-h-screen w-full bg-transparent text-white">
       <AnimatedBackground>
         <div ref={heroRef} className="relative w-full bg-transparent">
-          {/* Hero Section */}
-          <motion.section 
-            className="relative h-screen flex flex-col items-center justify-center px-4 md:px-8 bg-transparent"
-          >
-            {/* 3D Animation */}
-            <motion.div className="absolute inset-0 w-full h-full z-10" style={{ y: bgY }}>
+          {/* Persistent globe.
+              Lifted out of the hero so it survives past it: as the hero scrolls
+              away the globe shrinks and settles into the bottom-right, carrying
+              through the whole page instead of being hero decoration that
+              disappears.
+
+              Sticky rather than fixed. `position: fixed` is neutralised by any
+              transformed ancestor, and the page-transition wrapper in App.jsx is
+              a motion.div that carries a transform — measured breaking it. Sticky
+              is unaffected by that, and it pins for as long as this container
+              (hero + services + featured) is on screen, which is the whole page.
+
+              h-0 so it claims no layout space; the inner h-screen simply
+              overflows. z-10 sits above the starfield (z-0), below content (z-20). */}
+          <div className="sticky top-0 h-0 z-10 pointer-events-none" aria-hidden="true">
+            <motion.div
+              className="w-full h-screen"
+              style={{ scale: globeScale, x: globeX, y: globeY, opacity: globeOpacity }}
+            >
               <Suspense fallback={
                 <div className="w-full h-full flex items-center justify-center">
                   <div className="text-white flex flex-col items-center">
@@ -187,7 +262,13 @@ const Home = () => {
                 <HeroAnimation />
               </Suspense>
             </motion.div>
-            
+          </div>
+
+          {/* Hero Section */}
+          <motion.section
+            ref={heroSectionRef}
+            className="relative h-screen flex flex-col items-center justify-center px-4 md:px-8 bg-transparent"
+          >
             {/* Content Overlay — parallax foreground (moves fast) */}
             <motion.div
               className="relative z-20 container mx-auto px-4 sm:px-6 md:px-8 bg-transparent pt-32 md:pt-40"
@@ -291,39 +372,28 @@ const Home = () => {
                 </h2>
               </ScrollReveal>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-                {[
-                  {
-                    title: "Frontend Development",
-                    description: "Creating responsive, performant user interfaces with React, Next.js, and modern CSS frameworks.",
-                    type: "frontend"
-                  },
-                  {
-                    title: "Backend Engineering",
-                    description: "Building scalable APIs and server-side applications using Node.js, Express, and cloud technologies.",
-                    type: "backend"
-                  },
-                  {
-                    title: "AI",
-                    description: "Implementing data-driven solutions with Python and modern ML frameworks for real-world applications.",
-                    type: "ml"
-                  }
-                ].map((service, index) => (
-                  <ScrollReveal
-                    key={index}
-                    animation="slide"
-                    direction={["left", "up", "right"][index]}
-                    delay={index * 0.1}
-                  >
+              {/* One direction, staggered — the previous version slid each card in
+                  from a different side (left/up/right), which reads as three
+                  unrelated effects rather than one considered entrance.
+                  MotionConfig drops the y-offset under reduced motion. */}
+              <motion.div
+                className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: '-80px' }}
+                variants={{ visible: { transition: { staggerChildren: 0.12 } } }}
+              >
+                {SERVICES.map((service) => (
+                  <motion.div key={service.type} variants={cardVariants}>
                     <ServiceCard service={service} />
-                  </ScrollReveal>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             </div>
           </section>
           
           {/* Horizontal Scroll Project Showcase */}
-          <HorizontalProjectScroll />
+          <StackingProjectCards />
         </div>
         
         {/* Sound Control */}

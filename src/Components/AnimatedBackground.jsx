@@ -17,6 +17,26 @@ const AnimatedBackground = ({ children }) => {
     // Tracked so the loop and the meteor scheduler can actually be torn down —
     // previously neither was cancelled on unmount.
     let rafId = null;
+
+    // --- Descent -------------------------------------------------------
+    // The page reads as one continuous journey rather than three stacked
+    // sections if the sky itself changes as you move down it. `depth` runs 0
+    // at the top to 1 at the bottom and drives everything below.
+    //
+    // Deliberately subtle — it should be felt, not noticed. Both ends stay very
+    // dark so text contrast never shifts (white-on-near-black at every depth).
+    const SKY_TOP = [[2, 6, 23], [15, 23, 42]];   // cold near-black blue
+    const SKY_DEEP = [[5, 4, 24], [26, 16, 56]];  // indigo, further down
+
+    const lerp = (a, b, t) => a + (b - a) * t;
+    const mixRGB = (c1, c2, t) =>
+      `rgb(${Math.round(lerp(c1[0], c2[0], t))}, ${Math.round(lerp(c1[1], c2[1], t))}, ${Math.round(lerp(c1[2], c2[2], t))})`;
+
+    const getDepth = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      if (max <= 0) return 0;
+      return Math.min(1, Math.max(0, window.scrollY / max));
+    };
     let meteorTimeoutId = null;
     let isMouseMoving = false;
     let mouseTimeout;
@@ -261,10 +281,10 @@ const AnimatedBackground = ({ children }) => {
     };
     
     // Fill canvas with initial gradient
-    const fillBackground = () => {
+    const fillBackground = (depth = 0) => {
       const gradient = context.createLinearGradient(0, 0, 0, height);
-      gradient.addColorStop(0, '#020617'); // Deep space blue at top
-      gradient.addColorStop(1, '#0f172a'); // Slightly lighter blue at bottom
+      gradient.addColorStop(0, mixRGB(SKY_TOP[0], SKY_DEEP[0], depth));
+      gradient.addColorStop(1, mixRGB(SKY_TOP[1], SKY_DEEP[1], depth));
       
       context.fillStyle = gradient;
       context.fillRect(0, 0, width, height);
@@ -279,8 +299,12 @@ const AnimatedBackground = ({ children }) => {
       // Clear canvas
       context.clearRect(0, 0, width, height);
       
+      const depth = getDepth();
+
+      
       // Fill with gradient background
-      fillBackground();
+      
+      fillBackground(depth);
       
       // Update stars position based on scroll
       const scrollY = window.scrollY;
@@ -321,7 +345,7 @@ const AnimatedBackground = ({ children }) => {
       context.fillRect(0, 0, width, height);
       
       // Draw nebula
-      drawNebula(context, width, height, scrollY);
+      drawNebula(context, width, height, scrollY, depth);
 
       // Under reduced motion the scene is painted once and left static: the
       // starfield still reads as a backdrop, but nothing drifts or streaks.
@@ -331,7 +355,7 @@ const AnimatedBackground = ({ children }) => {
     };
     
     // Draw a nebula effect
-    const drawNebula = (ctx, width, height, scrollY) => {
+    const drawNebula = (ctx, width, height, scrollY, depth = 0) => {
       // Only draw nebula in part of the screen to avoid performance issues
       const nebulaX = width * 0.8;
       const nebulaY = height * 0.2 - scrollY * 0.2;
@@ -342,8 +366,10 @@ const AnimatedBackground = ({ children }) => {
         nebulaX, nebulaY, width * 0.4
       );
       
-      nebulaGradient.addColorStop(0, 'rgba(63, 81, 181, 0.02)');
-      nebulaGradient.addColorStop(0.5, 'rgba(103, 58, 183, 0.015)');
+      // Thickens with depth, so the lower page feels denser.
+        const k = 1 + depth * 1.6;
+        nebulaGradient.addColorStop(0, `rgba(63, 81, 181, ${(0.02 * k).toFixed(4)})`);
+      nebulaGradient.addColorStop(0.5, `rgba(${Math.round(103 + 40 * depth)}, 58, 183, ${(0.015 * k).toFixed(4)})`);
       nebulaGradient.addColorStop(1, 'rgba(33, 33, 33, 0)');
       
       ctx.fillStyle = nebulaGradient;
@@ -380,7 +406,7 @@ const AnimatedBackground = ({ children }) => {
     
     // Initialize
     updateDimensions();
-    fillBackground(); // Ensure the background is filled immediately
+    fillBackground(getDepth()); // Ensure the background is filled immediately
     window.addEventListener('resize', updateDimensions);
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('scroll', handleScroll);

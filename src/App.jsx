@@ -107,6 +107,8 @@ const App = () => {
     <MotionConfig reducedMotion="user">
       <main className="bg-[#020617] text-white relative min-h-screen">
         <Router>
+          {/* Scroll-driven, no JS. Gives a long page a sense of journey. */}
+          <div className="scroll-progress" aria-hidden="true" />
           <Navbar />
           <VoiceNavigation />
           <ScrollToTop />

@@ -457,3 +457,386 @@ body:has(.card[data-color="green"]:hover) {
     transform: none !important;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Focus & selection
+
+   Nothing on this site had a focus indicator except the three contact inputs,
+   so a keyboard user had no idea where they were. These are global so every
+   link, button and control is covered without touching each component.
+
+   :focus-visible rather than :focus — the ring shows for keyboard navigation
+   but not on mouse clicks, which is what makes it feel designed rather than
+   noisy.
+--------------------------------------------------------------------------- */
+:where(a, button, [role="button"], input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 3px;
+  border-radius: 6px;
+  /* Dark halo underneath keeps the ring legible over the starfield and over
+     light-coloured cards alike. */
+  box-shadow: 0 0 0 5px rgba(2, 6, 23, 0.85);
+}
+
+/* Elements that already draw their own ring shouldn't get two. */
+:where(input, textarea, select):focus-visible {
+  outline-offset: 0;
+  box-shadow: none;
+}
+
+/* Never leave a focused element hidden behind the fixed navbar. */
+:where(a, button, [tabindex]) {
+  scroll-margin-top: 6rem;
+}
+
+::selection {
+  background: rgba(59, 130, 246, 0.35);
+  color: #ffffff;
+}
+
+::-moz-selection {
+  background: rgba(59, 130, 246, 0.35);
+  color: #ffffff;
+}
+
+/* ---------------------------------------------------------------------------
+   Motion tokens
+
+   The codebase had ~8 different easing curves. Consistent motion is most of
+   what makes an interface read as "designed", so everything new uses these.
+--------------------------------------------------------------------------- */
+:root {
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);      /* decelerate — entrances */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);  /* symmetric — moves */
+  --dur-fast: 140ms;
+  --dur-base: 260ms;
+  --dur-slow: 420ms;
+}
+
+/* ---------------------------------------------------------------------------
+   Glass card
+
+   Replaces the old hover treatment, which scaled the whole card (1.05 via a
+   utility class *and* 1.03 inline, fighting each other). Scaling a card scales
+   its text, so every hover produced sub-pixel blur and a reflow. A lift plus a
+   brighter edge reads more expensive and costs nothing.
+
+   Tilt gets a short transition rather than none: long enough to smooth the
+   per-frame jitter, short enough not to feel laggy behind the pointer.
+--------------------------------------------------------------------------- */
+.glass-card {
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  --glare-x: 50%;
+  --glare-y: 50%;
+  --glare-opacity: 0.15;
+  --lift: 0px;
+
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  background: rgba(10, 15, 30, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transform: perspective(1000px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y))
+    translate3d(0, var(--lift), 0);
+  transition:
+    transform var(--dur-fast) linear,
+    box-shadow var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out);
+}
+
+.glass-card--interactive:hover {
+  --lift: -4px;
+  border-color: rgba(96, 165, 250, 0.35);
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(96, 165, 250, 0.12),
+    0 0 28px rgba(59, 130, 246, 0.12);
+}
+
+.glass-card__glare {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-out);
+  background: radial-gradient(
+    circle at var(--glare-x) var(--glare-y),
+    rgba(255, 255, 255, var(--glare-opacity)),
+    transparent 80%
+  );
+}
+
+.glass-card--interactive:hover .glass-card__glare {
+  opacity: 1;
+}
+
+.glass-card__edge {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: 0.75rem;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-card {
+    transform: none !important;
+    transition: border-color var(--dur-base) linear !important;
+  }
+  .glass-card--interactive:hover {
+    --lift: 0px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Sticky card stack (Featured Work)
+
+   Each card sticks to the top; as the next one slides over it, a scroll-driven
+   animation scales it down so the stack reads as depth rather than a pile.
+
+   Two details that make it work:
+   - `view-timeline-name` goes on the list, and the scale animation on the
+     inner `.card-stack__card`. The <li> must keep scrolling to drive the
+     timeline, so it is the *inner* element that gets pinned and scaled.
+   - Everything is behind @supports. Without `animation-timeline` the cards
+     still stack via position: sticky, they just don't scale — which looks
+     deliberate rather than broken.
+--------------------------------------------------------------------------- */
+.card-stack {
+  --card-height: 52vh;
+  --card-top-offset: 1.25em;
+  --stack-gap: 1.75rem;
+  /* Cards pin below the fixed navbar (81px) rather than at viewport 0, where
+     the top of every pinned card slid underneath it. */
+  --stack-top: 6rem;
+
+  list-style: none;
+  margin: 0;
+  padding: 0 0 calc(var(--numcards) * var(--card-top-offset)) 0;
+  grid-template-rows: repeat(var(--numcards), var(--card-height));
+  gap: var(--stack-gap);
+  view-timeline-name: --card-stack-scroll;
+}
+
+.card-stack__item {
+  position: sticky;
+  top: var(--stack-top);
+  /* Staggering the offset is what exposes the edge of each card underneath. */
+  padding-top: calc(var(--index) * var(--card-top-offset));
+}
+
+.card-stack__card {
+  height: var(--card-height);
+}
+
+@supports (animation-timeline: view()) {
+  .card-stack__item {
+    --index0: calc(var(--index) - 1);
+    --reverse-index: calc(var(--numcards) - var(--index0));
+    --reverse-index0: calc(var(--reverse-index) - 1);
+  }
+
+  .card-stack__card {
+    transform-origin: 50% 0%;
+    will-change: transform;
+    --start-range: calc(var(--index0) / var(--numcards) * 100%);
+    --end-range: calc(var(--index) / var(--numcards) * 100%);
+
+    --scale-range: 0.12;
+    --scale-denom: calc(var(--numcards) - 1);
+
+    animation: linear card-stack-scale forwards;
+    animation-timeline: --card-stack-scroll;
+    animation-range: exit-crossing var(--start-range) exit-crossing var(--end-range);
+  }
+
+  /* Shrink is spread across however many cards there are, so the deepest card
+     always lands at --scale-range and no further. The commonly-copied
+     `1.1 - 0.1 * reverse-index` formula assumes about four cards; at six it
+     drives the first card down to 0.5, which reads as broken rather than deep. */
+  @keyframes card-stack-scale {
+    to {
+      transform: scale(
+        calc(1 - (var(--scale-range) * var(--reverse-index0) / var(--scale-denom)))
+      );
+    }
+  }
+}
+
+/* Scroll-linked scaling is movement tied to the reader's scroll, which is the
+   thing SC 2.3.3 is about. The component renders a plain grid in this case, but
+   this is a belt-and-braces guard in case the markup is ever reused. */
+@media (prefers-reduced-motion: reduce) {
+  .card-stack__item {
+    position: static;
+    padding-top: 0;
+  }
+  .card-stack__card {
+    animation: none !important;
+    transform: none !important;
+    height: auto;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Stacked cards must be opaque
+
+   GlassCard's default background is rgba(10,15,30,0.1) — 10% opaque. That is
+   the right look for a single card floating over the starfield, but in a stack
+   every card shows through every card beneath it, so six cards' worth of text
+   piles up in the same place and the whole section reads as garbage.
+
+   Scoped to the stack so the glass treatment is untouched everywhere else.
+--------------------------------------------------------------------------- */
+.card-stack__card {
+  overflow: hidden;
+  border-radius: 0.75rem;
+}
+
+.card-stack__card .glass-card {
+  height: 100%;
+  overflow: hidden;
+
+  /* Occlusion by blur, not by opacity.
+     A solid card fixed the text bleed-through but killed the theme: the rest
+     of the page is glass floating over a starfield, and six opaque slabs
+     stacking up read as paper instead. A heavy backdrop blur destroys the
+     legibility of whatever is underneath — which is all the bleed-through fix
+     actually needed — while the starfield still glows through. */
+  background: linear-gradient(
+    160deg,
+    rgba(20, 28, 54, 0.62) 0%,
+    rgba(9, 14, 30, 0.72) 100%
+  );
+  backdrop-filter: blur(36px) saturate(150%);
+  -webkit-backdrop-filter: blur(36px) saturate(150%);
+
+  /* Lit top edge — the detail that makes glass read as glass rather than as a
+     translucent rectangle. */
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.14) inset,
+    0 -1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 -30px 60px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Safari and older engines without backdrop-filter would show raw
+   bleed-through, so those fall back to the opaque treatment. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .card-stack__card .glass-card {
+    background: rgba(9, 14, 30, 0.96);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Scroll progress + section seams
+
+   Two small things that make a long page read as one continuous journey rather
+   than a stack of separate blocks:
+
+   1. A progress line under the navbar, driven entirely by scroll-timeline —
+      no JS, no scroll listener, and it runs on the compositor.
+   2. Soft seams so sections bleed into each other instead of butting together
+      at a hard edge.
+--------------------------------------------------------------------------- */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  width: 100%;
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  z-index: 60;
+  pointer-events: none;
+  background: linear-gradient(90deg, #3b82f6, #22d3ee 55%, #a855f7);
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.6);
+}
+
+@supports (animation-timeline: scroll()) {
+  .scroll-progress {
+    animation: scroll-progress-grow linear both;
+    animation-timeline: scroll(root block);
+  }
+
+  @keyframes scroll-progress-grow {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+  }
+}
+
+/* Without scroll-timeline there is no cheap way to drive this, so hide it
+   rather than leave a permanently empty bar. */
+@supports not (animation-timeline: scroll()) {
+  .scroll-progress { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-progress {
+    box-shadow: none;
+  }
+}
+
+/* Seams: a section that follows another gets a soft fade at its top edge, so
+   the starfield reads as continuous rather than sliced. */
+.section-seam {
+  position: relative;
+}
+
+.section-seam::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 8rem;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgba(2, 6, 23, 0.55), transparent);
+}
+
+/* ---------------------------------------------------------------------------
+   Service icon idle motion
+
+   Each icon animates the thing it depicts rather than just moving:
+   the browser bars fill like a page rendering, the database tiers pulse
+   downward like data settling, the network nodes fire in sequence.
+
+   `--i` staggers each element. All three are slow and low-contrast — ambient,
+   not attention-seeking. The prefers-reduced-motion block above already
+   neutralises every animation on the page, so no extra guard is needed here.
+--------------------------------------------------------------------------- */
+.svc-bar {
+  transform-origin: 30px center;
+  animation: svc-bar-fill 4.5s var(--ease-in-out) infinite;
+  animation-delay: calc(var(--i) * 0.35s);
+}
+
+@keyframes svc-bar-fill {
+  0%, 100% { opacity: 0.28; transform: scaleX(0.82); }
+  35%      { opacity: 0.8;  transform: scaleX(1); }
+  70%      { opacity: 0.45; transform: scaleX(0.94); }
+}
+
+.svc-tier {
+  animation: svc-tier-pulse 3.6s var(--ease-in-out) infinite;
+  animation-delay: calc(var(--i) * 0.45s);
+}
+
+@keyframes svc-tier-pulse {
+  0%, 100% { opacity: 0.45; }
+  40%      { opacity: 1; }
+}
+
+.svc-node {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: svc-node-fire 3.2s var(--ease-in-out) infinite;
+  animation-delay: calc(var(--i) * 0.22s);
+}
+
+@keyframes svc-node-fire {
+  0%, 100% { opacity: 0.55; transform: scale(0.92); }
+  45%      { opacity: 1;    transform: scale(1.06); }
+}

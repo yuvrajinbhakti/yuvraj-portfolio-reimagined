@@ -26,9 +26,9 @@ const FrontendIcon = ({ gid }) => (
     <circle cx="29" cy="34" r="3" fill={`url(#${gid})`} />
     <circle cx="40" cy="34" r="3" fill={`url(#${gid})`} opacity="0.6" />
     <circle cx="51" cy="34" r="3" fill={`url(#${gid})`} opacity="0.35" />
-    <rect x="30" y="54" width="34" height="5" rx="2.5" fill={`url(#${gid})`} opacity="0.75" />
-    <rect x="30" y="66" width="52" height="5" rx="2.5" fill={`url(#${gid})`} opacity="0.45" />
-    <rect x="30" y="78" width="24" height="5" rx="2.5" fill={`url(#${gid})`} opacity="0.3" />
+    <rect className="svc-bar" style={{ '--i': 0 }} x="30" y="54" width="34" height="5" rx="2.5" fill={`url(#${gid})`} />
+    <rect className="svc-bar" style={{ '--i': 1 }} x="30" y="66" width="52" height="5" rx="2.5" fill={`url(#${gid})`} />
+    <rect className="svc-bar" style={{ '--i': 2 }} x="30" y="78" width="24" height="5" rx="2.5" fill={`url(#${gid})`} />
   </>
 );
 
@@ -36,7 +36,7 @@ const BackendIcon = ({ gid }) => (
   <>
     {/* Stacked database tiers */}
     {[30, 52, 74].map((y, i) => (
-      <g key={y} opacity={1 - i * 0.22}>
+      <g key={y} className="svc-tier" style={{ '--i': i, opacity: 1 - i * 0.22 }}>
         <ellipse cx="60" cy={y} rx="32" ry="10" stroke={`url(#${gid})`} strokeWidth="3" fill="rgba(139,92,246,0.08)" />
         <path d={`M28 ${y} v14`} stroke={`url(#${gid})`} strokeWidth="3" strokeLinecap="round" />
         <path d={`M92 ${y} v14`} stroke={`url(#${gid})`} strokeWidth="3" strokeLinecap="round" />
@@ -54,12 +54,12 @@ const MLIcon = ({ gid }) => (
       <path d="M34 78 L60 30 M34 78 L60 58 M34 78 L60 86" />
       <path d="M60 30 L88 58 M60 58 L88 58 M60 86 L88 58" />
     </g>
-    <circle cx="34" cy="38" r="8" fill="rgba(236,72,153,0.15)" stroke={`url(#${gid})`} strokeWidth="3" />
-    <circle cx="34" cy="78" r="8" fill="rgba(236,72,153,0.15)" stroke={`url(#${gid})`} strokeWidth="3" />
-    <circle cx="60" cy="30" r="7" fill="rgba(236,72,153,0.15)" stroke={`url(#${gid})`} strokeWidth="3" />
-    <circle cx="60" cy="58" r="7" fill="rgba(236,72,153,0.15)" stroke={`url(#${gid})`} strokeWidth="3" />
-    <circle cx="60" cy="86" r="7" fill="rgba(236,72,153,0.15)" stroke={`url(#${gid})`} strokeWidth="3" />
-    <circle cx="88" cy="58" r="9" fill="rgba(236,72,153,0.2)" stroke={`url(#${gid})`} strokeWidth="3" />
+    <circle className="svc-node" style={{ '--i': 0 }} cx="34" cy="38" r="8" fill="rgba(236,72,153,0.15)" stroke={`url(#${gid})`} strokeWidth="3" />
+    <circle className="svc-node" style={{ '--i': 1 }} cx="34" cy="78" r="8" fill="rgba(236,72,153,0.15)" stroke={`url(#${gid})`} strokeWidth="3" />
+    <circle className="svc-node" style={{ '--i': 2 }} cx="60" cy="30" r="7" fill="rgba(236,72,153,0.15)" stroke={`url(#${gid})`} strokeWidth="3" />
+    <circle className="svc-node" style={{ '--i': 3 }} cx="60" cy="58" r="7" fill="rgba(236,72,153,0.15)" stroke={`url(#${gid})`} strokeWidth="3" />
+    <circle className="svc-node" style={{ '--i': 4 }} cx="60" cy="86" r="7" fill="rgba(236,72,153,0.15)" stroke={`url(#${gid})`} strokeWidth="3" />
+    <circle className="svc-node" style={{ '--i': 5 }} cx="88" cy="58" r="9" fill="rgba(236,72,153,0.2)" stroke={`url(#${gid})`} strokeWidth="3" />
   </>
 );
 
