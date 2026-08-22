@@ -80,10 +80,13 @@ const ServiceIcon = ({ type, isHovered = false }) => {
   const gid = `svc-grad-${type}`;
 
   return (
-    <div className="w-full h-40 sm:h-48 relative flex items-center justify-center pointer-events-none">
+    // Left-aligned, and smaller than it was. Centering the mark over
+    // left-aligned copy left the card with two competing axes, and 192px of
+    // vertical space was a lot to spend on decoration above three lines of text.
+    <div className="w-full h-24 sm:h-28 relative flex items-center justify-start pointer-events-none">
       {/* Soft glow behind the mark, brightening on card hover */}
       <div
-        className={`absolute w-28 h-28 rounded-full blur-2xl transition-opacity duration-500 ${
+        className={`absolute left-0 w-24 h-24 rounded-full blur-2xl transition-opacity duration-500 ${
           isHovered ? 'opacity-40' : 'opacity-20'
         }`}
         style={{ background: `radial-gradient(circle, ${from}, transparent 70%)` }}
@@ -91,7 +94,7 @@ const ServiceIcon = ({ type, isHovered = false }) => {
       />
       <svg
         viewBox="0 0 120 120"
-        className={`relative w-28 h-28 sm:w-32 sm:h-32 transition-transform duration-500 ease-out ${
+        className={`relative w-20 h-20 sm:w-24 sm:h-24 transition-transform duration-500 ease-out ${
           isHovered ? 'scale-110 -translate-y-1' : ''
         }`}
         fill="none"
