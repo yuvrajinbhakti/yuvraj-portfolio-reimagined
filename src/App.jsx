@@ -1,6 +1,5 @@
 import { Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom';
 import Navbar from './Components/Navbar';
-import VoiceNavigation from './Components/VoiceNavigation';
 import Footer from './Components/Footer';
 import { useEffect, Suspense, lazy } from 'react';
 import { AnimatePresence, motion, MotionConfig, useReducedMotion } from 'framer-motion';
@@ -117,7 +116,6 @@ const App = () => {
               through the whole nav again on every page (WCAG 2.4.1). */}
           <a href="#main-content" className="skip-link">Skip to main content</a>
           <Navbar />
-          <VoiceNavigation />
           <ScrollToTop />
           {/* tabIndex={-1} so the skip link can actually move focus here;
               without it the browser scrolls but focus stays in the nav. */}
