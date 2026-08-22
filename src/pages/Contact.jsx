@@ -221,6 +221,10 @@ const Contact = () => {
                         value={formData.name}
                         onChange={handleChange}
                         required
+                        /* WCAG 1.3.5: fields collecting the user's own details
+                           have to declare their purpose so autofill and
+                           personalisation tooling can work. */
+                        autoComplete="name"
                         className="w-full px-4 py-3 rounded-lg bg-[#0f172a]/60 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
                         placeholder="John Doe"
                       />
@@ -237,6 +241,7 @@ const Contact = () => {
                         value={formData.email}
                         onChange={handleChange}
                         required
+                        autoComplete="email"
                         className="w-full px-4 py-3 rounded-lg bg-[#0f172a]/60 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
                         placeholder="john@example.com"
                       />
@@ -317,19 +322,28 @@ const Contact = () => {
                       )}
                     </motion.button>
 
-                    {submitStatus && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className={`mt-4 p-4 rounded-lg border ${
-                          submitStatus.success
-                            ? "bg-green-500/20 text-green-300 border-green-400/30"
-                            : "bg-red-500/20 text-red-300 border-red-400/30"
-                        }`}
-                      >
-                        {submitStatus.message}
-                      </motion.div>
-                    )}
+                    {/* The live region is mounted unconditionally and filled
+                        later. Screen readers only announce changes to a region
+                        that already existed — mounting the element and its text
+                        together (the old `{submitStatus && <div>}`) is the
+                        classic way to make an aria-live region announce
+                        nothing at all. WCAG 4.1.3. */}
+                    <div role="status" aria-live="polite" className="min-h-0">
+                      {isSubmitting && <span className="sr-only">Sending your message…</span>}
+                      {submitStatus && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className={`mt-4 p-4 rounded-lg border ${
+                            submitStatus.success
+                              ? "bg-green-500/20 text-green-300 border-green-400/30"
+                              : "bg-red-500/20 text-red-300 border-red-400/30"
+                          }`}
+                        >
+                          {submitStatus.message}
+                        </motion.div>
+                      )}
+                    </div>
                   </form>
                 </GlassCard>
               </ScrollReveal>

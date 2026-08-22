@@ -105,17 +105,28 @@ const App = () => {
     // honour the OS setting: transform and layout animations are dropped while
     // opacity transitions are kept.
     <MotionConfig reducedMotion="user">
-      <main className="bg-[#020617] text-white relative min-h-screen">
+      {/* A plain div, not <main>. This element wraps the nav and the footer, and
+          a main landmark that contains them tells a screen-reader user "the
+          main content is the entire page" — which is the same as saying
+          nothing. The real <main> is below, around the routed page only. */}
+      <div className="bg-[#020617] text-white relative min-h-screen">
         <Router>
           {/* Scroll-driven, no JS. Gives a long page a sense of journey. */}
           <div className="scroll-progress" aria-hidden="true" />
+          {/* Off-screen until focused. Without it, every keyboard visitor tabs
+              through the whole nav again on every page (WCAG 2.4.1). */}
+          <a href="#main-content" className="skip-link">Skip to main content</a>
           <Navbar />
           <VoiceNavigation />
           <ScrollToTop />
-          <AnimatedRoutes />
+          {/* tabIndex={-1} so the skip link can actually move focus here;
+              without it the browser scrolls but focus stays in the nav. */}
+          <main id="main-content" tabIndex={-1}>
+            <AnimatedRoutes />
+          </main>
           <Footer />
         </Router>
-      </main>
+      </div>
     </MotionConfig>
   );
 };
