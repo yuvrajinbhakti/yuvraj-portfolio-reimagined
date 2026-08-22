@@ -28,6 +28,18 @@ import {
     kubernets,
     aws
 } from "../assets/icons";
+
+// Generated project covers. The raw icons are 200-612px with mismatched
+// backgrounds (one had a transparency checkerboard baked in), and the card
+// renders them ~840x900 on a 2x display — so they were being upscaled ~4x.
+// These composite each mark at native size onto a consistent dark cover.
+// Regenerate with scripts/make-covers.py if an icon changes.
+import realtimeCodeEditorCover from "../assets/covers/realtime-code-editor.webp";
+import fileSharingCover from "../assets/covers/file-sharing.webp";
+import moneyzoldCover from "../assets/covers/moneyzold.webp";
+import careCarRentalCover from "../assets/covers/care-car-rental.webp";
+import dockerNodeCover from "../assets/covers/docker-node.webp";
+import codeGenieCover from "../assets/covers/code-genie.webp";
 export const skills = [
     {
         imageUrl: css,
@@ -187,7 +199,7 @@ export const projects = [
     {
         id: 1,
         iconUrl: realtimeCodeEditorIcon, 
-        image: realtimeCodeEditorIcon, // Using icon as image for now
+        image: realtimeCodeEditorCover,
         theme: 'btn-back-blue',
         name: 'Realtime Code Editor',
         description: 'Developed a collaborative real-time code editor using Socket.io and React.js, enabling multiple users to write and edit code simultaneously with live cursor tracking and syntax highlighting.',
@@ -200,7 +212,7 @@ export const projects = [
     {
         id: 2,
         iconUrl: fileSharingAppIcon, 
-        image: fileSharingAppIcon,
+        image: fileSharingCover,
         theme: 'btn-back-green',
         name: 'File Sharing App',
         description: 'Built a secure file-sharing web app that allows users to upload and share files with an expiration time, ensuring privacy and security with encrypted file storage.',
@@ -213,7 +225,7 @@ export const projects = [
     {
         id: 3,
         iconUrl: moneyzoldIcon, 
-        image: moneyzoldIcon,
+        image: moneyzoldCover,
         theme: 'btn-back-yellow',
         name: 'MoneyZold Finance App',
         description: 'Developed a finance app using Flutter that tracks expenses and savings, offering users a simple and intuitive way to manage their finances with beautiful charts and analytics.',
@@ -226,7 +238,7 @@ export const projects = [
     {
         id: 4,
         iconUrl: careCarRentalIcon, 
-        image: careCarRentalIcon,
+        image: careCarRentalCover,
         theme: 'btn-back-red',
         name: 'Care Car Rental Website',
         description: 'Overhauled and relaunched the Care car rental website, streamlining the booking process and improving user experience through an intuitive interface with modern design.',
@@ -239,7 +251,7 @@ export const projects = [
     {
         id: 5,
         iconUrl: dockerNodeAppIcon, 
-        image: dockerNodeAppIcon,
+        image: dockerNodeCover,
         theme: 'btn-back-black',
         name: 'Dockerized Node.js Application',
         description: 'Created a Dockerized Node.js application, pushing the image to DockerHub for easy deployment, demonstrating skills in containerization and DevOps practices.',
@@ -252,7 +264,7 @@ export const projects = [
     {
         id: 6,
         iconUrl: codeGenieIcon, 
-        image: codeGenieIcon,
+        image: codeGenieCover,
         theme: 'btn-back-purple',
         name: 'CodeGenie',
         description: 'Developed a Python code generation tool that automates the creation of functions, classes, exceptions, and machine learning/NLP components, ensuring well-structured, PEP 8-compliant code.',

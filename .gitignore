@@ -29,3 +29,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Agent tooling (machine-local permissions, generated context)
+.claude/
+AGENTS.md
