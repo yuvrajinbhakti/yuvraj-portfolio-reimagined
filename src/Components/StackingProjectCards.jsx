@@ -40,13 +40,23 @@ const ProjectCard = ({ project }) => {
             /* Absolutely positioned so the cover fills the column without
                contributing to layout height. Left in flow with h-full against
                a now auto-height card, it fell back to its intrinsic aspect
-               ratio and drove the card ~180px taller than its copy needed. */
+               ratio and drove the card ~180px taller than its copy needed.
+
+               object-contain with a little padding, not object-cover. The
+               covers are 1000x1000 squares whose rounded tile is 52% of the
+               canvas — the margin around it is part of the artwork. Cover
+               scaled to the panel's *width* and cropped that margin off the
+               top and bottom, which is why the mark looked oversized and
+               crowded. Contain restores it; the small padding just tops it up.
+               Padding applies to the image's content box, so object-fit
+               honours it. Net effect: the tile renders ~170px instead of
+               ~266px, centred in a 511x376 panel. */
             <img
               src={project.image}
               alt={project.name}
               loading="lazy"
               decoding="async"
-              className="absolute inset-0 w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-contain p-4 md:p-6"
             />
           ) : (
             <span className="text-5xl">💻</span>
