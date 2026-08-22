@@ -103,7 +103,7 @@ const ProjectCard = ({ project, index, setCursorVariant }) => {
                 <motion.img
                   src={project.image}
                   alt={project.name}
-                  className="w-full h-full object-contain bg-gradient-to-br from-gray-900/40 to-gray-800/40 p-8 transition-all duration-300"
+                  className="w-full h-full object-cover transition-all duration-300"
                   onError={() => setImageError(true)}
                   whileHover={{ 
                     scale: 1.03,
