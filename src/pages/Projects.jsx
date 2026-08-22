@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { projects } from "../constants";
+import { caseStudyForProject } from "../constants/caseStudies";
 import CTA from "../Components/CTA";
 import { motion, useScroll, useTransform, useInView, useMotionValue, useSpring } from "framer-motion";
 import AnimatedBackground from "../Components/AnimatedBackground";
@@ -23,6 +25,10 @@ const ProjectCard = ({ project, index, setCursorVariant }) => {
   const [imageError, setImageError] = useState(false);
   const [cardMousePosition, setCardMousePosition] = useState({ x: 0, y: 0 });
   const cardRef = useRef(null);
+  // The write-ups are the deepest content on the site and, until now, were
+  // reachable only from the four stacked cards on the homepage — this page
+  // linked out to GitHub and nowhere else.
+  const study = caseStudyForProject(project.id);
   
   // Use once: true and larger margin for better performance
   const isInView = useInView(cardRef, { 
@@ -226,9 +232,38 @@ const ProjectCard = ({ project, index, setCursorVariant }) => {
               </motion.p>
             </div>
             
+            {/* Case study — the primary action where one exists, so it sits
+                above Code/Demo rather than competing with them in the row. */}
+            {study && (
+              <motion.div
+                className="mt-auto pt-3 border-t border-white/10"
+                initial={{ opacity: 0, y: 15 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ delay: 0.28 + index * 0.05, duration: 0.3 }}
+              >
+                <Link
+                  to={`/work/${study.slug}`}
+                  className="inline-flex items-center gap-1.5 py-1.5 text-white hover:text-blue-300 transition-colors font-semibold text-sm group/study"
+                  onMouseEnter={handleLinkMouseEnter}
+                  onMouseLeave={handleLinkMouseLeave}
+                >
+                  Read case study
+                  <svg
+                    className="h-3.5 w-3.5 transition-transform duration-200 group-hover/study:translate-x-0.5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </Link>
+              </motion.div>
+            )}
+
             {/* Simplified Action Buttons */}
-            <motion.div 
-              className="flex justify-between items-center mt-auto pt-3 border-t border-white/10"
+            <motion.div
+              className={`flex justify-between items-center pt-3 border-t border-white/10 ${study ? '' : 'mt-auto'}`}
               initial={{ opacity: 0, y: 15 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ delay: 0.3 + index * 0.05, duration: 0.3 }}
