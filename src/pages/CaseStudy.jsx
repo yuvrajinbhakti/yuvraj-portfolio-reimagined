@@ -136,7 +136,7 @@ const CaseStudy = () => {
             {/* Takeaway */}
             <motion.div {...fade(0.4)} className="mt-12">
               <GlassCard className="p-6 md:p-8 border-l-2 border-l-blue-500">
-                <h2 className="text-sm uppercase tracking-[0.15em] text-blue-400 font-semibold mb-3">
+                <h2 className="text-sm uppercase tracking-label text-blue-400 font-semibold mb-3">
                   What I took from it
                 </h2>
                 <p className="text-white/80 leading-relaxed text-base md:text-lg">
@@ -148,7 +148,7 @@ const CaseStudy = () => {
             {/* Next case study */}
             {others.length > 0 && (
               <motion.nav {...fade(0.45)} className="mt-14 pt-8 border-t border-white/10">
-                <h2 className="text-sm uppercase tracking-[0.15em] text-white/50 font-semibold mb-4">
+                <h2 className="text-sm uppercase tracking-label text-white/50 font-semibold mb-4">
                   Read next
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

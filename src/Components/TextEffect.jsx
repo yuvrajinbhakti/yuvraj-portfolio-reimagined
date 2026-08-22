@@ -227,7 +227,12 @@ const TextEffect = () => {
           as="h1"
           text="I'm Yuvraj Singh Nain"
           type="character"
-          className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-6xl font-bold text-white leading-[1.3] tracking-wide"
+          // `tracking-wide` and `leading-[1.3]` were both wrong for the largest
+          // type on the site — wide tracking and loose leading are corrections
+          // for small text, and applying them at 60px is what makes display
+          // type read as untreated. The size scale now carries its own optical
+          // tracking and line height, so this just gets out of the way.
+          className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-6xl font-bold text-white"
           delay={0.5}
           staggerDelay={0.05}
         />

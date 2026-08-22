@@ -22,6 +22,36 @@ export default {
         worksans: ["Work Sans", "sans-serif"],
         poppins: ['Poppins', "sans-serif"]
       },
+      // Optical sizing. Tailwind's default scale ships every size at
+      // letter-spacing: normal, which is only correct in the middle of the
+      // range — the site was rendering 36-60px headings at normal or slightly
+      // positive tracking, which is the clearest "untouched defaults" tell in
+      // a type system.
+      //
+      // Type set large needs to be tightened and type set small needs to be
+      // opened up, because spacing that reads correctly at 16px reads loose at
+      // 60px and cramped at 12px. Line height tightens on the same curve, for
+      // the same reason. Pairing both with the size means every `text-*`
+      // utility carries its own optics and nothing has to be remembered.
+      fontSize: {
+        xs:   ['0.75rem',  { lineHeight: '1.125rem', letterSpacing: '0.01em'   }],
+        sm:   ['0.875rem', { lineHeight: '1.375rem', letterSpacing: '0.005em'  }],
+        base: ['1rem',     { lineHeight: '1.625rem', letterSpacing: '-0.006em' }],
+        lg:   ['1.125rem', { lineHeight: '1.75rem',  letterSpacing: '-0.011em' }],
+        xl:   ['1.25rem',  { lineHeight: '1.75rem',  letterSpacing: '-0.014em' }],
+        '2xl': ['1.5rem',  { lineHeight: '2rem',     letterSpacing: '-0.019em' }],
+        '3xl': ['1.875rem',{ lineHeight: '2.25rem',  letterSpacing: '-0.021em' }],
+        '4xl': ['2.25rem', { lineHeight: '2.5rem',   letterSpacing: '-0.024em' }],
+        '5xl': ['3rem',    { lineHeight: '1.08',     letterSpacing: '-0.028em' }],
+        '6xl': ['3.75rem', { lineHeight: '1.05',     letterSpacing: '-0.032em' }],
+        '7xl': ['4.5rem',  { lineHeight: '1.02',     letterSpacing: '-0.035em' }],
+        '8xl': ['6rem',    { lineHeight: '1',        letterSpacing: '-0.038em' }],
+      },
+      letterSpacing: {
+        // Small uppercase labels run the other way — at 12-14px, caps need air
+        // to stay legible. Was hardcoded as tracking-[0.15em] in two places.
+        label: '0.15em',
+      },
       boxShadow: {
         card: '0px 1px 2px 0px rgba(0, 0, 0, 0.05)',
         'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
