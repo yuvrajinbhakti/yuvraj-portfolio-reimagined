@@ -217,7 +217,10 @@ const CTA = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
           >
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            {/* tabIndex={-1}: framer-motion makes a wrapper focusable once it carries
+                tap handlers, so each button was costing two tab stops — a
+                role-less div, then the real control. */}
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} tabIndex={-1}>
               <Link
                 to="/contact"
                 className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 sm:px-7 md:px-8 sm:py-3 md:py-4 bg-white/5 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:translate-y-[-2px] hover:shadow-xl hover:shadow-blue-500/25 relative overflow-hidden group min-w-[160px] sm:min-w-[180px] font-medium text-sm sm:text-base"
@@ -230,7 +233,10 @@ const CTA = () => {
               </Link>
             </motion.div>
 
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            {/* tabIndex={-1}: framer-motion makes a wrapper focusable once it carries
+                tap handlers, so each button was costing two tab stops — a
+                role-less div, then the real control. */}
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} tabIndex={-1}>
               <button
                 onClick={handleResumeDownload}
                 className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 sm:px-7 md:px-8 sm:py-3 md:py-4 bg-transparent border border-white/30 backdrop-blur-sm text-white rounded-lg hover:bg-white/10 hover:border-white/50 transition-all duration-300 transform hover:translate-y-[-2px] hover:shadow-xl hover:shadow-white/10 relative overflow-hidden group min-w-[160px] sm:min-w-[180px] font-medium text-sm sm:text-base"

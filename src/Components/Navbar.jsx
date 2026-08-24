@@ -152,29 +152,22 @@ const Navbar = () => {
       className="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-white/5 border-b border-white/10 shadow-lg shadow-black/20"
     >
       <header className="header">
-        {/* Logo */}
-        {/* tabIndex={-1} for the same reason as NavItem above: the tap handlers
-            make this wrapper focusable, so the logo was costing two tab stops
-            — a role-less div, then the actual link. */}
-        <motion.div
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          tabIndex={-1}
+        {/* The wordmark, not a boxed tile. A bordered, shadowed, gradient-filled
+            square is a lot of chrome around three letters, and it matched the
+            four pills it sat next to — the whole bar read as buttons.
+
+            No motion wrapper either: scaling a wordmark on hover is a tell, and
+            dropping it also removes the stray tab stop the wrapper introduced,
+            so the tabIndex={-1} workaround is no longer needed. */}
+        <NavLink
+          to="/"
+          className="text-lg font-bold tracking-tight text-white hover:text-blue-300 transition-colors duration-200"
         >
-          {/* The wordmark, not a boxed tile. A bordered, shadowed, gradient-
-              filled square is a lot of chrome around three letters, and it
-              matched the four pills it sat next to — the whole bar read as
-              buttons. */}
-          <NavLink
-            to="/"
-            className="text-lg font-bold tracking-tight text-white hover:text-blue-300 transition-colors duration-200"
-          >
-            YSN
-          </NavLink>
-        </motion.div>
+          YSN
+        </NavLink>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex text-lg gap-8 font-medium">
+        <nav className="hidden md:flex text-sm gap-7 font-medium">
           {navItems.map((item) => (
             <NavItem key={item.to} {...item} />
           ))}
@@ -183,9 +176,12 @@ const Navbar = () => {
         {/* Mobile Hamburger Button */}
         <motion.button
           ref={triggerRef}
-          className="hamburger-button md:hidden w-12 h-12 rounded-xl bg-gradient-to-br from-white/20 to-white/10 backdrop-blur-md border border-white/20 items-center justify-center flex font-bold shadow-lg hover:shadow-blue-500/25 transition-all duration-300 hover:border-blue-400/50"
+          // Matches the rest of the bar now that the pills are gone — a
+          // gradient-filled, bordered, drop-shadowed tile was the last piece of
+          // furniture left up here. Still 44px, so it stays a comfortable
+          // target.
+          className="hamburger-button md:hidden w-11 h-11 -mr-2 rounded-lg items-center justify-center flex text-white/70 hover:text-white hover:bg-white/5 transition-colors duration-200"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           aria-label={isMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
           aria-expanded={isMenuOpen}
@@ -202,7 +198,7 @@ const Navbar = () => {
                 : { rotate: 0, y: -6, opacity: 1 }
               }
               transition={{ duration: 0.3 }}
-              className="absolute w-5 h-0.5 bg-white rounded-full"
+              className="absolute w-5 h-0.5 bg-current rounded-full"
             />
             <motion.span
               animate={isMenuOpen 
@@ -210,7 +206,7 @@ const Navbar = () => {
                 : { opacity: 1 }
               }
               transition={{ duration: 0.3 }}
-              className="absolute w-5 h-0.5 bg-white rounded-full"
+              className="absolute w-5 h-0.5 bg-current rounded-full"
             />
             <motion.span
               animate={isMenuOpen 
@@ -218,7 +214,7 @@ const Navbar = () => {
                 : { rotate: 0, y: 6, opacity: 1 }
               }
               transition={{ duration: 0.3 }}
-              className="absolute w-5 h-0.5 bg-white rounded-full"
+              className="absolute w-5 h-0.5 bg-current rounded-full"
             />
           </motion.div>
         </motion.button>

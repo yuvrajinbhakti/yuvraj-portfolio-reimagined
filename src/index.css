@@ -267,7 +267,7 @@ body:has(.card[data-color="green"]:hover) {
        full-width wrapper around this element, and an absolutely positioned
        child contributes no height — so the bar would have collapsed to a
        1px rule with nothing behind it. */
-    @apply flex justify-between items-center px-4 sm:px-8 md:px-16 py-4 max-w-5xl mx-auto relative bg-transparent z-10;
+    @apply flex justify-between items-center px-4 sm:px-8 md:px-10 py-3 max-w-6xl mx-auto relative bg-transparent z-10;
   }
 
   .footer {
@@ -622,7 +622,7 @@ body:has(.card[data-color="green"]:hover) {
   --stack-gap: 1.75rem;
   /* Cards pin below the fixed navbar (81px) rather than at viewport 0, where
      the top of every pinned card slid underneath it. */
-  --stack-top: 6rem;
+  --stack-top: 5.25rem;
 
   list-style: none;
   margin: 0;
