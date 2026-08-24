@@ -334,8 +334,15 @@ const InteractiveTerminal = () => {
           ))}
         </AnimatePresence>
 
-        {/* Current Input Line */}
-        <div className="flex items-center text-green-400">
+        {/* Current Input Line.
+            `terminal-prompt` carries the focus indicator instead of the input.
+            The global focus ring drew a rounded blue box around the caret,
+            which is wrong twice over here: the terminal auto-focuses on mount,
+            so it appeared without anyone asking, and a rounded outline inside a
+            terminal breaks the one illusion the component exists to create. A
+            block caret and a lit prompt are what a terminal uses to say
+            "you're typing here", and they say it just as clearly. */}
+        <div className="terminal-prompt flex items-center text-green-400">
           <span className="mr-2">visitor@yuvraj-portfolio:~$</span>
           <input
             ref={inputRef}
@@ -343,7 +350,8 @@ const InteractiveTerminal = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyPress}
-            className="flex-1 bg-transparent outline-none text-green-400 caret-green-400"
+            aria-label="Terminal command input"
+            className="terminal-input flex-1 bg-transparent outline-none text-green-400 caret-green-400"
             autoComplete="off"
             spellCheck="false"
           />

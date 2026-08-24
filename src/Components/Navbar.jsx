@@ -4,43 +4,40 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import PropTypes from 'prop-types'
 
 const navItems = [
-  { to: '/about', label: 'About', gradient: 'from-blue-600/0 via-blue-600/20 to-blue-600/0' },
-  { to: '/projects', label: 'Projects', gradient: 'from-blue-600/0 via-blue-600/20 to-blue-600/0' },
-  { to: '/playground', label: 'Playground', gradient: 'from-blue-600/0 via-blue-600/20 to-blue-600/0' },
-  { to: '/contact', label: 'Contact', gradient: 'from-blue-600/0 via-blue-600/20 to-blue-600/0' }
+  { to: '/about', label: 'About' },
+  { to: '/projects', label: 'Projects' },
+  { to: '/playground', label: 'Playground' },
+  { to: '/contact', label: 'Contact' }
 ]
 
 // Declared at module scope, not inside Navbar. Defining a component inside
 // another component gives it a new type on every render, so React unmounts and
 // remounts the whole nav on each state change — which restarts animations and,
 // critically here, throws away keyboard focus and breaks the focus trap.
-const NavItem = ({ to, label, gradient, onClick }) => (
-  // tabIndex={-1}: framer-motion makes a motion.div focusable once it has tap
-  // handlers, which put a second, role-less tab stop in front of every link.
-  // The anchor inside is the real control, so the wrapper is taken out of the
-  // tab order.
-  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} tabIndex={-1}>
-    <NavLink
-      to={to}
-      onClick={onClick}
-      className={({ isActive }) => `
-        px-4 py-3 md:py-2 rounded-lg backdrop-blur-sm border border-transparent transition-all duration-300 relative overflow-hidden group block text-center md:text-left
-        ${isActive
-          ? 'text-blue-400 bg-blue-500/20 border-blue-400/30 shadow-lg shadow-blue-500/25'
-          : 'text-white hover:text-blue-300 hover:bg-white/10 hover:border-white/20 hover:shadow-lg hover:shadow-white/10'
-        }
-      `}
-    >
-      <span className="relative z-10">{label}</span>
-      <div className={`absolute inset-0 bg-gradient-to-r ${gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
-    </NavLink>
-  </motion.div>
+// Plain links, not buttons. Four bordered, filled, drop-shadowed pills in a row
+// read as a toolbar — they compete with each other and with the page, and they
+// make navigation look like the most important thing on screen. A nav is a
+// signpost. Text, with the current page marked, and a rule that draws in on
+// hover: the affordance without the furniture.
+const NavItem = ({ to, label, onClick }) => (
+  <NavLink
+    to={to}
+    onClick={onClick}
+    className={({ isActive }) => `
+      relative py-2 block text-center md:text-left transition-colors duration-200
+      ${isActive ? 'text-white' : 'text-white/60 hover:text-white'}
+      after:absolute after:left-0 after:right-0 after:-bottom-0.5 after:h-px
+      after:bg-blue-400 after:origin-left after:transition-transform after:duration-300
+      ${isActive ? 'after:scale-x-100' : 'after:scale-x-0 hover:after:scale-x-100'}
+    `}
+  >
+    {label}
+  </NavLink>
 )
 
 NavItem.propTypes = {
   to: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
-  gradient: PropTypes.string.isRequired,
   onClick: PropTypes.func
 }
 
@@ -146,9 +143,15 @@ const Navbar = () => {
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.8, ease: "easeOut" }}
-      className="fixed top-0 left-0 right-0 z-50"
+      // The frosted panel, the border and the shadow belong on this full-width
+      // wrapper, not on <header>. `.header` is max-w-5xl, so putting them there
+      // painted a 1024px bar floating in the middle of a wider window — hard
+      // vertical edges, and a bottom rule that stopped a couple of hundred
+      // pixels short of each side. The bar now spans the viewport; the content
+      // inside it stays constrained.
+      className="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-white/5 border-b border-white/10 shadow-lg shadow-black/20"
     >
-      <header className="header backdrop-blur-lg bg-white/5 border-b border-white/10 shadow-lg shadow-black/20">
+      <header className="header">
         {/* Logo */}
         {/* tabIndex={-1} for the same reason as NavItem above: the tap handlers
             make this wrapper focusable, so the logo was costing two tab stops
@@ -158,11 +161,15 @@ const Navbar = () => {
           whileTap={{ scale: 0.95 }}
           tabIndex={-1}
         >
-          <NavLink 
-            to="/" 
-            className="w-12 h-12 rounded-xl bg-gradient-to-br from-white/20 to-white/10 backdrop-blur-md border border-white/20 items-center justify-center flex font-bold shadow-lg hover:shadow-blue-500/25 transition-all duration-300 hover:border-blue-400/50 group" 
+          {/* The wordmark, not a boxed tile. A bordered, shadowed, gradient-
+              filled square is a lot of chrome around three letters, and it
+              matched the four pills it sat next to — the whole bar read as
+              buttons. */}
+          <NavLink
+            to="/"
+            className="text-lg font-bold tracking-tight text-white hover:text-blue-300 transition-colors duration-200"
           >
-            <p className="text-lg text-white">YSN</p>
+            YSN
           </NavLink>
         </motion.div>
 

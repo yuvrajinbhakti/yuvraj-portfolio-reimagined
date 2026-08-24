@@ -21,13 +21,17 @@ SIZE = 1000
 BASE = (9, 14, 30)          # matches the site background family
 
 # accent per project, pulled from the `gradient` field already in constants
+# Accents are all blue now, varied by value rather than hue. Six covers in six
+# different colours were the loudest thing left on a site whose accent is a
+# single blue — and stacked, they read as a rainbow. Value still tells them
+# apart; the marks themselves carry whatever colour each project has.
 PROJECTS = [
-    ("realtime-code-editor", "realtimeCodeEditorIcon.png", (59, 130, 246), (6, 182, 212)),
-    ("file-sharing",         "fileSharingAppIcon.jpeg",    (34, 197, 94),  (16, 185, 129)),
-    ("moneyzold",            "moneyzoldIcon.jpeg",         (234, 179, 8),  (249, 115, 22)),
-    ("care-car-rental",      "careCarRentalIcon.jpg",      (239, 68, 68),  (236, 72, 153)),
-    ("docker-node",          "dockerNodeAppIcon.png",      (56, 132, 255), (13, 148, 176)),
-    ("code-genie",           "codeGenieIcon.png",          (168, 85, 247), (99, 102, 241)),
+    ("realtime-code-editor", "realtimeCodeEditorIcon.png", (59, 130, 246), (37, 99, 235)),
+    ("file-sharing",         "fileSharingAppIcon.jpeg",    (37, 99, 235),  (29, 78, 216)),
+    ("moneyzold",            "moneyzoldIcon.jpeg",         (96, 165, 250), (59, 130, 246)),
+    ("care-car-rental",      "careCarRentalIcon.jpg",      (29, 78, 216),  (30, 58, 138)),
+    ("docker-node",          "dockerNodeAppIcon.png",      (56, 132, 255), (37, 99, 235)),
+    ("code-genie",           "codeGenieIcon.png",          (79, 140, 245), (37, 99, 235)),
 ]
 
 
