@@ -336,7 +336,9 @@ const About = () => {
                           <img
                             src={skill.imageUrl}
                             alt={skill.name}
-                            className="w-8 h-8 object-contain"
+                            className={`w-8 h-8 object-contain ${
+                              skill.tone === 'invert' ? 'icon-invert' : skill.tone === 'lift' ? 'icon-lift' : ''
+                            }`}
                           />
                         </div>
                         <span className="mt-2 text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">

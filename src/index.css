@@ -1055,3 +1055,19 @@ body:has(.card[data-color="green"]:hover) {
   .wordmark__rest { transition: none; }
 }
 
+
+/* ---------------------------------------------------------------------------
+   Icon tone correction
+
+   Brand marks are drawn for whatever background their owner had in mind, which
+   is usually white. Dropped on a near-black card, the dark ones disappear:
+   Express is pure black at zero saturation and measured 1.14:1 against the card
+   surface — in the DOM, invisible on the page.
+
+   Two treatments, and the difference matters. A neutral mark can be inverted
+   outright, because black-to-white is the same mark. A coloured one cannot —
+   inverting AWS orange gives a blue that is not AWS — so those are only
+   brightened, which lifts them off the background without touching hue.
+--------------------------------------------------------------------------- */
+.icon-invert { filter: invert(1); }
+.icon-lift { filter: brightness(1.45) saturate(1.05); }
