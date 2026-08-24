@@ -1,3 +1,4 @@
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { caseStudies } from '../constants/caseStudies';
 
@@ -36,8 +37,31 @@ const footerSocials = [
   },
 ];
 
+const EMAIL = 'yuvrajsinghnain03@gmail.com';
+
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const [copied, setCopied] = useState(false);
+  const timer = useRef(null);
+
+  // An email address in a footer is nearly always going to be copied rather
+  // than clicked — mailto: opens whatever the OS thinks is a mail client, which
+  // for a lot of people is nothing useful. Copying is the action people
+  // actually want, so it gets to be the primary one.
+  const copyEmail = useCallback(async (event) => {
+    if (!navigator.clipboard) return;      // let the mailto: fall through
+    event.preventDefault();
+    try {
+      await navigator.clipboard.writeText(EMAIL);
+      setCopied(true);
+      clearTimeout(timer.current);
+      timer.current = setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);                    // clipboard blocked; mailto: still works
+    }
+  }, []);
+
+  useEffect(() => () => clearTimeout(timer.current), []);
 
   return (
     <footer className="relative border-t border-white/10">
@@ -46,7 +70,7 @@ const Footer = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Brand */}
             <div>
-              <Link to="/" className="inline-block text-xl font-bold text-blue-400">
+              <Link to="/" className="inline-block text-xl font-bold tracking-tight text-white hover:text-blue-300 transition-colors duration-200">
                 YSN
               </Link>
               <p className="text-white/50 mt-2 text-sm leading-relaxed">
@@ -62,12 +86,12 @@ const Footer = () => {
                   <Link
                     key={study.slug}
                     to={`/work/${study.slug}`}
-                    className="text-white/50 hover:text-blue-400 transition-colors text-sm"
+                    className="group relative inline-block w-fit text-white/50 hover:text-white transition-colors text-sm after:absolute after:left-0 after:right-0 after:-bottom-0.5 after:h-px after:bg-blue-400 after:origin-left after:scale-x-0 after:transition-transform after:duration-300 hover:after:scale-x-100"
                   >
                     {study.title}
                   </Link>
                 ))}
-                <Link to="/projects" className="text-white/50 hover:text-blue-400 transition-colors text-sm">
+                <Link to="/projects" className="group relative inline-block w-fit text-white/50 hover:text-white transition-colors text-sm after:absolute after:left-0 after:right-0 after:-bottom-0.5 after:h-px after:bg-blue-400 after:origin-left after:scale-x-0 after:transition-transform after:duration-300 hover:after:scale-x-100">
                   All projects
                 </Link>
               </nav>
@@ -97,10 +121,20 @@ const Footer = () => {
           <div className="mt-8 pt-6 border-t border-white/10 flex flex-col sm:flex-row gap-2 sm:gap-4 items-center justify-between text-white/50 text-sm">
             <span>&copy; {currentYear} Yuvraj Singh Nain</span>
             <a
-              href="mailto:yuvrajsinghnain03@gmail.com"
-              className="hover:text-blue-400 transition-colors"
+              href={`mailto:${EMAIL}`}
+              onClick={copyEmail}
+              className="group inline-flex items-center gap-2 hover:text-white transition-colors"
+              title="Click to copy"
             >
-              yuvrajsinghnain03@gmail.com
+              <span className="font-mono">{EMAIL}</span>
+              {/* aria-live, so the confirmation is announced rather than only
+                  seen — the whole point is feedback that the copy happened. */}
+              <span
+                aria-live="polite"
+                className={`text-xs transition-colors ${copied ? 'text-emerald-300' : 'text-white/30 group-hover:text-white/60'}`}
+              >
+                {copied ? 'copied' : 'copy'}
+              </span>
             </a>
           </div>
         </div>
