@@ -129,7 +129,7 @@ const Contact = () => {
                       <div className="ml-4">
                         <h3 className="text-lg font-semibold text-white mb-1 group-hover:text-blue-300 transition-colors duration-300">Email</h3>
                         <p className="text-gray-300 mt-1">
-                          <a href="mailto:yuvrajsinghnain03@gmail.com" className="hover:text-blue-400 transition-all duration-300 hover:underline decoration-blue-400/50 underline-offset-2">
+                          <a href="mailto:yuvrajsinghnain03@gmail.com" className="inline-block py-1 -my-1 hover:text-blue-400 transition-all duration-300 hover:underline decoration-blue-400/50 underline-offset-2">
                             yuvrajsinghnain03@gmail.com
                           </a>
                         </p>

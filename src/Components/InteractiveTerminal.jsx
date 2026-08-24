@@ -351,7 +351,7 @@ const InteractiveTerminal = () => {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyPress}
             aria-label="Terminal command input"
-            className="terminal-input flex-1 bg-transparent outline-none text-green-400 caret-green-400"
+            className="terminal-input flex-1 min-h-[24px] py-0.5 bg-transparent outline-none text-green-400 caret-green-400"
             autoComplete="off"
             spellCheck="false"
           />
