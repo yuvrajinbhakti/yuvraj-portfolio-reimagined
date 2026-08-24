@@ -9,7 +9,7 @@ import CTA from "../Components/CTA";
 import AnimatedBackground from "../Components/AnimatedBackground";
 import ScrollReveal from "../Components/ScrollReveal";
 import GlassCard from "../Components/GlassCard";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import useDocumentMeta from '../hooks/useDocumentMeta';
 
 // Self-drawing animated SVG timeline accent line
@@ -61,6 +61,65 @@ const AnimatedTimelineLine = ({ itemCount = 4 }) => {
         strokeWidth="3"
         fill="none"
         strokeLinecap="round"
+      />
+    </svg>
+  );
+};
+
+/**
+ * A stroke that draws itself under a word, once.
+ *
+ * Deliberately not a border-bottom: the path is slightly irregular and
+ * overshoots at both ends, which is what makes it read as drawn by hand rather
+ * than measured by a browser. It runs a single time on mount and then stops —
+ * an underline that loops would be decoration, and the page has just had all of
+ * that taken out of it.
+ */
+const DrawnUnderline = () => {
+  const pathRef = useRef(null);
+  const reduce = useReducedMotion();
+
+  useEffect(() => {
+    const path = pathRef.current;
+    if (!path) return;
+    const length = path.getTotalLength();
+
+    if (reduce) {
+      // Drawn, but instantly. The mark carries meaning as an emphasis, so it
+      // stays visible — only the drawing of it is motion.
+      path.style.strokeDasharray = 'none';
+      path.style.strokeDashoffset = '0';
+      return;
+    }
+
+    path.style.strokeDasharray = length;
+    path.style.strokeDashoffset = length;
+    // Two frames, so the starting state is painted before the transition begins
+    // — set both in one frame and the browser coalesces them into no animation.
+    const id = requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        path.style.transition = 'stroke-dashoffset 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.45s';
+        path.style.strokeDashoffset = '0';
+      })
+    );
+    return () => cancelAnimationFrame(id);
+  }, [reduce]);
+
+  return (
+    <svg
+      className="absolute left-0 -bottom-2 w-full h-3 overflow-visible pointer-events-none"
+      viewBox="0 0 200 12"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+    >
+      <path
+        ref={pathRef}
+        d="M2 8.5C34 4.5 78 3.2 122 4.8C152 5.9 178 7.4 198 5.2"
+        stroke="#60a5fa"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        fill="none"
+        vectorEffect="non-scaling-stroke"
       />
     </svg>
   );
@@ -279,8 +338,9 @@ const About = () => {
                   transition={{ duration: 0.5 }}
                 >
                   Hello, I&apos;m{" "}
-                  <span className="text-blue-400">
+                  <span className="relative inline-block text-blue-400">
                     Yuvraj
+                    <DrawnUnderline />
                   </span>
                 </motion.h1>
                 
@@ -296,24 +356,25 @@ const About = () => {
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.2, duration: 0.5 }}
                   >
+                    {/* Every paragraph carries a number. Scale is legible on sight;
+                        framing makes the reader do the work of being impressed. */}
                     <p>
-                      The frontend problems I like are the ones that turn out not to be
-                      frontend problems. A dashboard is straightforward until the data arrives
-                      late, out of order, or not at all — and then it&apos;s a systems problem
-                      wearing a UI.
+                      At Razorpay I build the analytics and reporting platform that
+                      <strong className="text-white font-semibold"> 16,000+ merchants </strong>
+                      use to understand their payments. I joined as an intern in July 2024 and
+                      went full-time a year later.
                     </p>
                     <p>
-                      At Razorpay I work on merchant reporting and analytics. Getting that
-                      right has meant an A/B testing framework with client-side caching, a
-                      change-data-capture pipeline that cut data onboarding from two weeks to a
-                      day, and a reporting stack rebuilt from scratch. I joined as an intern in
-                      July 2024 and went full-time a year later.
+                      Getting it there meant an A/B testing framework with client-side caching,
+                      a change-data-capture pipeline that cut data onboarding from two weeks to
+                      24 hours, and a reporting stack rebuilt from scratch. Platform adoption
+                      went up 25%; report generation time came down 40%.
                     </p>
                     <p>
-                      The thing I&apos;m proudest of outside work is a collaborative code
-                      editor where I implemented Operational Transform by hand — the algorithm
-                      that lets two people type in the same line without either losing a
-                      keystroke. Almost every interesting bug was in the part nobody sees.
+                      Outside work, the one I&apos;m proudest of is a collaborative code editor
+                      where I implemented Operational Transform by hand — the algorithm that
+                      lets two people type in the same line without either losing a keystroke.
+                      It holds 1,000 concurrent users at 10,000 operations a second, 75ms P95.
                     </p>
                   </motion.div>
                 </div>
