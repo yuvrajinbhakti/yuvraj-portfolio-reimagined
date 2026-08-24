@@ -7,16 +7,12 @@ import {
     dockerNodeAppIcon,
     codeGenieIcon,
     contact,
-    css,
     express,
-    git,
     github,
-    html,
     javascript,
     linkedin,
     mongodb,
     motion,
-    mui,
     nextjs,
     nodejs,
     react,
@@ -42,29 +38,9 @@ import dockerNodeCover from "../assets/covers/docker-node.webp";
 import codeGenieCover from "../assets/covers/code-genie.webp";
 export const skills = [
     {
-        imageUrl: css,
-        name: "CSS",
-        type: "Frontend",
-    },
-    {
         imageUrl: express,
         name: "Express",
         type: "Backend",
-    },
-    {
-        imageUrl: git,
-        name: "Git",
-        type: "Version Control",
-    },
-    {
-        imageUrl: github,
-        name: "GitHub",
-        type: "Version Control",
-    },
-    {
-        imageUrl: html,
-        name: "HTML",
-        type: "Frontend",
     },
     {
         imageUrl: javascript,
@@ -80,11 +56,6 @@ export const skills = [
         imageUrl: motion,
         name: "Motion",
         type: "Animation",
-    },
-    {
-        imageUrl: mui,
-        name: "Material-UI",
-        type: "Frontend",
     },
     {
         imageUrl: nextjs,
@@ -118,7 +89,7 @@ export const skills = [
     },
     {
         imageUrl: golang,
-        name:"GoLang",
+        name:"Go",
         type: "Backend",
     },
     {
@@ -128,7 +99,7 @@ export const skills = [
     },
     {
         imageUrl: kubernets,
-        name:"Kubernets",
+        name:"Kubernetes",
         type: "Backend",
     },
     {
@@ -136,7 +107,6 @@ export const skills = [
         name:"AWS",
         type: "Cloud",
     },
-    
 ];
 
 

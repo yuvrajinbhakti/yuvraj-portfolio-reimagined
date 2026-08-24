@@ -240,7 +240,7 @@ const TextEffect = () => {
 
       <div className="overflow-hidden bg-transparent px-2 sm:px-4">
         <AnimatedText
-          text="Full Stack Developer & Software Engineer"
+          text="Frontend Engineer at Razorpay"
           type="split-words"
           className="text-base sm:text-lg md:text-xl lg:text-2xl text-blue-300 mb-4 leading-relaxed"
           delay={1.5}
@@ -252,7 +252,7 @@ const TextEffect = () => {
       {animate && (
         <div className="mt-6 overflow-hidden bg-transparent px-2 sm:px-4">
           <AnimatedText
-            text="Building digital experiences that inspire!"
+            text="Merchant analytics dashboards by day. Real-time collaborative systems for fun."
             type="glitch"
             className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300 leading-relaxed"
             delay={2.5}

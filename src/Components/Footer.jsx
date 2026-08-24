@@ -52,7 +52,7 @@ const Footer = () => {
                 YSN
               </Link>
               <p className="text-white/50 mt-2 text-sm leading-relaxed">
-                Software Engineer & Full Stack Developer building modern web experiences.
+                Frontend Engineer at Razorpay. React, TypeScript, and the systems underneath.
               </p>
             </div>
 

@@ -99,8 +99,8 @@ ServiceCard.propTypes = {
 
 const Home = () => {
   useDocumentMeta({
-    title: 'Yuvraj Singh Nain | Full Stack Developer & Software Engineer',
-    description: 'Full Stack Developer and Software Engineer building fast, accessible web applications with React, Node.js, TypeScript and Go. Frontend Engineer at Razorpay.',
+    title: 'Yuvraj Singh Nain | Frontend Engineer',
+    description: 'Frontend Engineer at Razorpay. I build merchant-facing analytics dashboards in React and TypeScript, and real-time collaborative systems on the side.',
     path: '/',
   });
 

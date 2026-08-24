@@ -285,16 +285,35 @@ const About = () => {
                   </span>
                 </motion.h1>
                 
+                {/* Left-aligned prose, not a centred one-liner. This is the one
+                    page where the reader wants to know who you are, and it
+                    previously said "based in India, with a passion for creating
+                    innovative web applications" — true of everyone, therefore
+                    about no one. */}
                 <div className="w-full max-w-2xl mx-auto">
-                  <motion.div 
-                    className="text-lg text-gray-300 mb-12 text-center"
+                  <motion.div
+                    className="text-lg text-gray-300 mb-12 space-y-4 leading-relaxed"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.2, duration: 0.5 }}
                   >
                     <p>
-                      Full Stack Developer & Software Engineer based in India, with a passion for creating 
-                      innovative web applications and solving complex problems through code.
+                      I&apos;m a Frontend Engineer at Razorpay, where I build the analytics and
+                      reporting dashboards merchants use to understand their own payments. I
+                      joined as an intern in 2024 and stayed.
+                    </p>
+                    <p>
+                      Most of my work sits at the seam between the interface and the systems
+                      behind it — an A/B testing framework, a change-data-capture pipeline that
+                      took data onboarding from two weeks down to a day, a reporting stack
+                      rebuilt from scratch. The problems I like are the ones where the frontend
+                      answer depends on getting the backend right.
+                    </p>
+                    <p>
+                      Outside work I build things that are harder than they need to be. The one
+                      I&apos;m proudest of is a collaborative code editor with Operational
+                      Transform written by hand — two people typing in the same line, neither
+                      losing a keystroke.
                     </p>
                   </motion.div>
                 </div>
