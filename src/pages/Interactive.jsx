@@ -27,16 +27,14 @@ const Interactive = () => {
   const features = [
     {
       title: "Interactive Terminal",
-      description: "Explore my background, skills, and experience through terminal commands. Type 'help' to get started!",
-      icon: "💻",
+      description: "A shell that answers questions about my background. Type help to see what it knows.",
       component: <InteractiveTerminal />,
       gradient: "from-blue-600/20 to-cyan-600/20",
       borderColor: "border-blue-500/20"
     },
     {
       title: "Code Playground",
-      description: "Experiment with live code examples and see real-time results. Try the interactive games and animations!",
-      icon: "⚡",
+      description: "A live HTML, CSS and JavaScript editor with an instant preview. Edit anything; it re-runs as you type.",
       component: <CodePlayground />,
       gradient: "from-purple-600/20 to-pink-600/20",
       borderColor: "border-purple-500/20"
@@ -122,7 +120,7 @@ const Interactive = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.8 }}
               >
-                Experiment with cutting-edge web technologies and explore innovative development tools
+                Two things I built to answer questions about myself. Ask the terminal, or edit the code and watch it run.
               </motion.p>
             </motion.div>
 
@@ -134,7 +132,7 @@ const Interactive = () => {
               viewport={{ once: true, margin: "-100px" }}
               className="mt-16 space-y-12"
             >
-              {features.map((feature, index) => (
+              {features.map((feature) => (
                 <motion.div
                   key={feature.title}
                   variants={itemVariants}
@@ -177,25 +175,15 @@ const Interactive = () => {
                   </div>
 
                   <div className="text-center mb-8 relative z-10">
-                    <motion.h2 
-                      className="text-3xl md:text-4xl font-bold mb-4 flex items-center justify-center gap-3"
+                    {/* The heading used to open with a wobbling emoji. Emoji as
+                        an icon system is the fastest way to make engineering
+                        work read as a hobby project, and it was inside the h2,
+                        so screen readers announced it as part of the heading. */}
+                    <motion.h2
+                      className="text-3xl md:text-4xl font-bold mb-4"
                       whileHover={{ scale: 1.05 }}
                       transition={{ type: "spring", stiffness: 300 }}
                     >
-                      <motion.span 
-                        className="text-4xl md:text-5xl"
-                        animate={{ 
-                          rotate: [0, 10, -10, 0],
-                          scale: [1, 1.1, 1]
-                        }}
-                        transition={{ 
-                          duration: 2,
-                          repeat: Infinity,
-                          delay: index * 0.5
-                        }}
-                      >
-                        {feature.icon}
-                      </motion.span>
                       <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                         {feature.title}
                       </span>
@@ -222,58 +210,6 @@ const Interactive = () => {
               ))}
             </motion.div>
 
-            {/* Enhanced Instructions with Scroll Animation */}
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="mt-20 bg-black/30 backdrop-blur-sm rounded-3xl p-8 border border-white/10 relative overflow-hidden group"
-            >
-              {/* Animated Border */}
-              <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 p-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                <div className="w-full h-full bg-black/30 backdrop-blur-sm rounded-3xl" />
-              </div>
-              
-              <div className="relative z-10">
-                <motion.h3 
-                  className="text-3xl font-bold mb-8 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent"
-                  whileHover={{ scale: 1.05 }}
-                >
-                  How to Use These Tools
-                </motion.h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
-                  <motion.div
-                    whileHover={{ scale: 1.05, x: 10 }}
-                    className="bg-gradient-to-br from-blue-600/10 to-cyan-600/10 p-6 rounded-xl border border-blue-500/20"
-                  >
-                    <h4 className="font-semibold text-blue-400 mb-3 text-lg flex items-center gap-2">
-                      <span>💻</span> Terminal
-                    </h4>
-                    <ul className="text-gray-300 space-y-2">
-                      <li>• Type commands to explore my background</li>
-                      <li>• Use arrow keys for command history</li>
-                      <li>• Try &lsquo;help&rsquo; to see all available commands</li>
-                      <li>• Discover hidden easter eggs!</li>
-                    </ul>
-                  </motion.div>
-                  <motion.div
-                    whileHover={{ scale: 1.05, x: 10 }}
-                    className="bg-gradient-to-br from-purple-600/10 to-pink-600/10 p-6 rounded-xl border border-purple-500/20"
-                  >
-                    <h4 className="font-semibold text-purple-400 mb-3 text-lg flex items-center gap-2">
-                      <span>⚡</span> Code Playground
-                    </h4>
-                    <ul className="text-gray-300 space-y-2">
-                      <li>• Edit HTML, CSS, JavaScript in real-time</li>
-                      <li>• See live results instantly</li>
-                      <li>• Try the interactive example projects</li>
-                      <li>• Experiment with animations and games</li>
-                    </ul>
-                  </motion.div>
-                </div>
-              </div>
-            </motion.div>
           </div>
         </section>
       </AnimatedBackground>

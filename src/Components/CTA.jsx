@@ -208,8 +208,8 @@ const CTA = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
-            I&apos;m currently available for freelance work or full-time opportunities.
-            If you&apos;re looking for a developer who can bring your ideas to life, let&apos;s talk!
+            Open to interesting problems — especially anything involving real-time systems,
+            data-heavy interfaces, or performance work. Happy to talk shop either way.
           </motion.p>
           <motion.div
             className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-4 justify-center items-center px-2 sm:px-0"

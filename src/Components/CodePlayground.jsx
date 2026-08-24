@@ -117,7 +117,7 @@ setInterval(createParticle, 1000);`
   const EXAMPLES = {
     'hello-world': {
       name: 'Hello World',
-      icon: '👋',
+      icon: '',
       category: 'Basic',
       description: 'Interactive buttons with animations',
       difficulty: 'Beginner',
@@ -224,7 +224,7 @@ setInterval(createParticle, 1000);`
     },
     'react-counter': {
       name: 'React Counter',
-      icon: '🔢',
+      icon: '',
       category: 'Interactive',
       description: 'State management demonstration',
       difficulty: 'Intermediate',
@@ -310,7 +310,7 @@ const counter = new Counter();`
     },
     'css-animation': {
       name: 'CSS Animation',
-      icon: '✨',
+      icon: '',
       category: 'Visual',
       description: 'Advanced CSS animations and effects',
       difficulty: 'Advanced',
@@ -442,7 +442,7 @@ document.addEventListener('click', () => {
     },
     'mini-game': {
       name: 'Enhanced Mini Game',
-      icon: '🎮',
+      icon: '',
       category: 'Interactive',
       description: 'Advanced game with multiple modes, power-ups, and effects',
       difficulty: 'Advanced',
@@ -1642,13 +1642,13 @@ if (document.readyState === 'loading') {
   const LAYOUT_OPTIONS = [
     { value: 'horizontal', icon: '⬌', label: 'Side by Side', shortcut: 'H' },
     { value: 'vertical', icon: '⬍', label: 'Top & Bottom', shortcut: 'V' },
-    { value: 'output-only', icon: '🖥️', label: 'Preview Only', shortcut: 'P' }
+    { value: 'output-only', icon: '', label: 'Preview Only', shortcut: 'P' }
   ];
 
   const TABS = [
-    { id: 'html', name: 'HTML', icon: '🌐', color: 'text-orange-400' },
-    { id: 'css', name: 'CSS', icon: '🎨', color: 'text-blue-400' },
-    { id: 'js', name: 'JavaScript', icon: '⚡', color: 'text-yellow-400' }
+    { id: 'html', name: 'HTML', icon: '', color: 'text-orange-400' },
+    { id: 'css', name: 'CSS', icon: '', color: 'text-blue-400' },
+    { id: 'js', name: 'JavaScript', icon: '', color: 'text-yellow-400' }
   ];
 
   // Professional event handlers
