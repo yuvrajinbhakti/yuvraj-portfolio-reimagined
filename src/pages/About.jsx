@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import { skills, experiences, RESUME_URL } from "../constants";
 import {
@@ -12,6 +12,7 @@ import ScrollReveal from "../Components/ScrollReveal";
 import GlassCard from "../Components/GlassCard";
 import { motion, useReducedMotion } from "framer-motion";
 import useDocumentMeta from '../hooks/useDocumentMeta';
+import { DrawnName } from '../Components/DrawnUnderline';
 
 // Self-drawing animated SVG timeline accent line
 const AnimatedTimelineLine = ({ itemCount = 4 }) => {
@@ -68,97 +69,6 @@ const AnimatedTimelineLine = ({ itemCount = 4 }) => {
 };
 
 AnimatedTimelineLine.propTypes = { itemCount: PropTypes.number };
-
-// Two passes, because that is what people actually do: a first stroke, then a
-// shorter scribble back over part of it that doesn't line up. One perfectly
-// smooth curve reads as a border-bottom with extra steps; the mismatch between
-// the two is the entire effect. The second overshoots the word on the right.
-const STROKES = [
-  { d: 'M3 8.4C36 4.2 79 3.0 124 4.9C153 6.1 178 7.6 197 5.0', width: 2.5, delay: 0.45, duration: 0.85, opacity: 1 },
-  { d: 'M14 10.4C52 7.6 96 6.6 138 8.0C160 8.7 182 9.6 204 8.2', width: 1.75, delay: 0.72, duration: 0.62, opacity: 0.55 },
-];
-
-const DrawnUnderline = ({ onReady }) => {
-  const pathRefs = useRef([]);
-  const reduce = useReducedMotion();
-
-  // Pulled out so both the mount animation and the hover replay use it.
-  const draw = useCallback((immediate = false) => {
-    pathRefs.current.forEach((path, i) => {
-      if (!path) return;
-      const { delay, duration } = STROKES[i];
-      const length = path.getTotalLength();
-
-      if (immediate) {
-        path.style.transition = 'none';
-        path.style.strokeDasharray = 'none';
-        path.style.strokeDashoffset = '0';
-        return;
-      }
-
-      path.style.transition = 'none';
-      path.style.strokeDasharray = length;
-      path.style.strokeDashoffset = length;
-      // Read a layout property to flush the reset before the transition is
-      // reattached. Without it the browser collapses reset and redraw into one
-      // style recalculation and the replay never animates.
-      void path.getBoundingClientRect();
-      path.style.transition = `stroke-dashoffset ${duration}s cubic-bezier(0.22, 1, 0.36, 1) ${delay}s`;
-      path.style.strokeDashoffset = '0';
-    });
-  }, []);
-
-  useEffect(() => {
-    onReady?.(() => draw());
-    // Reduced motion: drawn, but instantly. The mark is emphasis, so it stays;
-    // only the drawing of it is movement.
-    const id = requestAnimationFrame(() => draw(reduce));
-    return () => cancelAnimationFrame(id);
-  }, [reduce, draw, onReady]);
-
-  return (
-    <svg
-      className="wordmark-underline absolute left-0 -bottom-2.5 w-full h-3.5 overflow-visible pointer-events-none"
-      viewBox="0 0 200 12"
-      preserveAspectRatio="none"
-      aria-hidden="true"
-    >
-      {STROKES.map((s, i) => (
-        <path
-          key={s.d}
-          ref={(el) => { pathRefs.current[i] = el; }}
-          d={s.d}
-          stroke="#60a5fa"
-          strokeWidth={s.width}
-          strokeLinecap="round"
-          strokeOpacity={s.opacity}
-          fill="none"
-          vectorEffect="non-scaling-stroke"
-        />
-      ))}
-    </svg>
-  );
-};
-
-DrawnUnderline.propTypes = { onReady: PropTypes.func };
-
-// The word and its underline as one thing, so the hover target is the word —
-// the svg is pointer-events: none, and has to be, or it would sit over the text.
-const DrawnName = ({ children }) => {
-  const replay = useRef(null);
-  const reduce = useReducedMotion();
-  return (
-    <span
-      className="relative inline-block text-blue-400"
-      onMouseEnter={reduce ? undefined : () => replay.current?.()}
-    >
-      {children}
-      <DrawnUnderline onReady={(fn) => { replay.current = fn; }} />
-    </span>
-  );
-};
-
-DrawnName.propTypes = { children: PropTypes.node };
 
 const About = () => {
   useDocumentMeta({
@@ -373,7 +283,7 @@ const About = () => {
                   transition={{ duration: 0.5 }}
                 >
                   Hello, I&apos;m{" "}
-                  <DrawnName>Yuvraj</DrawnName>
+                  <DrawnName className="text-blue-400" double>Yuvraj</DrawnName>
                 </motion.h1>
                 
                 {/* Left-aligned prose, not a centred one-liner. This is the one

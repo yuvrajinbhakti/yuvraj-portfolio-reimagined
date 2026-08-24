@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import PropTypes from 'prop-types'
+import DrawnUnderline from './DrawnUnderline'
 
 const navItems = [
   { to: '/about', label: 'About' },
@@ -167,24 +168,31 @@ const Navbar = () => {
 
             aria-label carries the full name at all times, so the accessible
             name never depends on a pointer being present. */}
+        {/* The same drawn stroke the About heading uses, so the mark repeats
+            across the site instead of being a one-off on one page. Single pass
+            here, not double: two strokes under three letters is fussy at 48px,
+            where one confident line is better than two competing ones.
+
+            No replay on hover — hovering already unpacks the name, and a line
+            redrawing underneath that at the same time is two things happening
+            for one gesture. It stretches with the wordmark instead, which is
+            the more interesting of the two. */}
         <NavLink
           to="/"
           aria-label="Yuvraj Singh Nain — home"
-          className="wordmark text-xl font-bold text-white hover:text-blue-300 transition-colors duration-200"
+          className="wordmark relative inline-block text-xl font-bold text-white hover:text-blue-300 transition-colors duration-200"
         >
+          <DrawnUnderline
+            double={false}
+            strokeWidth={2}
+            delay={0.35}
+            className="-bottom-1.5 h-2.5"
+          />
           <span aria-hidden="true">
             Y<span className="wordmark__rest">uvraj </span>
             S<span className="wordmark__rest">ingh </span>
             N<span className="wordmark__rest">ain</span>
-            {/* A caret, not a full stop. A coloured period is on thousands of
-                logos and is a punctuation glyph pressed into a job it was not
-                drawn for; a text cursor says editor and terminal without
-                spelling either out, which is what most of this site is about.
-                Drawn as a box rather than a glyph so its weight matches the
-                letters instead of whatever the font decided. It does not blink
-                — a blinking element in the corner of every page is the sort of
-                thing this site has spent the day removing. */}
-            <span className="wordmark__caret" aria-hidden="true" />
+
           </span>
         </NavLink>
 
