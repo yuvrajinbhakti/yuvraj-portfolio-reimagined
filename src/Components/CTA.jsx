@@ -1,34 +1,13 @@
 import { Link } from "react-router-dom";
+import { RESUME_URL } from "../constants";
 import { motion } from "framer-motion";
 import GlassCard from "./GlassCard";
 import ScrollReveal from "./ScrollReveal";
 
 const CTA = () => {
 
-  // SIMPLE GOOGLE DRIVE RESUME DOWNLOAD - Easy to update, no caching issues!
   const handleResumeDownload = () => {
-    try {
-      // 🔗 SETUP INSTRUCTIONS:
-      // 1. Upload your resume to Google Drive
-      // 2. Right-click → Share → "Anyone with the link can view"
-      // 3. Copy the sharing link (looks like: https://drive.google.com/file/d/FILE_ID/view?usp=sharing)
-      // 4. Extract the FILE_ID from the URL
-      // 5. Replace YOUR_FILE_ID below with your actual file ID
-
-      // 📝 Your Google Drive file ID (extracted from the sharing link)
-      //  const GOOGLE_DRIVE_FILE_ID = '1_dzEZhGuwzkkuKOPu-0xiafFrqLfB2Wg'; 
-      const GOOGLE_DRIVE_FILE_ID = '1HQLXSGKhlacfSghWZpHeRbGrJcDDLRLo';
-
-      // 🚀 Direct download URL format
-      const downloadUrl = `https://drive.google.com/uc?export=download&id=${GOOGLE_DRIVE_FILE_ID}`;
-
-      // Open download in new tab
-      window.open(downloadUrl, '_blank');
-
-    } catch (error) {
-      console.error('Error downloading resume:', error);
-      alert('Unable to download resume at the moment. Please contact me directly for a copy.');
-    }
+    window.open(RESUME_URL, '_blank', 'noopener,noreferrer');
   };
 
   // Enhanced Contact Icon Component
@@ -162,28 +141,6 @@ const CTA = () => {
       />
     </motion.svg>
   );
-
-  // ALTERNATIVE METHODS (Replace above function with any of these):
-
-  // 1. Local File
-  // - Put resume.pdf in public/assets/ folder
-  // - Use: const resumePath = "/assets/resume.pdf"; (then download logic)
-
-  // 2. AWS S3 CloudFront (Professional)
-  // - Upload to S3 bucket → Enable CloudFront → Get CDN URL
-  // - Use: window.open("https://d1234567890.cloudfront.net/resume.pdf", '_blank');
-
-  // 3. Google Drive (Quick & Easy)
-  // - Upload to Drive → Share → Get shareable link → Convert to direct download
-  // - Use: window.open("https://drive.google.com/uc?id=FILE_ID&export=download", '_blank');
-
-  // 4. Dynamic Resume (Most Impressive)
-  // - Create /resume route that generates PDF from your data using react-pdf or jsPDF
-  // - Use: window.open('/resume-preview', '_blank');
-
-  // 5. Vercel/Netlify Static Files
-  // - Put resume.pdf in public folder → Deploy → Use direct URL
-  // - Use: window.open("https://yoursite.vercel.app/resume.pdf", '_blank');
 
   return (
     <ScrollReveal animation="fade">
