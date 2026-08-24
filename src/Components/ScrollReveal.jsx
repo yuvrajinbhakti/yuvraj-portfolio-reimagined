@@ -39,15 +39,22 @@ const ScrollReveal = ({
       return;
     }
 
-    let tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: element,
-        start: `top bottom-=${threshold * 100}%`,
-        toggleActions: once ? 'play none none none' : 'play reverse play reverse',
-        markers: false,
-      },
-    });
-    
+    // Paused, and with no ScrollTrigger attached yet.
+    //
+    // Attaching the trigger up here — as this did — creates it against an
+    // element whose initial state has not been written and whose timeline has
+    // no tweens in it. If the element is already past the start point on load,
+    // which is true of anything in the first viewport, the trigger fires
+    // immediately and plays an empty timeline to completion. Only *then* does
+    // the switch below set opacity to 0 and append the tween that was supposed
+    // to bring it back. The playhead is already at the end, so nothing runs and
+    // the block stays invisible — content in the initial viewport is exactly
+    // the case that breaks.
+    //
+    // Initial state and tweens are defined first now; the trigger is created
+    // afterwards, at the bottom.
+    let tl = gsap.timeline({ paused: true });
+
     // Get all children if stagger animation
     const children = animation === 'stagger' ? childrenRef.current : null;
     
@@ -112,13 +119,27 @@ const ScrollReveal = ({
         tl.to(element, { opacity: 1, y: 0, duration, delay, ease });
     }
     
+    // Now that the initial state is written and the tweens exist, wire up the
+    // trigger. `once` maps to a one-way play; otherwise it reverses on the way
+    // back out.
+    const trigger = ScrollTrigger.create({
+      trigger: element,
+      start: `top bottom-=${threshold * 100}%`,
+      onEnter: () => tl.play(),
+      onLeaveBack: once ? undefined : () => tl.reverse(),
+      once,
+    });
+
+    // Belt and braces for the case that caused this: anything already inside
+    // the viewport when the component mounts should be visible, not waiting on
+    // a scroll that may never come. ScrollTrigger's own evaluation can miss
+    // this if it runs before fonts and images have settled the layout.
+    const rect = element.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) tl.play();
+
     return () => {
       if (tl) tl.kill();
-      if (element) ScrollTrigger.getAll().forEach(trigger => {
-        if (trigger.vars.trigger === element) {
-          trigger.kill();
-        }
-      });
+      trigger.kill();
     };
   }, [animation, direction, duration, delay, ease, staggerDelay, distance, threshold, once, reduce]);
   
