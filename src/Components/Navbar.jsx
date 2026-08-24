@@ -176,10 +176,15 @@ const Navbar = () => {
             Y<span className="wordmark__rest">uvraj </span>
             S<span className="wordmark__rest">ingh </span>
             N<span className="wordmark__rest">ain</span>
-            {/* One character of accent, and the smallest possible mark. It also
-                does something useful when the name unpacks: it turns into the
-                full stop the sentence wanted anyway. */}
-            <span className="text-blue-400">.</span>
+            {/* A caret, not a full stop. A coloured period is on thousands of
+                logos and is a punctuation glyph pressed into a job it was not
+                drawn for; a text cursor says editor and terminal without
+                spelling either out, which is what most of this site is about.
+                Drawn as a box rather than a glyph so its weight matches the
+                letters instead of whatever the font decided. It does not blink
+                — a blinking element in the corner of every page is the sort of
+                thing this site has spent the day removing. */}
+            <span className="wordmark__caret" aria-hidden="true" />
           </span>
         </NavLink>
 
