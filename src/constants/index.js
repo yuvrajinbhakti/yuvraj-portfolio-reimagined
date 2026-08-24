@@ -146,6 +146,12 @@ export const experiences = [
 ];
 
 
+// One source of truth for the resume. It was hardcoded in two places with two
+// different file ids — the About page was serving the copy that CTA.jsx had
+// explicitly commented out and replaced, so half the site handed out a stale CV.
+export const RESUME_URL =
+    'https://drive.google.com/uc?export=download&id=1HQLXSGKhlacfSghWZpHeRbGrJcDDLRLo';
+
 export const socialLinks = [
     {
         name: 'Email',

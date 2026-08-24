@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { skills, experiences } from "../constants";
+import { skills, experiences, RESUME_URL } from "../constants";
 import {
   VerticalTimeline,
   VerticalTimelineElement,
@@ -487,7 +487,7 @@ const About = () => {
                     <span>GitHub</span>
                   </a>
                   <a
-                    href="https://drive.google.com/uc?id=1_dzEZhGuwzkkuKOPu-0xiafFrqLfB2Wg&export=download"
+                    href={RESUME_URL}
                     download
                     className="w-full sm:w-auto flex items-center justify-center gap-2 sm:gap-3 text-green-400 hover:text-green-300 transition-all duration-300 transform hover:scale-105 px-4 py-3 sm:px-6 sm:py-3 rounded-lg hover:bg-green-500/10 border border-green-500/20 hover:border-green-500/40 backdrop-blur-sm font-medium text-sm sm:text-base"
                   >
