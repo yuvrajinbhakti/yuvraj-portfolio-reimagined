@@ -21,6 +21,10 @@ const AnimatedText = ({
   const textRef = useRef(null);
   // Declare glitchInterval in component scope
   const glitchIntervalRef = useRef(null);
+  const splitRef = useRef(null);
+  // Latest onComplete without making it an effect dependency.
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
   const reduce = useReducedMotion();
 
   useEffect(() => {
@@ -32,13 +36,13 @@ const AnimatedText = ({
     // advances.
     if (reduce) {
       gsap.set(element, { clearProps: 'all', opacity: 1, x: 0, y: 0 });
-      onComplete();
+      onCompleteRef.current();
       return;
     }
 
     let tl = gsap.timeline({
       delay,
-      onComplete
+      onComplete: () => onCompleteRef.current()
     });
 
     switch (type) {
@@ -152,9 +156,12 @@ const AnimatedText = ({
         break;
 
       case 'split-words':
-        // Create a SplitText instance for words
-        const splitText = new SplitText(element, { type: "words" });
-        const words = splitText.words;
+        // Held in a ref so cleanup can revert the split. Without that, a
+        // re-run splits an element that is already split — the new words nest
+        // inside the old ones, the outer set keeps the opacity: 0 written
+        // below and is never animated, and the line renders blank forever.
+        splitRef.current = new SplitText(element, { type: "words" });
+        const words = splitRef.current.words;
 
         // Set initial state
         gsap.set(words, { opacity: 0, y: 20 });
@@ -180,12 +187,25 @@ const AnimatedText = ({
 
     return () => {
       tl.kill();
+      // Put the markup back the way it was, and clear anything the timeline
+      // left half-applied — a killed timeline leaves its targets wherever they
+      // happened to be, which for a delayed animation is opacity: 0.
+      if (splitRef.current) {
+        splitRef.current.revert();
+        splitRef.current = null;
+      }
+      gsap.set(element, { clearProps: 'opacity,transform' });
       if (glitchIntervalRef.current) {
         clearInterval(glitchIntervalRef.current);
         glitchIntervalRef.current = null;
       }
     };
-  }, [text, delay, duration, type, staggerDelay, onComplete, reduce]);
+    // onComplete is deliberately not a dependency. It defaults to an inline
+    // arrow, so it has a new identity on every render of the parent — including
+    // it re-ran this whole effect mid-animation, which is what broke the split
+    // above. The ref keeps the latest callback without retriggering.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [text, delay, duration, type, staggerDelay, reduce]);
 
   return (
     <Tag ref={textRef} className={`bg-transparent ${className}`}>
@@ -252,7 +272,7 @@ const TextEffect = () => {
       {animate && (
         <div className="mt-6 overflow-hidden bg-transparent px-2 sm:px-4">
           <AnimatedText
-            text="Merchant analytics dashboards by day. Real-time collaborative systems for fun."
+            text="I build the screens businesses use to understand their money."
             type="split-words"
             className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300 leading-relaxed"
             delay={2.5}
