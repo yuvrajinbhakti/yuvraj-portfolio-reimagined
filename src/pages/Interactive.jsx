@@ -20,15 +20,11 @@ const Interactive = () => {
       title: "Interactive Terminal",
       description: "A shell that answers questions about my background. Type help to see what it knows.",
       component: <InteractiveTerminal />,
-      tint: "bg-blue-600/10",
-      borderColor: "border-blue-500/20"
     },
     {
       title: "Code Playground",
       description: "A live HTML, CSS and JavaScript editor with an instant preview. Edit anything; it re-runs as you type.",
       component: <CodePlayground />,
-      tint: "bg-blue-600/10",
-      borderColor: "border-blue-500/20"
     }
   ];
 
@@ -94,7 +90,7 @@ const Interactive = () => {
                 <motion.div
                   key={feature.title}
                   variants={itemVariants}
-                  className={`${feature.tint} backdrop-blur-sm rounded-3xl p-8 ${feature.borderColor} border-2 shadow-2xl relative overflow-hidden group max-w-5xl mx-auto`}
+                  className="bg-white/[0.03] backdrop-blur-sm rounded-xl p-6 md:p-8 border border-white/10 relative overflow-hidden max-w-5xl mx-auto"
                 >
                   <div className="text-center mb-8 relative z-10">
                     {/* The heading used to open with a wobbling emoji. Emoji as

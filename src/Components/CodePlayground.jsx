@@ -1842,7 +1842,7 @@ if (document.readyState === 'loading') {
               <button
                 onClick={runCode}
                 disabled={isRunning}
-                className="bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-600 text-white px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 flex items-center gap-2 shadow-lg min-w-[70px]"
+                className="bg-blue-600 hover:bg-blue-500 disabled:bg-gray-600 text-white px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 flex items-center gap-2 shadow-lg min-w-[70px]"
                 title="Run Code (Ctrl+Enter)"
               >
                 {isRunning ? (
@@ -1879,10 +1879,20 @@ if (document.readyState === 'loading') {
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                  className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-md transition-all duration-200"
-                  title="Toggle Theme"
+                  className="p-1.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-md transition-all duration-200"
+                  title="Toggle editor theme"
+                  aria-label={theme === 'dark' ? 'Switch editor to light theme' : 'Switch editor to dark theme'}
                 >
-                  {theme === 'dark' ? '☀️' : '🌙'}
+                  {theme === 'dark' ? (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                      <circle cx="12" cy="12" r="4" />
+                      <path strokeLinecap="round" d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+                    </svg>
+                  ) : (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z" />
+                    </svg>
+                  )}
                 </button>
 
                 <button
@@ -1939,7 +1949,6 @@ if (document.readyState === 'loading') {
                     className="flex items-center gap-2 px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-md transition-all duration-200 text-xs font-medium whitespace-nowrap shrink-0"
                     title="Start with clean template"
                   >
-                    <span className="text-sm">✨</span>
                     <span>New Project</span>
                   </button>
                 </div>
@@ -2032,15 +2041,14 @@ if (document.readyState === 'loading') {
 
           {/* Enhanced Output */}
           <div 
-            className={`border-l border-gray-700 ${layout === 'output-only' ? 'w-full' : ''} bg-white`}
+            className={`border-l border-white/10 ${layout === 'output-only' ? 'w-full' : ''} bg-[#0b1020]`}
             style={{ 
               width: layout === 'horizontal' ? `${100 - editorWidth}%` : '100%',
               height: layout === 'vertical' ? '50%' : '100%'
             }}
           >
-            <div className="bg-gray-800 px-4 py-3 text-white text-sm font-medium flex items-center justify-between border-b border-gray-700">
+            <div className="bg-white/5 px-4 py-3 text-white text-sm font-medium flex items-center justify-between border-b border-white/10">
               <div className="flex items-center gap-2">
-                <span>🖥️</span>
                 <span>Live Preview</span>
                 {isRunning && (
                   <motion.div
@@ -2078,7 +2086,7 @@ if (document.readyState === 'loading') {
               <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
               <span>Ready</span>
             </div>
-            <span>💡 Auto-runs on change</span>
+            <span>Auto-runs on change</span>
           </div>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 text-gray-500">
