@@ -1936,7 +1936,7 @@ if (document.readyState === 'loading') {
                   
                   <button
                     onClick={handleFreshStart}
-                    className="flex items-center gap-2 px-2.5 py-1 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 text-white rounded-md transition-all duration-200 text-xs font-medium whitespace-nowrap shrink-0"
+                    className="flex items-center gap-2 px-2.5 py-1 bg-white/5 hover:from-blue-500 hover:to-blue-400 text-white rounded-md transition-all duration-200 text-xs font-medium whitespace-nowrap shrink-0"
                     title="Start with clean template"
                   >
                     <span className="text-sm">✨</span>

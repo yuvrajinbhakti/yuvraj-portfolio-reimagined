@@ -1,4 +1,4 @@
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useRef } from 'react';
 import InteractiveTerminal from '../Components/InteractiveTerminal';
 import CodePlayground from '../Components/CodePlayground';
@@ -13,31 +13,22 @@ const Interactive = () => {
   });
 
   const containerRef = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "end start"]
-  });
 
-  // Parallax transforms for different elements
-  const y1 = useTransform(scrollYProgress, [0, 1], [100, -100]);
-  const y2 = useTransform(scrollYProgress, [0, 1], [-50, 50]);
-  const rotate = useTransform(scrollYProgress, [0, 1], [0, 360]);
-  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.8, 1.1, 0.9]);
 
   const features = [
     {
       title: "Interactive Terminal",
       description: "A shell that answers questions about my background. Type help to see what it knows.",
       component: <InteractiveTerminal />,
-      gradient: "from-blue-600/20 to-cyan-600/20",
+      gradient: "from-blue-600/20 to-blue-600/20",
       borderColor: "border-blue-500/20"
     },
     {
       title: "Code Playground",
       description: "A live HTML, CSS and JavaScript editor with an instant preview. Edit anything; it re-runs as you type.",
       component: <CodePlayground />,
-      gradient: "from-purple-600/20 to-pink-600/20",
-      borderColor: "border-purple-500/20"
+      gradient: "from-blue-600/20 to-blue-600/20",
+      borderColor: "border-blue-500/20"
     }
   ];
 
@@ -74,33 +65,11 @@ const Interactive = () => {
     }
   };
 
-  const floatingVariants = {
-    animate: {
-      y: [-10, 10, -10],
-      rotate: [-2, 2, -2],
-      transition: {
-        duration: 4,
-        repeat: Infinity,
-        ease: "easeInOut"
-      }
-    }
-  };
-
   return (
     <div className="min-h-screen bg-transparent text-white" ref={containerRef}>
       <AnimatedBackground>
         {/* Hero Section with Enhanced Animations */}
         <section className="relative pt-24 md:pt-32 pb-20 px-4 overflow-hidden">
-          {/* Floating Background Elements */}
-          <motion.div
-            className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-xl"
-            style={{ y: y1, rotate }}
-          />
-          <motion.div
-            className="absolute bottom-20 right-10 w-48 h-48 bg-gradient-to-r from-pink-500/10 to-cyan-500/10 rounded-full blur-xl"
-            style={{ y: y2, scale }}
-          />
-
           <div className="max-w-6xl mx-auto text-center relative z-10">
             <motion.div
               initial={{ opacity: 0, y: 50, scale: 0.9 }}
@@ -108,9 +77,7 @@ const Interactive = () => {
               transition={{ duration: 1, ease: "easeOut" }}
             >
               <motion.h1 
-                className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
-                variants={floatingVariants}
-                animate="animate"
+                className="text-5xl md:text-7xl font-bold mb-6 text-white"
               >
                 Developer Playground
               </motion.h1>
@@ -150,30 +117,6 @@ const Interactive = () => {
                   {/* Animated Background Gradient */}
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 transform -skew-x-12 group-hover:animate-pulse" />
                   
-                  {/* Floating Particles */}
-                  <div className="absolute inset-0 pointer-events-none">
-                    {[...Array(6)].map((_, i) => (
-                      <motion.div
-                        key={i}
-                        className="absolute w-2 h-2 bg-white/20 rounded-full"
-                        style={{
-                          left: `${20 + i * 15}%`,
-                          top: `${10 + (i % 3) * 30}%`,
-                        }}
-                        animate={{
-                          y: [-10, 10, -10],
-                          opacity: [0.2, 0.8, 0.2],
-                          scale: [0.5, 1, 0.5],
-                        }}
-                        transition={{
-                          duration: 3 + i * 0.5,
-                          repeat: Infinity,
-                          delay: i * 0.2,
-                        }}
-                      />
-                    ))}
-                  </div>
-
                   <div className="text-center mb-8 relative z-10">
                     {/* The heading used to open with a wobbling emoji. Emoji as
                         an icon system is the fastest way to make engineering
@@ -184,7 +127,7 @@ const Interactive = () => {
                       whileHover={{ scale: 1.05 }}
                       transition={{ type: "spring", stiffness: 300 }}
                     >
-                      <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                      <span className="text-white">
                         {feature.title}
                       </span>
                     </motion.h2>

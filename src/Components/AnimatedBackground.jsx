@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { useReducedMotion } from 'framer-motion';
-import AmbientOrbs from './AmbientOrbs';
 
 const AnimatedBackground = ({ children }) => {
   const canvasRef = useRef(null);
@@ -433,10 +432,12 @@ const AnimatedBackground = ({ children }) => {
   
   return (
     <div ref={containerRef} className="relative w-full min-h-screen bg-[#020617]">
-      {/* Ambient floating orbs */}
-      <AmbientOrbs />
-
-      <canvas 
+      {/* AmbientOrbs used to sit here — five blurred 350-600px colour blobs
+          drifting behind everything. With the starfield canvas already running,
+          they were a second decorative layer competing with the first, and they
+          were the main source of stray purple and pink on a page whose accent is
+          blue. The canvas carries the depth on its own. */}
+      <canvas
         ref={canvasRef} 
         className="fixed top-0 left-0 w-full h-screen pointer-events-none"
         style={{ 

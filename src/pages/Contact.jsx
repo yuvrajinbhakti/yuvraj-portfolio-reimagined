@@ -125,7 +125,7 @@ const Contact = () => {
 
                   <div className="space-y-6">
                     <div className="flex items-start group">
-                      <div className="flex-shrink-0 p-3 bg-gradient-to-br from-blue-500/30 to-cyan-500/20 rounded-xl border border-blue-400/30 group-hover:border-blue-400/60 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-blue-500/25">
+                      <div className="flex-shrink-0 p-3 bg-white/5 rounded-xl border border-blue-400/30 group-hover:border-blue-400/60 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-blue-500/25">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-400 group-hover:text-blue-300 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
@@ -141,21 +141,21 @@ const Contact = () => {
                     </div>
                     
                     <div className="flex items-start group">
-                      <div className="flex-shrink-0 p-3 bg-gradient-to-br from-purple-500/30 to-pink-500/20 rounded-xl border border-purple-400/30 group-hover:border-purple-400/60 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-purple-500/25">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-purple-400 group-hover:text-purple-300 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <div className="flex-shrink-0 p-3 bg-white/5 rounded-xl border border-blue-400/30 group-hover:border-blue-400/60 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-blue-500/25">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-400 group-hover:text-blue-300 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
                       </div>
                       <div className="ml-4">
-                        <h3 className="text-lg font-semibold text-white mb-1 group-hover:text-purple-300 transition-colors duration-300">Location</h3>
+                        <h3 className="text-lg font-semibold text-white mb-1 group-hover:text-blue-300 transition-colors duration-300">Location</h3>
                         <p className="text-gray-300 mt-1">Chandigarh, India</p>
                       </div>
                     </div>
                     
                     <div className="flex items-start group">
-                      <div className="flex-shrink-0 p-3 bg-gradient-to-br from-green-500/30 to-teal-500/20 rounded-xl border border-green-400/30 group-hover:border-green-400/60 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-green-500/25">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-400 group-hover:text-green-300 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <div className="flex-shrink-0 p-3 bg-white/5 rounded-xl border border-blue-400/30 group-hover:border-blue-400/60 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-blue-500/25">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-400 group-hover:text-blue-300 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                         </svg>
                       </div>
@@ -190,7 +190,7 @@ const Contact = () => {
                             href="https://twitter.com/YuvrajS82748951"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="p-2 rounded-lg bg-cyan-500/20 border border-cyan-400/50 hover:border-cyan-300 text-cyan-400 hover:text-cyan-300 transition-all duration-300 hover:bg-cyan-500/30 hover:scale-110 hover:shadow-lg hover:shadow-cyan-500/25"
+                            className="p-2 rounded-lg bg-blue-500/20 border border-blue-400/50 hover:border-blue-300 text-blue-400 hover:text-blue-300 transition-all duration-300 hover:bg-blue-500/30 hover:scale-110 hover:shadow-lg hover:shadow-blue-500/25"
                             title="Twitter"
                             aria-label="Twitter profile"
                           >
@@ -271,7 +271,7 @@ const Contact = () => {
                       className={`w-full py-4 px-6 rounded-xl font-semibold text-white transition-all duration-500 relative overflow-hidden group shadow-lg ${
                         isSubmitting
                           ? "bg-blue-400/80 cursor-not-allowed shadow-blue-400/20"
-                          : "bg-gradient-to-r from-blue-600 via-blue-700 to-purple-600 hover:from-blue-700 hover:via-purple-600 hover:to-blue-800 hover:shadow-2xl hover:shadow-blue-500/30 hover:-translate-y-1"
+                          : "bg-white/5 hover:from-blue-700 hover:via-blue-600 hover:to-blue-800 hover:shadow-2xl hover:shadow-blue-500/30 hover:-translate-y-1"
                       }`}
                     >
                       {/* Background gradient animation */}
@@ -318,7 +318,7 @@ const Contact = () => {
                       
                       {/* Glow effect */}
                       {!isSubmitting && (
-                        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-600/50 via-purple-600/50 to-blue-600/50 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500 -z-10" />
+                        <div className="absolute inset-0 rounded-xl bg-white/5 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500 -z-10" />
                       )}
                     </motion.button>
 

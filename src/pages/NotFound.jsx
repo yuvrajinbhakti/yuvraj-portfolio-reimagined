@@ -256,11 +256,11 @@ const NotFound = () => {
               onMouseEnter={() => setIsHovering(true)}
               onMouseLeave={() => setIsHovering(false)}
             >
-              <span className="inline-block bg-gradient-to-r from-blue-400 via-purple-500 to-cyan-400 bg-clip-text text-transparent animate-pulse">
+              <span className="inline-block text-white">
                 4
               </span>
               <span className="relative inline-block">
-                <span className="bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 bg-clip-text text-transparent">
+                <span className="text-blue-400">
                   0
                 </span>
                 {/* Multiple Rotating Rings */}
@@ -273,7 +273,7 @@ const NotFound = () => {
                   />
                 ))}
               </span>
-              <span className="inline-block bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 bg-clip-text text-transparent animate-pulse">
+              <span className="inline-block text-white">
                 4
               </span>
             </motion.h1>
@@ -301,12 +301,12 @@ const NotFound = () => {
               transition={{ duration: 2, repeat: Infinity }}
             >
               {/* Holographic Border */}
-              <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500 p-[2px] -z-10">
+              <div className="absolute inset-0 rounded-3xl bg-white/5 p-[2px] -z-10">
                 <div className="w-full h-full bg-[#020617] rounded-3xl" />
               </div>
               
               <motion.h2 
-                className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white via-blue-200 to-white bg-clip-text text-transparent"
+                className="text-4xl md:text-6xl font-bold mb-6 text-white"
                 animate={{ 
                   backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
                 }}
@@ -347,7 +347,7 @@ const NotFound = () => {
             >
               <Link
                 to="/"
-                className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full font-semibold text-lg overflow-hidden transition-all duration-300 shadow-2xl hover:shadow-blue-500/50 transform-gpu block"
+                className="group relative px-8 py-4 bg-white/5 text-white rounded-full font-semibold text-lg overflow-hidden transition-all duration-300 shadow-2xl hover:shadow-blue-500/50 transform-gpu block"
                 style={{ transformStyle: 'preserve-3d' }}
                 onMouseEnter={() => setIsHovering(true)}
                 onMouseLeave={() => setIsHovering(false)}
@@ -355,7 +355,7 @@ const NotFound = () => {
                 <span className="relative z-10 flex items-center gap-2">
                   🏠 Return to Reality
                 </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-cyan-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 skew-x-12" />
               </Link>
             </motion.div>
@@ -367,13 +367,13 @@ const NotFound = () => {
             >
               <button
                 onClick={() => window.history.back()}
-                className="group relative px-8 py-4 bg-gradient-to-r from-gray-600 to-gray-800 text-white rounded-full font-semibold text-lg overflow-hidden transition-all duration-300 shadow-2xl hover:shadow-gray-500/50 transform-gpu"
+                className="group relative px-8 py-4 bg-white/5 text-white rounded-full font-semibold text-lg overflow-hidden transition-all duration-300 shadow-2xl hover:shadow-gray-500/50 transform-gpu"
                 style={{ transformStyle: 'preserve-3d' }}
               >
                 <span className="relative z-10 flex items-center gap-2">
                   ⬅️ Quantum Jump Back
                 </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-gray-700 to-gray-900 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </button>
             </motion.div>
           </motion.div>
@@ -384,8 +384,8 @@ const NotFound = () => {
             className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 max-w-4xl mx-auto"
           >
             {[
-              { name: 'About', path: '/about', icon: '👨‍🚀', color: 'from-blue-500 to-cyan-500', description: 'Discover my journey' },
-              { name: 'Projects', path: '/projects', icon: '🚀', color: 'from-purple-500 to-pink-500', description: 'Explore my creations' },
+              { name: 'About', path: '/about', icon: '👨‍🚀', color: 'from-blue-500 to-blue-500', description: 'Discover my journey' },
+              { name: 'Projects', path: '/projects', icon: '🚀', color: 'from-blue-500 to-blue-500', description: 'Explore my creations' },
               { name: 'Contact', path: '/contact', icon: '📡', color: 'from-green-500 to-blue-500', description: 'Send a transmission' },
             ].map((item, index) => (
               <motion.div

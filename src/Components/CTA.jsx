@@ -220,7 +220,7 @@ const CTA = () => {
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link
                 to="/contact"
-                className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 sm:px-7 md:px-8 sm:py-3 md:py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:translate-y-[-2px] hover:shadow-xl hover:shadow-blue-500/25 relative overflow-hidden group min-w-[160px] sm:min-w-[180px] font-medium text-sm sm:text-base"
+                className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 sm:px-7 md:px-8 sm:py-3 md:py-4 bg-white/5 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:translate-y-[-2px] hover:shadow-xl hover:shadow-blue-500/25 relative overflow-hidden group min-w-[160px] sm:min-w-[180px] font-medium text-sm sm:text-base"
               >
                 <span className="relative z-10 flex items-center justify-center gap-2">
                   <ContactIcon />
@@ -239,7 +239,7 @@ const CTA = () => {
                   <DownloadIcon />
                   <span>Download Resume</span>
                 </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/0 via-blue-600/20 to-blue-600/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                <div className="absolute inset-0 bg-white/5 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
               </button>
             </motion.div>
           </motion.div>

@@ -5,9 +5,9 @@ import PropTypes from 'prop-types'
 
 const navItems = [
   { to: '/about', label: 'About', gradient: 'from-blue-600/0 via-blue-600/20 to-blue-600/0' },
-  { to: '/projects', label: 'Projects', gradient: 'from-purple-600/0 via-purple-600/20 to-purple-600/0' },
-  { to: '/playground', label: 'Playground', gradient: 'from-pink-600/0 via-pink-600/20 to-pink-600/0' },
-  { to: '/contact', label: 'Contact', gradient: 'from-green-600/0 via-green-600/20 to-green-600/0' }
+  { to: '/projects', label: 'Projects', gradient: 'from-blue-600/0 via-blue-600/20 to-blue-600/0' },
+  { to: '/playground', label: 'Playground', gradient: 'from-blue-600/0 via-blue-600/20 to-blue-600/0' },
+  { to: '/contact', label: 'Contact', gradient: 'from-blue-600/0 via-blue-600/20 to-blue-600/0' }
 ]
 
 // Declared at module scope, not inside Navbar. Defining a component inside
@@ -162,7 +162,7 @@ const Navbar = () => {
             to="/" 
             className="w-12 h-12 rounded-xl bg-gradient-to-br from-white/20 to-white/10 backdrop-blur-md border border-white/20 items-center justify-center flex font-bold shadow-lg hover:shadow-blue-500/25 transition-all duration-300 hover:border-blue-400/50 group" 
           >
-            <p className="blue-gradient_text text-lg group-hover:scale-110 transition-transform duration-300">YSN</p>
+            <p className="text-lg text-white">YSN</p>
           </NavLink>
         </motion.div>
 

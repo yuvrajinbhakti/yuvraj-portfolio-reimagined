@@ -12,10 +12,14 @@ import PropTypes from 'prop-types';
 // at once, and duplicate SVG ids would make every icon resolve url(#...) to
 // whichever one mounted first.
 
+// One hue, three depths. Giving each card its own colour — blue, purple, pink —
+// implied the three disciplines were three unrelated things, and it put every
+// stray hue on the homepage into the one section that was supposed to read as a
+// set. Value separates them now, which is what was actually wanted.
 const GRADIENTS = {
-  frontend: ['#3b82f6', '#22d3ee'],
-  backend: ['#8b5cf6', '#6366f1'],
-  ml: ['#ec4899', '#f59e0b'],
+  frontend: ['#60a5fa', '#3b82f6'],
+  backend:  ['#3b82f6', '#1d4ed8'],
+  ml:       ['#93c5fd', '#60a5fa'],
 };
 
 const FrontendIcon = ({ gid }) => (
