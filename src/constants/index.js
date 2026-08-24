@@ -36,10 +36,21 @@ import moneyzoldCover from "../assets/covers/moneyzold.webp";
 import careCarRentalCover from "../assets/covers/care-car-rental.webp";
 import dockerNodeCover from "../assets/covers/docker-node.webp";
 import codeGenieCover from "../assets/covers/code-genie.webp";
+// `tone` marks icons that were drawn for a light background.
+//
+// Measured against the card surface: Express is pure black at zero saturation,
+// so it rendered at 1.14:1 contrast — present in the DOM and invisible on the
+// page. Next.js is near-neutral and sat at 1.54:1.
+//
+// 'invert' only for neutral marks. AWS, Redux and Motion are equally dark but
+// carry brand colour, and inverting a brand colour misrepresents it — those get
+// 'lift', which raises brightness without touching hue. Everything at or above
+// roughly 4:1 is left alone.
 export const skills = [
     {
         imageUrl: express,
         name: "Express",
+        tone: "invert",
         type: "Backend",
     },
     {
@@ -60,6 +71,7 @@ export const skills = [
     {
         imageUrl: nextjs,
         name: "Next.js",
+        tone: "invert",
         type: "Frontend",
     },
     {
@@ -75,6 +87,7 @@ export const skills = [
     {
         imageUrl: redux,
         name: "Redux",
+        tone: "lift",
         type: "State Management",
     },
     {
@@ -105,6 +118,7 @@ export const skills = [
     {
         imageUrl: aws,
         name:"AWS",
+        tone: "lift",
         type: "Cloud",
     },
 ];
