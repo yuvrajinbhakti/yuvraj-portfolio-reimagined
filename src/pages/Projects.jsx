@@ -239,7 +239,7 @@ const ProjectCard = ({ project, index, setCursorVariant }) => {
                   href={project.source_code_link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-blue-400 hover:text-blue-300 transition-colors font-medium text-sm group/link cursor-pointer"
+                  className="py-1.5 -my-1.5 flex items-center gap-1.5 text-blue-400 hover:text-blue-300 transition-colors font-medium text-sm group/link cursor-pointer"
                   whileHover={{ scale: 1.02, x: 2 }}
                   whileTap={{ scale: 0.98 }}
                   onMouseEnter={handleLinkMouseEnter}
@@ -259,7 +259,7 @@ const ProjectCard = ({ project, index, setCursorVariant }) => {
                   href={project.demo_link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-emerald-400 hover:text-emerald-300 transition-colors font-medium text-sm group/link cursor-pointer"
+                  className="py-1.5 -my-1.5 flex items-center gap-1.5 text-emerald-400 hover:text-emerald-300 transition-colors font-medium text-sm group/link cursor-pointer"
                   whileHover={{ scale: 1.02, x: 2 }}
                   whileTap={{ scale: 0.98 }}
                   onMouseEnter={handleLinkMouseEnter}

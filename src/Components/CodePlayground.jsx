@@ -243,7 +243,7 @@ const CodePlayground = () => {
                   <button
                     key={option.value}
                     onClick={() => setLayout(option.value)}
-                    className={`p-1.5 text-xs rounded transition-all duration-200 ${
+                    className={`min-w-[28px] min-h-[28px] inline-flex items-center justify-center p-1.5 text-xs rounded transition-all duration-200 ${
                       layout === option.value
                         ? 'bg-blue-600 text-white shadow-sm'
                         : 'text-gray-400 hover:text-white hover:bg-gray-700'
@@ -277,7 +277,7 @@ const CodePlayground = () => {
 
                 <button
                   onClick={toggleFullscreen}
-                  className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-md transition-all duration-200"
+                  className="min-w-[28px] min-h-[28px] inline-flex items-center justify-center p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-md transition-all duration-200"
                   title="Toggle Fullscreen (Ctrl+F)"
                 >
                   {isFullscreen ? '⤓' : '⤢'}
@@ -294,7 +294,7 @@ const CodePlayground = () => {
                     max="800"
                     value={playgroundHeight}
                     onChange={(e) => setPlaygroundHeight(parseInt(e.target.value))}
-                    className="w-16 h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                    className="w-16 h-6 py-2.5 bg-clip-content bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
                   />
                   <span className="text-gray-400 text-xs font-mono w-8">{Math.round(playgroundHeight/100)*100}</span>
                 </div>

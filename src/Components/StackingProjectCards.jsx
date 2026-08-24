@@ -100,7 +100,7 @@ const ProjectCard = ({ project }) => {
             {study && (
               <Link
                 to={`/work/${study.slug}`}
-                className="inline-flex items-center gap-1.5 text-white hover:text-blue-300 transition-colors text-sm font-semibold"
+                className="inline-flex items-center gap-1.5 py-1.5 -my-1.5 text-white hover:text-blue-300 transition-colors text-sm font-semibold"
               >
                 Read case study
                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -113,7 +113,7 @@ const ProjectCard = ({ project }) => {
                 href={project.source_code_link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 transition-colors text-sm font-medium"
+                className="inline-flex items-center gap-1.5 py-1.5 -my-1.5 text-blue-400 hover:text-blue-300 transition-colors text-sm font-medium"
               >
                 Code
               </a>
