@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import PropTypes from 'prop-types'
+import DrawnUnderline from './DrawnUnderline'
 
 const navItems = [
   { to: '/about', label: 'About' },
@@ -44,6 +45,8 @@ NavItem.propTypes = {
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  // Drives the wordmark's underline; focus counts, so it is not pointer-only.
+  const [markHovered, setMarkHovered] = useState(false)
   const menuRef = useRef(null)
   const triggerRef = useRef(null)
 
@@ -167,17 +170,32 @@ const Navbar = () => {
 
             aria-label carries the full name at all times, so the accessible
             name never depends on a pointer being present. */}
-        {/* No underline here, deliberately. The About heading has ~139px to
-            draw a hand-made line across; the wordmark has 42. Flattening the
-            curve to suit that width got the geometry right and the result still
-            read as a stub rather than a gesture — some marks just need room,
-            and three letters do not have it. The letters unpacking into the
-            full name is the interaction worth keeping. */}
+        {/* The underline only exists while the name is unpacked, which is the
+            thing that makes it work here. At rest the wordmark is 42px and a
+            hand-drawn line across it reads as a stub — that was the earlier
+            attempt. Hovered, it is 180px, which is wider than the About heading
+            and plenty of room for the full curve.
+
+            So it uses the heading's path, not the flattened one: at 180px that
+            path lands around 0.020 vertical travel over width, against the
+            heading's 0.026. It draws after the name has finished unpacking and
+            retracts when the pointer leaves. */}
         <NavLink
           to="/"
           aria-label="Yuvraj Singh Nain — home"
-          className="wordmark text-xl font-bold text-white hover:text-blue-300 transition-colors duration-200"
+          onMouseEnter={() => setMarkHovered(true)}
+          onMouseLeave={() => setMarkHovered(false)}
+          onFocus={() => setMarkHovered(true)}
+          onBlur={() => setMarkHovered(false)}
+          className="wordmark relative inline-block text-xl font-bold text-white hover:text-blue-300 transition-colors duration-200"
         >
+          <DrawnUnderline
+            drawOnMount={false}
+            active={markHovered}
+            strokeWidth={2}
+            delay={0.18}
+            className="-bottom-1.5 h-2.5"
+          />
           <span aria-hidden="true">
             Y<span className="wordmark__rest">uvraj </span>
             S<span className="wordmark__rest">ingh </span>
