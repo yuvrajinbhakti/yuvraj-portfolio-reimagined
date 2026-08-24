@@ -100,8 +100,11 @@ const Footer = () => {
               <Link to="/" className="inline-block text-xl font-bold tracking-tight text-white hover:text-blue-300 transition-colors duration-200">
                 YSN
               </Link>
+              {/* A footer line is the last thing read, so it should leave
+                  something rather than restate the header. The old one was a
+                  business card — title, then stack, no turn in it. */}
               <p className="text-white/50 mt-2 text-sm leading-relaxed max-w-xs">
-                Frontend Engineer at Razorpay. React, TypeScript, and the systems underneath.
+                Frontend by title. Distributed systems and ML by choice.
               </p>
               {/* Real, and true right now — which is the whole reason it earns a
                   place here rather than another line of copy. */}
