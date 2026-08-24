@@ -1054,3 +1054,20 @@ body:has(.card[data-color="green"]:hover) {
 @media (prefers-reduced-motion: reduce) {
   .wordmark__rest { transition: none; }
 }
+
+/* Wordmark caret. Sized off the type so it tracks the wordmark if that ever
+   changes, rather than being a hardcoded pixel height that drifts. */
+.wordmark__caret {
+  display: inline-block;
+  width: 0.14em;
+  height: 0.86em;
+  margin-left: 0.16em;
+  vertical-align: -0.06em;
+  border-radius: 1px;
+  background: #60a5fa;
+  transition: background var(--dur-base) var(--ease-out);
+}
+
+.wordmark:hover .wordmark__caret {
+  background: #93c5fd;
+}
