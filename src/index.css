@@ -1009,6 +1009,15 @@ body:has(.card[data-color="green"]:hover) {
    The trailing spaces live inside the hidden spans, so at rest the initials sit
    flush together with no gaps to explain.
 --------------------------------------------------------------------------- */
+.wordmark {
+  /* All-caps at small sizes needs MORE space between letters, not less. The
+     optical size scale tightens everything from text-lg upward, which is right
+     for mixed-case display type and wrong for three capitals sitting together —
+     YSN was reading cramped. A touch of positive tracking undoes it, and stays
+     harmless once the name unpacks into mixed case. */
+  letter-spacing: 0.02em;
+}
+
 .wordmark__rest {
   display: inline-block;
   max-width: 0;

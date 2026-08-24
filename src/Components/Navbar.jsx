@@ -170,12 +170,16 @@ const Navbar = () => {
         <NavLink
           to="/"
           aria-label="Yuvraj Singh Nain — home"
-          className="wordmark text-lg font-bold tracking-tight text-white hover:text-blue-300 transition-colors duration-200"
+          className="wordmark text-xl font-bold text-white hover:text-blue-300 transition-colors duration-200"
         >
           <span aria-hidden="true">
             Y<span className="wordmark__rest">uvraj </span>
             S<span className="wordmark__rest">ingh </span>
             N<span className="wordmark__rest">ain</span>
+            {/* One character of accent, and the smallest possible mark. It also
+                does something useful when the name unpacks: it turns into the
+                full stop the sentence wanted anyway. */}
+            <span className="text-blue-400">.</span>
           </span>
         </NavLink>
 
