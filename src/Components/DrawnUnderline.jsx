@@ -28,7 +28,16 @@ const PRIMARY = { d: 'M3 8.4C36 4.2 79 3.0 124 4.9C153 6.1 178 7.6 197 5.0', wid
 const SECOND  = { d: 'M14 10.4C52 7.6 96 6.6 138 8.0C160 8.7 182 9.6 204 8.2', width: 1.75, delay: 0.72, duration: 0.62, opacity: 0.55 };
 const COMPACT = { d: 'M3 7.9C42 6.1 94 5.7 143 6.8C167 7.3 183 7.9 197 6.9', width: 2.5, delay: 0.45, duration: 0.7, opacity: 1 };
 
-const DrawnUnderline = ({ onReady, double = false, compact = false, strokeWidth, delay = 0, className = '-bottom-2.5 h-3.5' }) => {
+const DrawnUnderline = ({
+  onReady,
+  double = false,
+  compact = false,
+  strokeWidth,
+  delay = 0,
+  className = '-bottom-2.5 h-3.5',
+  drawOnMount = true,
+  active,
+}) => {
   const pathRefs = useRef([]);
   const reduce = useReducedMotion();
 
@@ -60,13 +69,40 @@ const DrawnUnderline = ({ onReady, double = false, compact = false, strokeWidth,
     });
   }, [double, compact, delay]);
 
+  const retract = useCallback(() => {
+    pathRefs.current.forEach((path) => {
+      if (!path) return;
+      const length = path.getTotalLength();
+      path.style.transition = 'stroke-dashoffset 0.25s ease-in';
+      path.style.strokeDashoffset = length;
+    });
+  }, []);
+
   useEffect(() => {
     onReady?.(() => draw());
+    if (!drawOnMount) {
+      // Parked undrawn, ready for whatever triggers it.
+      pathRefs.current.forEach((path) => {
+        if (!path) return;
+        const length = path.getTotalLength();
+        path.style.transition = 'none';
+        path.style.strokeDasharray = length;
+        path.style.strokeDashoffset = reduce ? '0' : length;
+      });
+      return;
+    }
     // Reduced motion: drawn, but instantly. The mark is emphasis, so it stays —
     // only the drawing of it is movement.
     const id = requestAnimationFrame(() => draw(reduce));
     return () => cancelAnimationFrame(id);
-  }, [reduce, draw, onReady]);
+  }, [reduce, draw, onReady, drawOnMount]);
+
+  // Driven mode: the line follows a parent's state instead of its own mount.
+  useEffect(() => {
+    if (active === undefined || reduce) return;
+    if (active) draw();
+    else retract();
+  }, [active, draw, retract, reduce]);
 
   return (
     <svg
@@ -99,6 +135,8 @@ DrawnUnderline.propTypes = {
   strokeWidth: PropTypes.number,
   delay: PropTypes.number,
   className: PropTypes.string,
+  drawOnMount: PropTypes.bool,
+  active: PropTypes.bool,
 };
 
 /**
