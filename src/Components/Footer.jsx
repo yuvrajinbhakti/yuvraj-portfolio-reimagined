@@ -1,12 +1,10 @@
 import { Link } from 'react-router-dom';
+import { caseStudies } from '../constants/caseStudies';
 
-const navLinks = [
-  { to: '/', label: 'Home' },
-  { to: '/about', label: 'About' },
-  { to: '/projects', label: 'Projects' },
-  { to: '/playground', label: 'Playground' },
-  { to: '/contact', label: 'Contact' },
-];
+// The nav links that used to live here duplicated a bar that is fixed to the
+// top of every page — the visitor could already see them without scrolling. A
+// footer earns its place by offering something the header cannot: here, the
+// long-form write-ups, which are otherwise two clicks deep.
 
 const footerSocials = [
   {
@@ -56,25 +54,28 @@ const Footer = () => {
               </p>
             </div>
 
-            {/* Quick Links */}
+            {/* Read next */}
             <div>
-              <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">Quick Links</h3>
+              <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-label">Case studies</h3>
               <nav className="flex flex-col gap-2">
-                {navLinks.map((link) => (
+                {caseStudies.map((study) => (
                   <Link
-                    key={link.to}
-                    to={link.to}
+                    key={study.slug}
+                    to={`/work/${study.slug}`}
                     className="text-white/50 hover:text-blue-400 transition-colors text-sm"
                   >
-                    {link.label}
+                    {study.title}
                   </Link>
                 ))}
+                <Link to="/projects" className="text-white/50 hover:text-blue-400 transition-colors text-sm">
+                  All projects
+                </Link>
               </nav>
             </div>
 
             {/* Social */}
             <div>
-              <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">Connect</h3>
+              <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-label">Connect</h3>
               <div className="flex gap-3">
                 {footerSocials.map((social) => (
                   <a
@@ -93,8 +94,14 @@ const Footer = () => {
           </div>
 
           {/* Copyright */}
-          <div className="mt-8 pt-6 border-t border-white/10 text-center text-white/50 text-sm">
-            &copy; {currentYear} Yuvraj Singh Nain. All rights reserved.
+          <div className="mt-8 pt-6 border-t border-white/10 flex flex-col sm:flex-row gap-2 sm:gap-4 items-center justify-between text-white/50 text-sm">
+            <span>&copy; {currentYear} Yuvraj Singh Nain</span>
+            <a
+              href="mailto:yuvrajsinghnain03@gmail.com"
+              className="hover:text-blue-400 transition-colors"
+            >
+              yuvrajsinghnain03@gmail.com
+            </a>
           </div>
         </div>
       </div>
