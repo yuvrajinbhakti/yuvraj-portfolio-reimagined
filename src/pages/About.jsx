@@ -71,11 +71,7 @@ const AnimatedTimelineLine = ({ itemCount = 4 }) => {
 AnimatedTimelineLine.propTypes = { itemCount: PropTypes.number };
 
 const About = () => {
-  useDocumentMeta({
-    title: 'About | Yuvraj Singh Nain',
-    description: 'Frontend Engineer at Razorpay and Amazon ML Summer School alumnus. My experience, engineering background and the technologies I build with.',
-    path: '/about',
-  });
+  useDocumentMeta({ path: '/about' });
 
   const [activeTab, setActiveTab] = useState("experience");
 

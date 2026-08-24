@@ -1,8 +1,7 @@
 import { useEffect } from 'react';
+import { SITE_URL, OG_IMAGE, getRouteMeta } from '../constants/routeMeta';
 
-export const SITE_URL = 'https://yuvraj-portfolio-reimagined.vercel.app';
-
-const OG_IMAGE = `${SITE_URL}/og-image.png`;
+export { SITE_URL };
 
 /**
  * Keeps <title>, description, canonical and the OG/Twitter mirrors in sync with
@@ -31,19 +30,28 @@ const meta = (key, kind = 'name') => (value) =>
     return el;
   }, 'content', value);
 
+/**
+ * Pass a `path` on its own and the title and description come from routeMeta,
+ * which is the same array the build-time prerender uses. Passing them
+ * explicitly still works, for the routes that are not in that list — the 404,
+ * and a case study slug that does not resolve.
+ */
 const useDocumentMeta = ({ title, description, path = '' }) => {
   useEffect(() => {
+    const fromRoutes = getRouteMeta(path);
+    const finalTitle = title ?? fromRoutes?.title;
+    const finalDescription = description ?? fromRoutes?.description;
     const url = `${SITE_URL}${path}`;
 
-    if (title) document.title = title;
+    if (finalTitle) document.title = finalTitle;
 
-    meta('description')(description);
-    meta('og:title', 'property')(title);
-    meta('og:description', 'property')(description);
+    meta('description')(finalDescription);
+    meta('og:title', 'property')(finalTitle);
+    meta('og:description', 'property')(finalDescription);
     meta('og:url', 'property')(url);
     meta('og:image', 'property')(OG_IMAGE);
-    meta('twitter:title')(title);
-    meta('twitter:description')(description);
+    meta('twitter:title')(finalTitle);
+    meta('twitter:description')(finalDescription);
     meta('twitter:image')(OG_IMAGE);
 
     upsert('link[rel="canonical"]', () => {
