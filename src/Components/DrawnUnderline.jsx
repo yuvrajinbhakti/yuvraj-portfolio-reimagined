@@ -15,19 +15,29 @@ import PropTypes from 'prop-types';
  * better than two competing ones.
  */
 
+// preserveAspectRatio="none" is what lets one path stretch to any word, and it
+// is also the trap: the viewBox is 200 wide, so a 139px heading squashes it
+// 0.7x horizontally while a 42px wordmark squashes it 0.21x — four times
+// harder. The vertical squash barely changes either way, so the same curve that
+// reads as a hand wobble under a heading becomes a swoosh under a wordmark.
+//
+// Measured as a ratio of vertical travel to rendered width: the heading lands
+// at 0.026, the wordmark was at 0.089. COMPACT flattens the curve so short
+// words land in the same range instead.
 const PRIMARY = { d: 'M3 8.4C36 4.2 79 3.0 124 4.9C153 6.1 178 7.6 197 5.0', width: 2.5, delay: 0.45, duration: 0.85, opacity: 1 };
 const SECOND  = { d: 'M14 10.4C52 7.6 96 6.6 138 8.0C160 8.7 182 9.6 204 8.2', width: 1.75, delay: 0.72, duration: 0.62, opacity: 0.55 };
+const COMPACT = { d: 'M3 7.9C42 6.1 94 5.7 143 6.8C167 7.3 183 7.9 197 6.9', width: 2.5, delay: 0.45, duration: 0.7, opacity: 1 };
 
-const DrawnUnderline = ({ onReady, double = false, strokeWidth, delay = 0, className = '-bottom-2.5 h-3.5' }) => {
+const DrawnUnderline = ({ onReady, double = false, compact = false, strokeWidth, delay = 0, className = '-bottom-2.5 h-3.5' }) => {
   const pathRefs = useRef([]);
   const reduce = useReducedMotion();
 
-  const strokes = double ? [PRIMARY, SECOND] : [PRIMARY];
+  const strokes = compact ? [COMPACT] : double ? [PRIMARY, SECOND] : [PRIMARY];
 
   const draw = useCallback((immediate = false) => {
     pathRefs.current.forEach((path, i) => {
       if (!path) return;
-      const stroke = (double ? [PRIMARY, SECOND] : [PRIMARY])[i];
+      const stroke = (compact ? [COMPACT] : double ? [PRIMARY, SECOND] : [PRIMARY])[i];
       const length = path.getTotalLength();
 
       if (immediate) {
@@ -48,7 +58,7 @@ const DrawnUnderline = ({ onReady, double = false, strokeWidth, delay = 0, class
         `stroke-dashoffset ${stroke.duration}s cubic-bezier(0.22, 1, 0.36, 1) ${stroke.delay + delay}s`;
       path.style.strokeDashoffset = '0';
     });
-  }, [double, delay]);
+  }, [double, compact, delay]);
 
   useEffect(() => {
     onReady?.(() => draw());
@@ -85,6 +95,7 @@ const DrawnUnderline = ({ onReady, double = false, strokeWidth, delay = 0, class
 DrawnUnderline.propTypes = {
   onReady: PropTypes.func,
   double: PropTypes.bool,
+  compact: PropTypes.bool,
   strokeWidth: PropTypes.number,
   delay: PropTypes.number,
   className: PropTypes.string,
