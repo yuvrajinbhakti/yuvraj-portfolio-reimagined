@@ -1842,7 +1842,7 @@ if (document.readyState === 'loading') {
               <button
                 onClick={runCode}
                 disabled={isRunning}
-                className="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 disabled:from-gray-600 disabled:to-gray-500 text-white px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 flex items-center gap-2 shadow-lg min-w-[70px]"
+                className="bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-600 text-white px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 flex items-center gap-2 shadow-lg min-w-[70px]"
                 title="Run Code (Ctrl+Enter)"
               >
                 {isRunning ? (
@@ -1936,7 +1936,7 @@ if (document.readyState === 'loading') {
                   
                   <button
                     onClick={handleFreshStart}
-                    className="flex items-center gap-2 px-2.5 py-1 bg-white/5 hover:from-blue-500 hover:to-blue-400 text-white rounded-md transition-all duration-200 text-xs font-medium whitespace-nowrap shrink-0"
+                    className="flex items-center gap-2 px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-md transition-all duration-200 text-xs font-medium whitespace-nowrap shrink-0"
                     title="Start with clean template"
                   >
                     <span className="text-sm">✨</span>

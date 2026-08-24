@@ -297,22 +297,23 @@ const About = () => {
                     transition={{ delay: 0.2, duration: 0.5 }}
                   >
                     <p>
-                      I&apos;m a Frontend Engineer at Razorpay, where I build the analytics and
-                      reporting dashboards merchants use to understand their own payments. I
-                      joined as an intern in 2024 and stayed.
+                      The frontend problems I like are the ones that turn out not to be
+                      frontend problems. A dashboard is straightforward until the data arrives
+                      late, out of order, or not at all — and then it&apos;s a systems problem
+                      wearing a UI.
                     </p>
                     <p>
-                      Most of my work sits at the seam between the interface and the systems
-                      behind it — an A/B testing framework, a change-data-capture pipeline that
-                      took data onboarding from two weeks down to a day, a reporting stack
-                      rebuilt from scratch. The problems I like are the ones where the frontend
-                      answer depends on getting the backend right.
+                      At Razorpay I work on merchant reporting and analytics. Getting that
+                      right has meant an A/B testing framework with client-side caching, a
+                      change-data-capture pipeline that cut data onboarding from two weeks to a
+                      day, and a reporting stack rebuilt from scratch. I joined as an intern in
+                      July 2024 and went full-time a year later.
                     </p>
                     <p>
-                      Outside work I build things that are harder than they need to be. The one
-                      I&apos;m proudest of is a collaborative code editor with Operational
-                      Transform written by hand — two people typing in the same line, neither
-                      losing a keystroke.
+                      The thing I&apos;m proudest of outside work is a collaborative code
+                      editor where I implemented Operational Transform by hand — the algorithm
+                      that lets two people type in the same line without either losing a
+                      keystroke. Almost every interesting bug was in the part nobody sees.
                     </p>
                   </motion.div>
                 </div>

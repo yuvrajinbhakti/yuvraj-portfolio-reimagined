@@ -271,7 +271,7 @@ const Contact = () => {
                       className={`w-full py-4 px-6 rounded-xl font-semibold text-white transition-all duration-500 relative overflow-hidden group shadow-lg ${
                         isSubmitting
                           ? "bg-blue-400/80 cursor-not-allowed shadow-blue-400/20"
-                          : "bg-white/5 hover:from-blue-700 hover:via-blue-600 hover:to-blue-800 hover:shadow-2xl hover:shadow-blue-500/30 hover:-translate-y-1"
+                          : "bg-blue-600 hover:bg-blue-700 hover:shadow-2xl hover:shadow-blue-500/30 hover:-translate-y-1"
                       }`}
                     >
                       {/* Background gradient animation */}
