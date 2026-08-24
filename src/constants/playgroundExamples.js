@@ -16,34 +16,43 @@
  * component is not a reasonable place for content to live.
  */
 
-const SHARED_CSS = `
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    padding: 24px;
-    background: #0b1020;
-    color: #e8ecf5;
-    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-    line-height: 1.55;
-  }
-  h2 { margin: 0 0 4px; font-size: 1.25rem; letter-spacing: -0.02em; }
-  .sub { margin: 0 0 20px; color: #93a1bd; font-size: 0.875rem; }
-  .label {
-    display: block; font-size: 0.6875rem; letter-spacing: 0.12em;
-    text-transform: uppercase; color: #7c8aa8; margin-bottom: 6px;
-  }
-  code, .mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
-  button {
-    font: inherit; font-size: 0.8125rem; font-weight: 500; cursor: pointer;
-    padding: 8px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.14);
-    background: rgba(255,255,255,0.05); color: #e8ecf5;
-    transition: background 0.15s ease, border-color 0.15s ease;
-  }
-  button:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.28); }
-  button.primary { background: #2563eb; border-color: #2563eb; }
-  button.primary:hover { background: #1d4ed8; }
-  .row { display: flex; gap: 8px; flex-wrap: wrap; }
+// Base styling every example starts from, so the preview looks like it belongs
+// to this site rather than to 1996. Composed into each example's CSS rather
+// than injected behind the scenes: this is a playground, so what is in the CSS
+// tab has to be exactly what runs — invisible styles the reader cannot see or
+// edit would be the more confusing choice.
+const BASE_CSS = `/* --- base --- */
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 28px;
+  background: #0b1020;
+  color: #e8ecf5;
+  font: 15px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+h2 { margin: 0 0 6px; font-size: 1.3rem; letter-spacing: -0.02em; font-weight: 650; }
+.sub { margin: 0 0 22px; color: #93a1bd; font-size: 0.875rem; max-width: 52ch; }
+.label {
+  display: block; margin-bottom: 6px; font-size: 0.6875rem; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase; color: #7c8aa8;
+}
+code, .mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+button {
+  font: 500 0.8125rem ui-sans-serif, system-ui, sans-serif;
+  padding: 8px 14px; border-radius: 8px; cursor: pointer;
+  color: #e8ecf5; background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.14);
+  transition: background .15s ease, border-color .15s ease;
+}
+button:hover { background: rgba(255,255,255,0.11); border-color: rgba(255,255,255,0.3); }
+button.primary { background: #2563eb; border-color: #2563eb; }
+button.primary:hover { background: #1d4ed8; border-color: #1d4ed8; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
 `;
+
+const withBase = (css) => BASE_CSS + `
+/* --- this example --- */` + css;
 
 export const EXAMPLES = {
   'operational-transform': {
@@ -85,7 +94,7 @@ export const EXAMPLES = {
   </div>
   <p class="verdict" id="verdict"></p>
 </div>`,
-      css: `.doc, .results code {
+      css: withBase(`.doc, .results code {
   display: block; padding: 10px 12px; border-radius: 8px;
   background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
   font-size: 0.875rem;
@@ -101,7 +110,7 @@ export const EXAMPLES = {
 .results { display: grid; gap: 12px; margin-top: 20px; }
 .verdict { margin-top: 14px; font-size: 0.875rem; font-weight: 500; min-height: 1.4em; }
 .verdict.ok { color: #6ee7b7; }
-.verdict.bad { color: #fca5a5; }`,
+.verdict.bad { color: #fca5a5; }`),
       js: `// Operational Transform, which is the whole reason a collaborative editor
 // can work. About thirty lines of it here.
 //
@@ -206,7 +215,7 @@ function resetDemo() {
     <button onclick="setVal('123456789')">12,34,56,789</button>
   </div>
 </div>`,
-      css: `.field {
+      css: withBase(`.field {
   display: flex; align-items: center; gap: 6px;
   padding: 10px 14px; border-radius: 10px;
   background: rgba(255,255,255,0.04);
@@ -225,7 +234,7 @@ function resetDemo() {
 .readout code {
   display: block; padding: 10px 12px; border-radius: 8px;
   background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-}`,
+}`),
       js: `// The grouping is the easy half. The hard half is the caret.
 //
 // Reformatting on every keystroke means replacing the input's value, and that
@@ -329,7 +338,7 @@ input.addEventListener('input', format);`,
   <span class="label" style="margin-top:22px">Webhook log</span>
   <div class="log mono" id="log"><span class="dim">waiting&hellip;</span></div>
 </div>`,
-      css: `.stages {
+      css: withBase(`.stages {
   list-style: none; padding: 0; margin: 20px 0;
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
 }
@@ -350,7 +359,7 @@ input.addEventListener('input', format);`,
 .log div { padding: 2px 0; }
 .dim { color: #64748b; }
 .ok { color: #6ee7b7; }
-.err { color: #fca5a5; }`,
+.err { color: #fca5a5; }`),
       js: `// Every stage is a separate network call that can fail on its own, which is
 // why a payment needs a state machine rather than a boolean. The two failure
 // buttons are the cases that actually generate support tickets: a decline
@@ -418,11 +427,13 @@ function start(flow) {
   },
 };
 
+// A blank project starts from the same base, so "New Project" doesn't drop you
+// onto a white page in Times New Roman.
 export const BLANK_PROJECT = {
-  html: '<div class="container">\n  <h1>New project</h1>\n  <p>Everything here runs in a sandboxed iframe.</p>\n</div>',
-  css: '.container {\n  padding: 2rem;\n  font-family: ui-sans-serif, system-ui, sans-serif;\n  color: #e8ecf5;\n  background: #0b1020;\n}',
+  html: '<div>\n  <h2>New project</h2>\n  <p class="sub">Everything here runs in a sandboxed iframe.</p>\n  <div class="row">\n    <button class="primary">A button</button>\n  </div>\n</div>',
+  css: BASE_CSS,
   js: '// Ctrl+Enter to run.\nconsole.log("ready");',
 };
 
-export { SHARED_CSS };
+export { BASE_CSS };
 export default EXAMPLES;
