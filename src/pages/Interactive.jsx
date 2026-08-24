@@ -6,11 +6,7 @@ import AnimatedBackground from '../Components/AnimatedBackground';
 import useDocumentMeta from '../hooks/useDocumentMeta';
 
 const Interactive = () => {
-  useDocumentMeta({
-    title: 'Playground | Yuvraj Singh Nain',
-    description: 'An interactive terminal and live code playground — explore my background through commands, or run code directly in the browser.',
-    path: '/playground',
-  });
+  useDocumentMeta({ path: '/playground' });
 
   const containerRef = useRef(null);
 

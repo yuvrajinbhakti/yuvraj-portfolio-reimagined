@@ -7,11 +7,7 @@ import { sendContactEmail, isEmailJSConfigured, createMailtoLink } from "../util
 import useDocumentMeta from '../hooks/useDocumentMeta';
 
 const Contact = () => {
-  useDocumentMeta({
-    title: 'Contact | Yuvraj Singh Nain',
-    description: 'Get in touch about roles, freelance work or collaboration. Based in Chandigarh, India.',
-    path: '/contact',
-  });
+  useDocumentMeta({ path: '/contact' });
 
   const formRef = useRef(null);
   const [formData, setFormData] = useState({

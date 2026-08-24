@@ -98,11 +98,7 @@ ServiceCard.propTypes = {
 };
 
 const Home = () => {
-  useDocumentMeta({
-    title: 'Yuvraj Singh Nain | Frontend Engineer',
-    description: 'Frontend Engineer at Razorpay. I build merchant-facing analytics dashboards in React and TypeScript, and real-time collaborative systems on the side.',
-    path: '/',
-  });
+  useDocumentMeta({ path: '/' });
 
   const [isPlayingMusic, setIsPlayingMusic] = useState(false);
   const audioRef = useRef(null);

@@ -307,11 +307,7 @@ ProjectCard.propTypes = {
 };
 
 const Projects = () => {
-  useDocumentMeta({
-    title: 'Projects | Yuvraj Singh Nain',
-    description: 'Selected engineering work — a real-time collaborative code editor, a secure file-sharing service, a Flutter finance app, and more. Source code for each.',
-    path: '/projects',
-  });
+  useDocumentMeta({ path: '/projects' });
 
   const [activeFilter, setActiveFilter] = useState("All");
   const [filteredProjects, setFilteredProjects] = useState(projects);
