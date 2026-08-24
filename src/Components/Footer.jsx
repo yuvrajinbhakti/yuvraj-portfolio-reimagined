@@ -39,10 +39,37 @@ const footerSocials = [
 
 const EMAIL = 'yuvrajsinghnain03@gmail.com';
 
+// Always IST, whatever timezone the reader is in — the point is where
+// he is, not where they are.
+const formatIST = () =>
+  new Intl.DateTimeFormat('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  }).format(new Date());
+
 const Footer = () => {
   const currentYear = new Date().getFullYear();
   const [copied, setCopied] = useState(false);
   const timer = useRef(null);
+
+  // Ticks on the minute rather than every second: a seconds display is a
+  // moving element in the corner of every page, which is exactly the kind of
+  // thing this site just spent a day removing.
+  const [localTime, setLocalTime] = useState(() => formatIST());
+
+  useEffect(() => {
+    const tick = () => setLocalTime(formatIST());
+    const now = new Date();
+    const msToNextMinute = (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
+    let interval;
+    const timeout = setTimeout(() => {
+      tick();
+      interval = setInterval(tick, 60_000);
+    }, msToNextMinute);
+    return () => { clearTimeout(timeout); clearInterval(interval); };
+  }, []);
 
   // An email address in a footer is nearly always going to be copied rather
   // than clicked — mailto: opens whatever the OS thinks is a mail client, which
@@ -67,14 +94,23 @@ const Footer = () => {
     <footer className="relative border-t border-white/10">
       <div className="backdrop-blur-lg bg-white/5">
         <div className="container mx-auto px-4 md:px-8 py-8 md:py-12">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 gap-10 md:grid-cols-[1.4fr_1fr_auto] md:gap-12">
             {/* Brand */}
             <div>
               <Link to="/" className="inline-block text-xl font-bold tracking-tight text-white hover:text-blue-300 transition-colors duration-200">
                 YSN
               </Link>
-              <p className="text-white/50 mt-2 text-sm leading-relaxed">
+              <p className="text-white/50 mt-2 text-sm leading-relaxed max-w-xs">
                 Frontend Engineer at Razorpay. React, TypeScript, and the systems underneath.
+              </p>
+              {/* Real, and true right now — which is the whole reason it earns a
+                  place here rather than another line of copy. */}
+              <p className="mt-4 text-white/35 text-xs flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/70" aria-hidden="true" />
+                India
+                <span aria-hidden="true">&middot;</span>
+                <time className="font-mono tabular-nums">{localTime}</time>
+                <span className="text-white/25">local time</span>
               </p>
             </div>
 
@@ -100,14 +136,14 @@ const Footer = () => {
             {/* Social */}
             <div>
               <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-label">Connect</h3>
-              <div className="flex gap-3">
+              <div className="flex gap-5">
                 {footerSocials.map((social) => (
                   <a
                     key={social.name}
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all duration-300"
+                    className="p-2 -m-2 text-white/45 hover:text-white transition-colors duration-200"
                     aria-label={social.name}
                   >
                     {social.icon}
@@ -129,11 +165,16 @@ const Footer = () => {
               <span className="font-mono">{EMAIL}</span>
               {/* aria-live, so the confirmation is announced rather than only
                   seen — the whole point is feedback that the copy happened. */}
+              {/* Hidden until hover, so it does not read as part of the
+                  address. The copied state overrides that — confirmation has to
+                  show even if the pointer has already moved away. */}
               <span
                 aria-live="polite"
-                className={`text-xs transition-colors ${copied ? 'text-emerald-300' : 'text-white/30 group-hover:text-white/60'}`}
+                className={`text-xs transition-opacity duration-200 ${
+                  copied ? 'text-emerald-300 opacity-100' : 'text-white/40 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100'
+                }`}
               >
-                {copied ? 'copied' : 'copy'}
+                {copied ? 'copied' : 'click to copy'}
               </span>
             </a>
           </div>
