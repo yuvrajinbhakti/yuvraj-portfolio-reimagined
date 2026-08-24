@@ -263,7 +263,11 @@ body:has(.card[data-color="green"]:hover) {
   }
 
   .header {
-    @apply flex justify-between items-center px-4 sm:px-8 md:px-16 py-4 max-w-5xl mx-auto absolute top-0 bg-transparent z-10 right-0 left-0;
+    /* `relative`, not `absolute`. The nav bar's frosted panel now lives on the
+       full-width wrapper around this element, and an absolutely positioned
+       child contributes no height — so the bar would have collapsed to a
+       1px rule with nothing behind it. */
+    @apply flex justify-between items-center px-4 sm:px-8 md:px-16 py-4 max-w-5xl mx-auto relative bg-transparent z-10;
   }
 
   .footer {
@@ -611,7 +615,9 @@ body:has(.card[data-color="green"]:hover) {
      result was the last row of the card — the "Read case study" / "Code" links
      — sliced in half. The px floor means a short viewport gets a card that
      extends past the fold rather than a card that eats its own content. */
-  --card-height: clamp(19.5rem, 42vh, 26rem);
+  /* Taller. At 42vh the cards read as letterbox strips — 1024 wide against
+     roughly 380 tall is nearly 3:1, which is a banner, not a card. */
+  --card-height: clamp(23rem, 50vh, 31rem);
   --card-top-offset: 1.25em;
   --stack-gap: 1.75rem;
   /* Cards pin below the fixed navbar (81px) rather than at viewport 0, where
@@ -938,4 +944,55 @@ body:has(.card[data-color="green"]:hover) {
    flash one when the skip link sends focus into it. */
 #main-content:focus {
   outline: none;
+}
+
+/* ---------------------------------------------------------------------------
+   Terminal prompt
+
+   The global :focus-visible ring is right almost everywhere and wrong here.
+   This input auto-focuses on mount, so the ring appeared unprompted, and a
+   rounded blue outline around a shell caret undoes the illusion the whole
+   component is built on.
+
+   The indicator moves to the prompt row: the prompt brightens and a caret bar
+   appears. That is what a terminal has always used to say "you're typing
+   here", so nothing is lost — least of all for keyboard users, who get a
+   clearer signal than a box drawn around an invisible input.
+--------------------------------------------------------------------------- */
+.terminal-input:focus-visible,
+.terminal-input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.terminal-prompt {
+  border-left: 2px solid transparent;
+  padding-left: 0.5rem;
+  margin-left: -0.5rem;
+  transition: border-color var(--dur-base) var(--ease-out);
+}
+
+/* :focus-within, so the row lights up whenever the caret is in the input —
+   including the mount-time focus, where it reads as "ready" rather than as a
+   stray outline. */
+.terminal-prompt:focus-within {
+  border-left-color: rgb(74 222 128);
+}
+
+/* ---------------------------------------------------------------------------
+   Glass card content passthrough
+
+   GlassCard wraps whatever you give it in a positioning div. That div sits
+   between the card and its children, so a card marked `flex flex-col` is not
+   the flex parent of anything the caller wrote — `flex-1`, `mt-auto` and
+   friends silently do nothing.
+
+   When the card is a flex column, the wrapper becomes one too and stretches to
+   fill. Callers can then use flex the way the markup implies.
+--------------------------------------------------------------------------- */
+.glass-card.flex.flex-col > .glass-card__content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }

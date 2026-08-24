@@ -78,7 +78,12 @@ const GlassCard = ({
     >
       {glareEffect && !reduce && <div className="glass-card__glare" aria-hidden="true" />}
 
-      <div className="relative z-20">{children}</div>
+      {/* Named, so index.css can make this wrapper a flex passthrough when the
+          card itself is a flex column. Without that, `flex-1` on a child does
+          nothing — it is separated from the flex container by this div — which
+          is why the three service cards' dividers and proof points sat at three
+          different heights instead of aligning across the row. */}
+      <div className="glass-card__content relative z-20">{children}</div>
 
       <div className="glass-card__edge" aria-hidden="true" />
     </div>
