@@ -183,7 +183,7 @@ const Navbar = () => {
           className="wordmark relative inline-block text-xl font-bold text-white hover:text-blue-300 transition-colors duration-200"
         >
           <DrawnUnderline
-            double={false}
+            compact
             strokeWidth={2}
             delay={0.35}
             className="-bottom-1.5 h-2.5"
