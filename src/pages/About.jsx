@@ -50,9 +50,8 @@ const AnimatedTimelineLine = ({ itemCount = 4 }) => {
     >
       <defs>
         <linearGradient id="timelineGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"  stopColor="#3b82f6" stopOpacity="0.9" />
-          <stop offset="50%" stopColor="#7c3aed" stopOpacity="0.9" />
-          <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.9" />
+          <stop offset="0%"   stopColor="#60a5fa" stopOpacity="0.7" />
+          <stop offset="100%" stopColor="#60a5fa" stopOpacity="0.15" />
         </linearGradient>
       </defs>
       <path
@@ -280,7 +279,7 @@ const About = () => {
                   transition={{ duration: 0.5 }}
                 >
                   Hello, I&apos;m{" "}
-                  <span className="bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text">
+                  <span className="text-blue-400">
                     Yuvraj
                   </span>
                 </motion.h1>
@@ -353,8 +352,12 @@ const About = () => {
             {/* Experience/Education/Achievements Tabs */}
             <ScrollReveal animation="fade">
               <div className="w-full max-w-4xl mx-auto">
-                <div className="mb-8 flex justify-center">
-                  <div className="border-b border-gray-700 flex space-x-8">
+                {/* Three tabs at space-x-8 plus px-4 each overflowed a 375px
+                    viewport by 14px, which pushed the whole document wider than
+                    the screen. Tighter gaps on small screens, and the strip
+                    scrolls on its own rather than dragging the page with it. */}
+                <div className="mb-8 flex justify-center max-w-full overflow-x-auto">
+                  <div className="border-b border-gray-700 flex space-x-2 sm:space-x-8 shrink-0">
                     <button
                       onClick={() => setActiveTab("experience")}
                       className={`py-4 px-4 font-medium text-sm border-b-2 transition-colors duration-300 ${

@@ -253,7 +253,7 @@ const TextEffect = () => {
         <div className="mt-6 overflow-hidden bg-transparent px-2 sm:px-4">
           <AnimatedText
             text="Merchant analytics dashboards by day. Real-time collaborative systems for fun."
-            type="glitch"
+            type="split-words"
             className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300 leading-relaxed"
             delay={2.5}
             duration={1}
@@ -261,29 +261,11 @@ const TextEffect = () => {
         </div>
       )}
 
-      {/* Floating particles */}
-      {animate && (
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {[...Array(20)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-1 h-1 rounded-full bg-blue-400/30"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animation: `float ${2 + Math.random() * 3}s ease-in-out infinite ${Math.random() * 2}s`
-              }}
-            />
-          ))}
-        </div>
-      )}
+      {/* Twenty blue dots used to drift here on an infinite float loop. With
+          the starfield canvas already running behind the hero, they were a
+          second particle system layered on the first — noise competing with
+          noise, and nothing to do with the message. */}
 
-      <style jsx="true">{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0) translateX(0); }
-          50% { transform: translateY(-20px) translateX(10px); }
-        }
-      `}</style>
     </div>
   );
 };

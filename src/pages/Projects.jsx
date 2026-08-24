@@ -9,17 +9,6 @@ import AnimatedBackground from "../Components/AnimatedBackground";
 import GlassCard from "../Components/GlassCard";
 import useDocumentMeta from '../hooks/useDocumentMeta';
 
-// Pre-generate particle positions outside component to avoid recalculation
-const PARTICLE_POSITIONS = Array.from({ length: 3 }, (_, i) => ({
-  id: i,
-  startX: Math.random() * 100,
-  startY: Math.random() * 100,
-  endX: Math.random() * 100 - 50,
-  endY: Math.random() * 100 - 50,
-  duration: 4 + Math.random() * 2,
-  delay: i * 1
-}));
-
 // Move ProjectCard outside to prevent recreation on every render
 const ProjectCard = ({ project, index, setCursorVariant }) => {
   const [imageError, setImageError] = useState(false);
@@ -89,7 +78,7 @@ const ProjectCard = ({ project, index, setCursorVariant }) => {
       className="group relative h-full cursor-pointer"
     >
       {/* Simplified glow effect */}
-      <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 rounded-3xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="absolute -inset-0.5 bg-white/5 rounded-3xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       
       <motion.div
         animate={{
@@ -102,7 +91,7 @@ const ProjectCard = ({ project, index, setCursorVariant }) => {
           {/* Optimized Image Section */}
           <div className="relative overflow-hidden h-64 rounded-t-3xl">
             {/* Static gradient background - no animation */}
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/8 via-purple-500/8 to-pink-500/8" />
+            <div className="absolute inset-0 bg-white/5" />
             
             <div className="w-full h-full relative z-10">
               {!imageError && project.image ? (
@@ -123,29 +112,6 @@ const ProjectCard = ({ project, index, setCursorVariant }) => {
                   whileHover={{ scale: 1.01 }}
                   transition={{ duration: 0.2 }}
                 >
-                  {/* Simplified particles with better performance */}
-                  {PARTICLE_POSITIONS.map((particle) => (
-                    <motion.div
-                      key={particle.id}
-                      className="absolute w-0.5 h-0.5 bg-white/20 rounded-full"
-                      animate={{
-                        x: [0, particle.endX],
-                        y: [0, particle.endY],
-                        opacity: [0, 0.6, 0],
-                      }}
-                      transition={{
-                        duration: particle.duration,
-                        repeat: Infinity,
-                        delay: particle.delay,
-                        ease: "easeInOut"
-                      }}
-                      style={{
-                        left: `${particle.startX}%`,
-                        top: `${particle.startY}%`,
-                      }}
-                    />
-                  ))}
-                  
                   {/* Simplified project icon */}
                   {project.iconUrl && (
                     <motion.img
@@ -215,7 +181,7 @@ const ProjectCard = ({ project, index, setCursorVariant }) => {
           <div className="p-5 flex flex-col flex-grow">
             <div className="flex-grow">
               <motion.h3 
-                className="text-lg font-bold text-white mb-2 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400 group-hover:bg-clip-text transition-all duration-200"
+                className="text-lg font-bold text-white mb-2 group-hover:text-transparent group-hover:text-blue-400 transition-all duration-200"
                 initial={{ opacity: 0, x: -15 }}
                 animate={isInView ? { opacity: 1, x: 0 } : {}}
                 transition={{ delay: 0.2 + index * 0.05, duration: 0.3 }}
@@ -466,7 +432,7 @@ const Projects = () => {
       
       {/* Simplified Progress Bar */}
       <motion.div
-        className="fixed top-0 left-0 h-0.5 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 z-40 origin-left will-change-transform"
+        className="fixed top-0 left-0 h-0.5 bg-white/5 z-40 origin-left will-change-transform"
         style={{ width: progressBarWidth }}
       />
       
@@ -494,7 +460,7 @@ const Projects = () => {
                 transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
               />
               <motion.div
-                className="absolute top-16 right-[12%] w-12 h-12 border border-purple-500/20 rotate-45"
+                className="absolute top-16 right-[12%] w-12 h-12 border border-blue-500/20 rotate-45"
                 animate={{ y: [0, 12, 0], rotate: [45, 135, 45] }}
                 transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
               />
@@ -525,7 +491,7 @@ const Projects = () => {
                     transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
                   >
                     <span className="text-white">My </span>
-                    <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                    <span className="text-white">
                       Projects
                     </span>
                   </motion.h1>
@@ -533,7 +499,7 @@ const Projects = () => {
 
                 {/* Animated underline */}
                 <motion.div
-                  className="mx-auto h-1 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 mb-6"
+                  className="mx-auto h-1 rounded-full bg-white/5 mb-6"
                   initial={{ width: 0 }}
                   animate={{ width: 120 }}
                   transition={{ delay: 0.4, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
@@ -559,7 +525,7 @@ const Projects = () => {
                   {[
                     { value: projects.length, label: "Projects", color: "from-blue-400 to-blue-600" },
                     { value: Math.max(0, allTags.length - 1), label: "Technologies", color: "from-emerald-400 to-emerald-600" },
-                    { value: 100, label: "Open Source", color: "from-purple-400 to-purple-600", suffix: "%" }
+                    { value: 100, label: "Open Source", color: "from-blue-400 to-blue-600", suffix: "%" }
                   ].map((stat, index) => (
                     <motion.div
                       key={stat.label}
@@ -596,7 +562,7 @@ const Projects = () => {
                   onClick={() => setActiveFilter(tag)}
                   className={`px-3 py-2 md:px-4 md:py-2 rounded-full text-sm font-semibold transition-all duration-300 relative overflow-hidden backdrop-blur-md will-change-transform cursor-pointer touch-target ${
                     activeFilter === tag
-                      ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md border border-white/20"
+                      ? "bg-white/5 text-white shadow-md border border-white/20"
                       : "bg-black/15 text-gray-300 hover:bg-white/10 border border-white/10 hover:border-white/20"
                   }`}
                   initial={{ opacity: 0, y: 15, scale: 0.95 }}
@@ -613,7 +579,7 @@ const Projects = () => {
                 >
                   {activeFilter === tag && (
                     <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500"
+                      className="absolute inset-0 bg-white/5"
                       layoutId="activeFilterBg"
                       transition={{ duration: 0.3 }}
                     />
@@ -647,7 +613,7 @@ const Projects = () => {
                 <p className="text-gray-300 mb-4 md:mb-6 text-sm md:text-base">No projects match the selected filter.</p>
                 <motion.button
                   onClick={() => setActiveFilter("All")}
-                  className="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full font-semibold hover:shadow-md transition-all duration-200 cursor-pointer text-sm md:text-base touch-target"
+                  className="px-6 py-2.5 bg-white/5 text-white rounded-full font-semibold hover:shadow-md transition-all duration-200 cursor-pointer text-sm md:text-base touch-target"
                   whileHover={{ scale: 1.03, y: -1 }}
                   whileTap={{ scale: 0.97 }}
                   onMouseEnter={handleLinkCursor}

@@ -48,7 +48,7 @@ const Footer = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Brand */}
             <div>
-              <Link to="/" className="inline-block text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text">
+              <Link to="/" className="inline-block text-xl font-bold text-blue-400">
                 YSN
               </Link>
               <p className="text-white/50 mt-2 text-sm leading-relaxed">

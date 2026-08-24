@@ -785,7 +785,10 @@ body:has(.card[data-color="green"]:hover) {
   transform: scaleX(0);
   z-index: 60;
   pointer-events: none;
-  background: linear-gradient(90deg, #3b82f6, #22d3ee 55%, #a855f7);
+  /* One colour. A three-stop rainbow bar pinned to the top of every page was
+     the loudest element on the site and carried no information the length of
+     the bar wasn't already carrying. */
+  background: #3b82f6;
   box-shadow: 0 0 12px rgba(59, 130, 246, 0.6);
 }
 
@@ -892,8 +895,8 @@ body:has(.card[data-color="green"]:hover) {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(38% 46% at 28% 34%, rgba(59, 130, 246, 0.22), transparent 70%),
-    radial-gradient(34% 42% at 74% 66%, rgba(139, 92, 246, 0.18), transparent 70%);
+    radial-gradient(38% 46% at 28% 34%, rgba(59, 130, 246, 0.20), transparent 70%),
+    radial-gradient(34% 42% at 74% 66%, rgba(37, 99, 235, 0.16), transparent 70%);
   filter: blur(40px);
   animation: cta-glow-drift 24s var(--ease-in-out) infinite;
 }
