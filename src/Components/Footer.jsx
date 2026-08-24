@@ -104,7 +104,7 @@ const Footer = () => {
                   something rather than restate the header. The old one was a
                   business card — title, then stack, no turn in it. */}
               <p className="text-white/50 mt-2 text-sm leading-relaxed max-w-xs">
-                Interfaces, the systems behind them, and an ML detour that stuck.
+                Interfaces, the systems behind them, and an ML detour I never came back from.
               </p>
               {/* Real, and true right now — which is the whole reason it earns a
                   place here rather than another line of copy. */}

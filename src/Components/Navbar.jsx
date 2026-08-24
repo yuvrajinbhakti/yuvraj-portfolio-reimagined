@@ -159,11 +159,24 @@ const Navbar = () => {
             No motion wrapper either: scaling a wordmark on hover is a tell, and
             dropping it also removes the stray tab stop the wrapper introduced,
             so the tabIndex={-1} workaround is no longer needed. */}
+        {/* The initials unpack into the full name on hover — each letter stays
+            put and the rest of its word grows out of it. Initials are opaque by
+            nature, so this is the rare hover that adds information rather than
+            decoration; that is the only reason it survives on a site that just
+            had its effects stripped out.
+
+            aria-label carries the full name at all times, so the accessible
+            name never depends on a pointer being present. */}
         <NavLink
           to="/"
-          className="text-lg font-bold tracking-tight text-white hover:text-blue-300 transition-colors duration-200"
+          aria-label="Yuvraj Singh Nain — home"
+          className="wordmark text-lg font-bold tracking-tight text-white hover:text-blue-300 transition-colors duration-200"
         >
-          YSN
+          <span aria-hidden="true">
+            Y<span className="wordmark__rest">uvraj </span>
+            S<span className="wordmark__rest">ingh </span>
+            N<span className="wordmark__rest">ain</span>
+          </span>
         </NavLink>
 
         {/* Desktop Navigation */}

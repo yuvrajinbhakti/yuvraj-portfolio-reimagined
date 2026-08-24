@@ -996,3 +996,52 @@ body:has(.card[data-color="green"]:hover) {
   flex: 1;
   min-height: 0;
 }
+
+/* ---------------------------------------------------------------------------
+   Wordmark
+
+   "YSN" unpacks into "Yuvraj Singh Nain" on hover. Each initial stays exactly
+   where it is and the rest of its word grows out of it, so nothing jumps —
+   the letters you were already looking at do not move.
+
+   max-width rather than width, because the words are different lengths and
+   hardcoding three of them would be three numbers to keep in sync with a name.
+   The trailing spaces live inside the hidden spans, so at rest the initials sit
+   flush together with no gaps to explain.
+--------------------------------------------------------------------------- */
+.wordmark__rest {
+  display: inline-block;
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  white-space: pre;
+  vertical-align: bottom;
+  transition:
+    max-width var(--dur-slow, 0.42s) var(--ease-out),
+    opacity 0.22s ease;
+}
+
+.wordmark:hover .wordmark__rest,
+.wordmark:focus-visible .wordmark__rest {
+  /* Generous cap: max-width only limits, the span still sizes to its own
+     content below this. 6ch was tight, since a ch is the width of a "0" and
+     these are wider bold letters. */
+  max-width: 8ch;
+  opacity: 1;
+}
+
+/* Below md the hamburger sits close enough that an expanding wordmark would
+   crowd it, and a hover state is not much use on a touch screen anyway. */
+@media (max-width: 767px) {
+  .wordmark:hover .wordmark__rest,
+  .wordmark:focus-visible .wordmark__rest {
+    max-width: 0;
+    opacity: 0;
+  }
+}
+
+/* Reduced motion: the name still unpacks, it just does not animate getting
+   there. Removing the reveal entirely would take away information. */
+@media (prefers-reduced-motion: reduce) {
+  .wordmark__rest { transition: none; }
+}
