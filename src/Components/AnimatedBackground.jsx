@@ -1,11 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
-import gsap from 'gsap';
+import { useEffect, useRef } from 'react';
+import PropTypes from 'prop-types';
 import { useReducedMotion } from 'framer-motion';
 
 const AnimatedBackground = ({ children }) => {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const reduce = useReducedMotion();
 
   useEffect(() => {
@@ -380,12 +379,11 @@ const AnimatedBackground = ({ children }) => {
       const rect = canvas.getBoundingClientRect();
       mouseX = e.clientX - rect.left;
       mouseY = e.clientY - rect.top + window.scrollY; // Adjust for scroll
-      
-      setMousePosition({
-        x: (e.clientX / window.innerWidth - 0.5) * 2,
-        y: (e.clientY / window.innerHeight - 0.5) * 2
-      });
-      
+
+      // The canvas reads mouseX/mouseY directly out of this closure. There was
+      // also a `mousePosition` state setter here, writing normalised
+      // coordinates that nothing ever read — a React re-render of every page
+      // that uses this background, on every mouse move, for no output.
       isMouseMoving = true;
       
       // Reset timeout
@@ -456,6 +454,10 @@ const AnimatedBackground = ({ children }) => {
       </div>
     </div>
   );
+};
+
+AnimatedBackground.propTypes = {
+  children: PropTypes.node,
 };
 
 export default AnimatedBackground; 
