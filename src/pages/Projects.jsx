@@ -497,10 +497,29 @@ const Projects = () => {
                   <span className="text-xs md:text-sm text-blue-300 font-medium tracking-wide uppercase">Portfolio</span>
                 </motion.div>
 
-                {/* Title with character stagger */}
-                <div className="overflow-hidden mb-4">
+                {/* Title.
+                    The wrapper clips so the heading can slide up into frame,
+                    and that same clip was cutting the descenders: Work Sans
+                    puts 20.6px of ink below the baseline at 96px, the baseline
+                    sits 81px down a 96px line box, so the tails of the y and
+                    the j fell 5.6px past the edge and were shaved flat.
+
+                    Padding the heading rather than the wrapper is what keeps
+                    the fix invisible — it grows the box downward, moving the
+                    clip edge clear of the ink without shifting the type. In em
+                    so it tracks the font size: the overflow is a fixed
+                    proportion of it (0.058em here), so one value covers every
+                    breakpoint. The wrapper's margin comes down to match, and
+                    the gap below stays where it was.
+
+                    leading-[0.9] is gone because it never applied. Tailwind's
+                    text-5xl/7xl/8xl each ship their own line-height of 1, and
+                    they win — computed line-height measured 96px, not the
+                    86.4px the class implies. Had it applied it would have made
+                    this worse, by shortening the line box further. */}
+                <div className="overflow-hidden mb-1">
                   <motion.h1
-                    className="text-5xl md:text-7xl lg:text-8xl font-black leading-[0.9] tracking-tight"
+                    className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight pb-[0.12em]"
                     initial={{ y: 80 }}
                     animate={{ y: 0 }}
                     transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
