@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { TextPlugin } from 'gsap/TextPlugin';
 import { SplitText } from 'gsap/SplitText';
@@ -55,7 +55,7 @@ const AnimatedText = ({
         });
         break;
 
-      case 'reveal':
+      case 'reveal': {
         // First hide the text container
         gsap.set(element, { overflow: 'hidden' });
 
@@ -72,8 +72,9 @@ const AnimatedText = ({
           ease: 'power4.out'
         });
         break;
+      }
 
-      case 'typewriter':
+      case 'typewriter': {
         const originalText = element.textContent;
         gsap.set(element, { text: '' });
         tl.to(element, {
@@ -82,8 +83,9 @@ const AnimatedText = ({
           ease: 'none'
         });
         break;
+      }
 
-      case 'character':
+      case 'character': {
         // Create a span for each character
         const chars = Array.from(element.textContent).map(char => {
           const span = document.createElement('span');
@@ -104,6 +106,7 @@ const AnimatedText = ({
           ease: 'back.out(1.7)'
         });
         break;
+      }
 
       case 'gradient':
         // Animate background position for gradient text
@@ -125,7 +128,7 @@ const AnimatedText = ({
         });
         break;
 
-      case 'glitch':
+      case 'glitch': {
         // First make a copy of the original text
         const originalGlitchText = element.textContent;
         const glitchChars = "!<>-_\\/[]{}—=+*^?#@%$&~".split('');
@@ -154,8 +157,9 @@ const AnimatedText = ({
             }, 30);
           });
         break;
+      }
 
-      case 'split-words':
+      case 'split-words': {
         // Held in a ref so cleanup can revert the split. Without that, a
         // re-run splits an element that is already split — the new words nest
         // inside the old ones, the outer set keeps the opacity: 0 written
@@ -175,6 +179,7 @@ const AnimatedText = ({
           ease: "power2.out"
         });
         break;
+      }
 
       default:
         tl.from(element, {
@@ -204,7 +209,6 @@ const AnimatedText = ({
     // arrow, so it has a new identity on every render of the parent — including
     // it re-ran this whole effect mid-animation, which is what broke the split
     // above. The ref keeps the latest callback without retriggering.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [text, delay, duration, type, staggerDelay, reduce]);
 
   return (

@@ -133,11 +133,17 @@ const Navbar = () => {
       }
     }
 
+    // Captured now rather than read in the cleanup. The effect only gets this
+    // far while the panel is open, so the hamburger is mounted and this is the
+    // element that opened it; reading triggerRef.current later would be reading
+    // it at an unrelated moment.
+    const trigger = triggerRef.current
+
     document.addEventListener('keydown', onKeyDown)
     return () => {
       document.removeEventListener('keydown', onKeyDown)
       // Send focus back to the control that opened the panel.
-      if (triggerRef.current) triggerRef.current.focus()
+      if (trigger) trigger.focus()
     }
   }, [isMenuOpen, isMobile, closeMenu])
 

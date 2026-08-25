@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import PropTypes from 'prop-types';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useReducedMotion } from 'framer-motion';
@@ -55,8 +56,10 @@ const ScrollReveal = ({
     // afterwards, at the bottom.
     let tl = gsap.timeline({ paused: true });
 
-    // Get all children if stagger animation
-    const children = animation === 'stagger' ? childrenRef.current : null;
+    // The collected child nodes, for the stagger case. Named distinctly from
+    // the `children` prop it used to shadow — the prop is what gets rendered
+    // below, these are the DOM nodes GSAP tweens.
+    const staggerTargets = animation === 'stagger' ? childrenRef.current : null;
     
     // Set initial state based on animation type
     switch (animation) {
@@ -65,12 +68,13 @@ const ScrollReveal = ({
         tl.to(element, { opacity: 1, y: 0, x: 0, duration, delay, ease });
         break;
         
-      case 'slide':
+      case 'slide': {
         const xFrom = direction === 'left' ? -distance : direction === 'right' ? distance : 0;
         const yFrom = direction === 'up' ? distance : direction === 'down' ? -distance : 0;
         gsap.set(element, { x: xFrom, y: yFrom, opacity: 0 });
         tl.to(element, { x: 0, y: 0, opacity: 1, duration, delay, ease });
         break;
+      }
         
       case 'scale':
         gsap.set(element, { scale: 0.7, opacity: 0 });
@@ -82,22 +86,23 @@ const ScrollReveal = ({
         tl.to(element, { rotation: 0, opacity: 1, duration, delay, ease });
         break;
         
-      case 'flip':
+      case 'flip': {
         const axis = direction === 'up' || direction === 'down' ? 'X' : 'Y';
         const deg = (direction === 'down' || direction === 'right') ? 90 : -90;
         gsap.set(element, { [`rotate${axis}`]: deg, opacity: 0 });
         tl.to(element, { [`rotate${axis}`]: 0, opacity: 1, duration, delay, ease });
         break;
-        
+      }
+
       case 'stagger':
-        if (children && children.length) {
-          gsap.set(children, { 
+        if (staggerTargets && staggerTargets.length) {
+          gsap.set(staggerTargets, {
             y: direction === 'up' ? distance : direction === 'down' ? -distance : 0,
             x: direction === 'left' ? distance : direction === 'right' ? -distance : 0,
-            opacity: 0 
+            opacity: 0
           });
-          
-          tl.to(children, { 
+
+          tl.to(staggerTargets, {
             y: 0, 
             x: 0, 
             opacity: 1, 
@@ -164,4 +169,19 @@ const ScrollReveal = ({
   );
 };
 
-export default ScrollReveal; 
+ScrollReveal.propTypes = {
+  children: PropTypes.node,
+  animation: PropTypes.oneOf(['fade', 'slide', 'scale', 'rotate', 'flip', 'stagger', 'custom']),
+  direction: PropTypes.oneOf(['up', 'down', 'left', 'right']),
+  duration: PropTypes.number,
+  delay: PropTypes.number,
+  ease: PropTypes.string,
+  staggerDelay: PropTypes.number,
+  distance: PropTypes.number,
+  // 0 to 1 — how far into the viewport the element must be before it plays.
+  threshold: PropTypes.number,
+  once: PropTypes.bool,
+  className: PropTypes.string,
+};
+
+export default ScrollReveal;

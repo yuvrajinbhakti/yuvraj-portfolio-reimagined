@@ -1,4 +1,5 @@
 import { useRef, useMemo, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { useReducedMotion } from 'framer-motion';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Float, Sphere, MeshDistortMaterial } from '@react-three/drei';
@@ -66,6 +67,19 @@ const OrganicShape = ({ mouse }) => {
   );
 };
 
+// A ref, not a value: pointer position is read inside useFrame at 60Hz, so it
+// deliberately never passes through React state.
+const mouseRef = PropTypes.shape({
+  current: PropTypes.shape({
+    x: PropTypes.number,
+    y: PropTypes.number,
+  }),
+});
+
+OrganicShape.propTypes = {
+  mouse: mouseRef.isRequired,
+};
+
 const OrbitingParticles = ({ count = 150, mouse }) => {
   const groupRef = useRef();
 
@@ -105,6 +119,11 @@ const OrbitingParticles = ({ count = 150, mouse }) => {
       ))}
     </group>
   );
+};
+
+OrbitingParticles.propTypes = {
+  count: PropTypes.number,
+  mouse: mouseRef.isRequired,
 };
 
 const HeroAnimation = () => {
