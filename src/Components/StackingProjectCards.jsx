@@ -70,9 +70,16 @@ const ProjectCard = ({ project }) => {
                        bg-gradient-to-b from-transparent via-transparent to-[#0b1020]/85"
             aria-hidden="true"
           />
-          <span className="absolute top-4 right-4 px-2 py-1 rounded-full text-xs font-medium bg-emerald-500/15 text-emerald-300 border border-emerald-400/30 backdrop-blur-md">
-            {project.status}
-          </span>
+          {/* Only when it says something. Every project in the list is
+              'Completed', so the badge rendered identically on all six — a green
+              pill drawing the eye on every card to tell you nothing that
+              distinguishes it from its neighbours. It earns its place the day
+              something is in progress. */}
+          {project.status && project.status !== 'Completed' && (
+            <span className="absolute top-4 right-4 px-2 py-1 rounded-full text-xs font-medium bg-amber-500/15 text-amber-300 border border-amber-400/30 backdrop-blur-md">
+              {project.status}
+            </span>
+          )}
         </div>
 
         {/* Copy */}
