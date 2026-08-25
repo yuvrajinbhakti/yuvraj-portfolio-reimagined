@@ -1175,6 +1175,13 @@ body:has(.card[data-color="green"]:hover) {
 }
 
 .cursor-pill__hide {
+  /* 24px is the floor every other target on the site was raised to (WCAG 2.5.8).
+     The padding here came to 20px, and the negative margin that keeps the pill
+     compact hid that it was the one control left under the line. min-height
+     restores the target without letting the pill grow around it. */
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
   padding: 0.25rem 0.5rem;
   margin: -0.25rem 0;
   border-radius: 999px;
