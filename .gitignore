@@ -33,3 +33,4 @@ dist-ssr
 # Agent tooling (machine-local permissions, generated context)
 .claude/
 AGENTS.md
+.gstack/
