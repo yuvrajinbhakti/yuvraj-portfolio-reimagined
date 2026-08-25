@@ -25,30 +25,88 @@ import { ROUTES, SITE_URL, OG_IMAGE } from './src/constants/routeMeta.js'
  * the content, so the body buys little; the meta is the part that is actually
  * broken.
  */
+/**
+ * Routes that should fetch a lazy chunk up front, keyed by the module that
+ * chunk was built from.
+ *
+ * The hero globe is the largest thing on the landing page and the last thing
+ * asked for. The browser has to fetch and parse the entry to discover Home,
+ * then fetch and parse Home to discover HeroAnimation — three sequential round
+ * trips for the one piece of the page that is above the fold. A modulepreload
+ * in the shipped HTML collapses that to one: the chunk is requested alongside
+ * the entry rather than after it, while staying behind its lazy() boundary so
+ * every other route still skips it.
+ *
+ * Only "/" gets it. Nothing else renders the globe, and preloading 226 kB gzip
+ * on /contact would be worse than the waterfall it fixes.
+ */
+const PRELOAD_BY_ROUTE = {
+  '/': 'src/Components/HeroAnimation.jsx',
+}
+
+// Values are interpolated into markup, so they get escaped on the way in. None
+// of the current strings contain a quote or an ampersand, which is exactly why
+// it is worth doing now — the first description with an "&" in it would
+// otherwise produce invalid markup that nothing would flag.
+const escapeText = (value) =>
+  String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+
+const escapeAttr = (value) => escapeText(value).replace(/"/g, '&quot;')
+
 const prerenderRoutes = () => ({
   name: 'prerender-routes',
   apply: 'build',
-  closeBundle() {
+  // writeBundle rather than closeBundle: it runs once dist/index.html is on
+  // disk, and unlike closeBundle it is handed the bundle, which is the only
+  // place the hashed chunk filenames exist.
+  writeBundle(_options, bundle) {
     const outDir = resolve(process.cwd(), 'dist')
     const shell = readFileSync(resolve(outDir, 'index.html'), 'utf-8')
 
+    const chunkFor = (moduleSuffix) => {
+      const chunk = Object.values(bundle).find(
+        (c) => c.type === 'chunk' && c.facadeModuleId?.replace(/\\/g, '/').endsWith(moduleSuffix)
+      )
+      return chunk ? `/${chunk.fileName}` : null
+    }
+
     // Anchored to the attribute that identifies each tag, so swapping og:title
     // cannot accidentally match twitter:title or the <title> element.
+    //
+    // Every replacement is a function. A string replacement would treat `$&`,
+    // `$1` and `$'` inside a title or description as backreferences and splice
+    // parts of the match back into the output.
     const swap = (html, { title, description, url }) =>
       html
-        .replace(/<title>[\s\S]*?<\/title>/, `<title>${title}</title>`)
-        .replace(/(<meta\s+name="description"\s+content=")[\s\S]*?(")/, `$1${description}$2`)
-        .replace(/(<link\s+rel="canonical"\s+href=")[^"]*(")/, `$1${url}$2`)
-        .replace(/(<meta\s+property="og:url"\s+content=")[^"]*(")/, `$1${url}$2`)
-        .replace(/(<meta\s+property="og:title"\s+content=")[\s\S]*?(")/, `$1${title}$2`)
-        .replace(/(<meta\s+property="og:description"\s*\n?\s*content=")[\s\S]*?(")/, `$1${description}$2`)
-        .replace(/(<meta\s+name="twitter:title"\s+content=")[\s\S]*?(")/, `$1${title}$2`)
-        .replace(/(<meta\s+name="twitter:description"\s*\n?\s*content=")[\s\S]*?(")/, `$1${description}$2`)
+        .replace(/<title>[\s\S]*?<\/title>/, () => `<title>${escapeText(title)}</title>`)
+        .replace(/(<meta\s+name="description"\s+content=")[\s\S]*?(")/, (_m, a, b) => `${a}${escapeAttr(description)}${b}`)
+        .replace(/(<link\s+rel="canonical"\s+href=")[^"]*(")/, (_m, a, b) => `${a}${escapeAttr(url)}${b}`)
+        .replace(/(<meta\s+property="og:url"\s+content=")[^"]*(")/, (_m, a, b) => `${a}${escapeAttr(url)}${b}`)
+        .replace(/(<meta\s+property="og:title"\s+content=")[\s\S]*?(")/, (_m, a, b) => `${a}${escapeAttr(title)}${b}`)
+        .replace(/(<meta\s+property="og:description"\s*\n?\s*content=")[\s\S]*?(")/, (_m, a, b) => `${a}${escapeAttr(description)}${b}`)
+        .replace(/(<meta\s+name="twitter:title"\s+content=")[\s\S]*?(")/, (_m, a, b) => `${a}${escapeAttr(title)}${b}`)
+        .replace(/(<meta\s+name="twitter:description"\s*\n?\s*content=")[\s\S]*?(")/, (_m, a, b) => `${a}${escapeAttr(description)}${b}`)
 
     let written = 0
+    let preloaded = 0
     for (const route of ROUTES) {
       const url = `${SITE_URL}${route.path === '/' ? '/' : route.path}`
-      const html = swap(shell, { title: route.title, description: route.description, url })
+      let html = swap(shell, { title: route.title, description: route.description, url })
+
+      const preloadModule = PRELOAD_BY_ROUTE[route.path]
+      const preloadHref = preloadModule ? chunkFor(preloadModule) : null
+      if (preloadHref) {
+        html = html.replace(
+          '</head>',
+          () => `  <link rel="modulepreload" href="${escapeAttr(preloadHref)}" />\n  </head>`
+        )
+        preloaded++
+      } else if (preloadModule) {
+        // The module was renamed or stopped being a lazy boundary of its own,
+        // so there is no chunk to point at. Loud, because the failure is
+        // otherwise invisible: the page still works, just slowly again.
+        this.warn(`no chunk found for preload module "${preloadModule}" (route ${route.path})`)
+      }
 
       // "/" is dist/index.html itself; everything else becomes a directory with
       // an index.html, which is what static hosts serve for a clean URL.
@@ -79,8 +137,9 @@ ${ROUTES.map(
 `
     writeFileSync(resolve(outDir, 'sitemap.xml'), sitemap)
 
-    // eslint-disable-next-line no-console
-    console.log(`\n  prerendered ${written} routes + sitemap (og image: ${OG_IMAGE})`)
+    console.log(
+      `\n  prerendered ${written} routes + sitemap, ${preloaded} with a modulepreload (og image: ${OG_IMAGE})`
+    )
   },
 })
 
