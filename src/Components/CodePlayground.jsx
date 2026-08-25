@@ -47,39 +47,6 @@ const CodePlayground = () => {
     setCode(BLANK_PROJECT);
   }, []);
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyboard = (e) => {
-      if (e.ctrlKey || e.metaKey) {
-        switch (e.key) {
-          case 'Enter':
-            e.preventDefault();
-            runCode();
-            break;
-          case 'h':
-            e.preventDefault();
-            setLayout('horizontal');
-            break;
-          case 'v':
-            e.preventDefault();
-            setLayout('vertical');
-            break;
-          case 'p':
-            e.preventDefault();
-            setLayout('output-only');
-            break;
-          case 'f':
-            e.preventDefault();
-            toggleFullscreen();
-            break;
-        }
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyboard);
-    return () => document.removeEventListener('keydown', handleKeyboard);
-  }, []);
-
   // Resizer functionality
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -157,6 +124,51 @@ const CodePlayground = () => {
       setPlaygroundHeight(500);
     }
   }, [isFullscreen]);
+
+  // Keyboard shortcuts.
+  //
+  // This has to sit below runCode and toggleFullscreen, not above them with the
+  // other effects: the dependency array is evaluated during render, so naming
+  // them any earlier is a temporal dead zone reference.
+  //
+  // It previously ran with an empty array, which bound the listener to the
+  // copies from the very first render. runCode closes over `code` and
+  // toggleFullscreen over `isFullscreen`, so Cmd+Enter re-ran whichever example
+  // the playground opened with rather than what had been typed since, and Cmd+F
+  // could only ever turn fullscreen on — `!isFullscreen` was reading a `false`
+  // captured at mount. Re-binding one document listener when either changes
+  // costs nothing next to getting the wrong code.
+  useEffect(() => {
+    const handleKeyboard = (e) => {
+      if (e.ctrlKey || e.metaKey) {
+        switch (e.key) {
+          case 'Enter':
+            e.preventDefault();
+            runCode();
+            break;
+          case 'h':
+            e.preventDefault();
+            setLayout('horizontal');
+            break;
+          case 'v':
+            e.preventDefault();
+            setLayout('vertical');
+            break;
+          case 'p':
+            e.preventDefault();
+            setLayout('output-only');
+            break;
+          case 'f':
+            e.preventDefault();
+            toggleFullscreen();
+            break;
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyboard);
+    return () => document.removeEventListener('keydown', handleKeyboard);
+  }, [runCode, toggleFullscreen]);
 
   return (
     <>
