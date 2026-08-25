@@ -4,6 +4,7 @@ import { useReducedMotion } from 'framer-motion';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Float, Sphere, MeshDistortMaterial } from '@react-three/drei';
 import * as THREE from 'three';
+import WebGLBoundary from './WebGLBoundary';
 
 const OrganicShape = ({ mouse }) => {
   const meshRef = useRef();
@@ -151,16 +152,21 @@ const HeroAnimation = () => {
           since that is what blends the sphere into the section below. */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#020617]/45 via-[#020617]/30 to-[#020617]/80 z-10"></div>
 
-      <Canvas camera={{ position: [0, 0, 7], fov: 45 }} dpr={[1, 1.5]} gl={{ alpha: true }} frameloop={reduce ? 'demand' : 'always'}>
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[10, 10, 5]} intensity={1.5} color="#3b82f6" />
-        <directionalLight position={[-10, -10, -5]} intensity={1} color="#8b5cf6" />
+      {/* Without this, a browser that refuses a WebGL context takes the whole
+          page down: Canvas throws, nothing catches it, and React unmounts from
+          the root. The globe is decoration; the page is not. */}
+      <WebGLBoundary>
+        <Canvas camera={{ position: [0, 0, 7], fov: 45 }} dpr={[1, 1.5]} gl={{ alpha: true }} frameloop={reduce ? 'demand' : 'always'}>
+          <ambientLight intensity={0.5} />
+          <directionalLight position={[10, 10, 5]} intensity={1.5} color="#3b82f6" />
+          <directionalLight position={[-10, -10, -5]} intensity={1} color="#8b5cf6" />
 
-        <OrganicShape mouse={mouse} />
-        <OrbitingParticles count={150} mouse={mouse} />
+          <OrganicShape mouse={mouse} />
+          <OrbitingParticles count={150} mouse={mouse} />
 
-        <fog attach="fog" args={['#020617', 5, 15]} />
-      </Canvas>
+          <fog attach="fog" args={['#020617', 5, 15]} />
+        </Canvas>
+      </WebGLBoundary>
     </div>
   );
 };
