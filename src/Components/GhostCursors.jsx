@@ -54,9 +54,6 @@ const hueFor = (id) => {
   return 196 + (Math.abs(hash) % 42);
 };
 
-const docHeight = () =>
-  Math.max(document.documentElement.scrollHeight, window.innerHeight);
-
 const readTrails = (route) => {
   try {
     const raw = window.localStorage.getItem(TRAILS_KEY);
@@ -105,6 +102,7 @@ const CursorLayer = () => {
   const lastSend = useRef(0);
   const lastMove = useRef(0);
   const pointer = useRef({ x: 0.5, y: 0.5, active: false });
+  const docH = useRef(0);
 
   const syncIds = useCallback(() => {
     const next = [...cursors.current.keys()];
@@ -144,13 +142,38 @@ const CursorLayer = () => {
     syncIds();
   }, [pathname, syncIds]);
 
+  // Document height, measured only when it can actually have changed.
+  //
+  // Reading scrollHeight forces the browser to flush layout, and this used to
+  // happen inside the pointermove handler — so a trackpad reporting at 120Hz
+  // triggered 120 synchronous reflows a second to compute a number that only
+  // changes when the page does. Measured here instead, on the events that move
+  // it: mount, route change, viewport resize, and content reflow.
+  useEffect(() => {
+    const measure = () => {
+      docH.current = Math.max(document.documentElement.scrollHeight, window.innerHeight);
+    };
+    measure();
+
+    window.addEventListener('resize', measure);
+    // Images and lazily-rendered sections change the page height without a
+    // resize event, and a stale height puts every cursor at the wrong depth.
+    const observer =
+      typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
+    observer?.observe(document.body);
+
+    return () => {
+      window.removeEventListener('resize', measure);
+      observer?.disconnect();
+    };
+  }, [pathname]);
+
   // Pointer capture + broadcast.
   useEffect(() => {
     const onMove = (event) => {
-      const height = docHeight();
       pointer.current = {
         x: event.clientX / window.innerWidth,
-        y: (event.clientY + window.scrollY) / height,
+        y: (event.clientY + window.scrollY) / docH.current,
         active: true,
       };
       lastMove.current = performance.now();
@@ -251,7 +274,7 @@ const CursorLayer = () => {
       const dt = Math.min(now - prev, 100);
       prev = now;
       const idle = now - lastMove.current > SELF_IDLE_MS;
-      const height = docHeight();
+      const height = docH.current;
       const width = window.innerWidth;
       const scroll = window.scrollY;
 
