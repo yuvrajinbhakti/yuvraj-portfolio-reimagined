@@ -335,7 +335,11 @@ const Home = () => {
                       href={link.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group flex items-center gap-2 px-4 py-2.5 sm:px-5 sm:py-3 rounded-full bg-white/5 backdrop-blur-md border border-white/10 hover:border-white/25 hover:bg-white/10 transition-all duration-300"
+                      // min-h-44 and justify-center are for the icon-only phone
+                      // layout: without a label to give it height the pill came
+                      // to 38px, and centring matters once the icon is the whole
+                      // content. Desktop already clears 44 from sm:py-3.
+                      className="group flex items-center justify-center gap-2 min-h-[44px] px-4 py-2.5 sm:px-5 sm:py-3 rounded-full bg-white/5 backdrop-blur-md border border-white/10 hover:border-white/25 hover:bg-white/10 transition-all duration-300"
                       aria-label={link.name}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -348,7 +352,14 @@ const Home = () => {
                         className="w-4 h-4 sm:w-5 sm:h-5 text-white/70 group-hover:text-white transition-colors duration-300"
                         animationIndex={index}
                       />
-                      <span className="text-sm sm:text-base text-white/70 group-hover:text-white transition-colors duration-300 font-medium">
+                      {/* Hidden below sm, where the three labelled pills need
+                          344px and the column is 305. They wrapped two-then-one,
+                          which centres as a visibly lopsided block under a hero
+                          that is otherwise symmetrical. Three icons fit on one
+                          line with room to spare, and it is the treatment the
+                          footer already uses. aria-label on the anchor carries
+                          the name for screen readers either way. */}
+                      <span className="hidden sm:inline text-sm sm:text-base text-white/70 group-hover:text-white transition-colors duration-300 font-medium">
                         {link.name}
                       </span>
                     </motion.a>
