@@ -247,8 +247,18 @@ const Home = () => {
               h-0 so it claims no layout space; the inner h-screen simply
               overflows. z-10 sits above the starfield (z-0), below content (z-20). */}
           <div className="sticky top-0 h-0 z-10 pointer-events-none" aria-hidden="true">
+            {/* `relative` is what makes the globe render at all. HeroAnimation's
+                root is `absolute inset-0 h-full`, and this element is the only
+                thing between it and the sticky wrapper above, which is
+                deliberately h-0. Static, it is not a containing block, so those
+                offsets resolved against that zero-height ancestor and the canvas
+                collapsed to its 300x150 default in the corner. A transform would
+                also make it one, which is why this looked fine in passing: the
+                globe appears the moment you scroll and framer-motion writes a
+                real transform, and vanishes again at the top of the page where an
+                identity transform is serialised as `none`. */}
             <motion.div
-              className="w-full h-screen"
+              className="relative w-full h-screen"
               style={{ scale: globeScale, x: globeX, y: globeY, opacity: globeOpacity }}
             >
               <Suspense fallback={
