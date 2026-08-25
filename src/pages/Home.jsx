@@ -24,6 +24,9 @@ import { socialLinks } from "../constants";
 import sakura from '../assets/sakura.mp3';
 import { soundoff, soundon } from "../assets/icons";
 import useDocumentMeta from '../hooks/useDocumentMeta';
+// A plain function with no imports of its own, so naming it here does not drag
+// three.js back onto the entry path.
+import { supportsWebGL } from "../utils/webgl";
 
 // Each card carries a concrete proof point rather than a capability claim.
 // "Creating responsive, performant user interfaces" is something anyone can
@@ -122,6 +125,11 @@ const Home = () => {
   // MotionConfig can't switch it off; the ranges are flattened to 0 instead.
   // Decoupled scroll movement is a classic vestibular trigger.
   const reduce    = useReducedMotion();
+  // Resolved after mount rather than during render: the prerendered HTML is
+  // built in Node, where there is no canvas to probe, and deciding this during
+  // render would make the build output disagree with the first client render.
+  const [globeSupported, setGlobeSupported] = useState(false);
+  useEffect(() => setGlobeSupported(supportsWebGL()), []);
   const p         = (distance) => (reduce ? 0 : distance);
   const midY      = useTransform(scrollYProgress, [0, 1], [0, p(220)]);  // medium: subtitle
   const y         = useTransform(scrollYProgress, [0, 1], [0, p(320)]);  // fast: headline
@@ -261,16 +269,21 @@ const Home = () => {
               className="relative w-full h-screen"
               style={{ scale: globeScale, x: globeX, y: globeY, opacity: globeOpacity }}
             >
-              <Suspense fallback={
-                <div className="w-full h-full flex items-center justify-center">
-                  <div className="text-white flex flex-col items-center">
-                    <div className="w-12 h-12 md:w-16 md:h-16 border-4 border-t-blue-500 border-opacity-20 rounded-full animate-spin mb-4"></div>
-                    <p className="text-sm md:text-base">Loading 3D Experience...</p>
-                  </div>
-                </div>
-              }>
-                <HeroAnimation />
-              </Suspense>
+              {/* Checked before the lazy import is triggered, so a device that
+                  cannot render the globe never downloads the 226 kB gzip needed
+                  to discover that. WebGLBoundary inside HeroAnimation still
+                  catches the other case — a context that is advertised, then
+                  fails to allocate. */}
+              {globeSupported && (
+                // fallback={null}, not a spinner. The globe is aria-hidden
+                // decoration sitting behind the headline; a spinner and the
+                // words "Loading 3D Experience..." announced a wait for
+                // something nobody asked for, on top of the content they did.
+                // Nothing is the honest placeholder for decoration.
+                <Suspense fallback={null}>
+                  <HeroAnimation />
+                </Suspense>
+              )}
             </motion.div>
           </div>
 
