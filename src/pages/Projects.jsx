@@ -387,9 +387,24 @@ const Projects = () => {
 
   return (
     <div className="w-full" ref={containerRef} style={{ scrollBehavior: 'smooth' }}>
-      {/* Enhanced Custom Cursor - Hide on mobile */}
+      {/* Hover ring — a halo around the pointer over a card or a link, and
+          nothing at all the rest of the time.
+
+          It used to carry mix-blend-difference and a filled white dot in its
+          resting state, which produced the artefact this replaces: difference
+          inverts whatever is behind it, and inverting a blue-cast near-black
+          (13, 18, 36) gives a warm cream (242, 237, 219). So a beige disc rode
+          around on top of the headline — the only warm colour on a site that
+          was deliberately taken to near-monochrome — and turned black wherever
+          it crossed white text.
+
+          The resting dot is gone with it. It duplicated the pointer the OS is
+          already drawing, and it lagged behind it on the spring, so fast
+          movement separated the two. A ring that appears only on an
+          interactive target says something the native cursor does not; a dot
+          that shadows it says nothing. */}
       <motion.div
-        className="fixed top-0 left-0 pointer-events-none z-50 mix-blend-difference hidden md:block"
+        className="fixed top-0 left-0 pointer-events-none z-50 hidden md:block"
         style={{
           x: smoothMouseX,
           y: smoothMouseY,
@@ -397,30 +412,34 @@ const Projects = () => {
         transition={{ type: "spring", damping: 25, stiffness: 200, mass: 0.3 }}
       >
         <motion.div
-          className="relative -translate-x-1/2 -translate-y-1/2"
+          className="relative -translate-x-1/2 -translate-y-1/2 rounded-full"
           variants={{
             default: {
               width: 16,
               height: 16,
-              backgroundColor: "rgba(255, 255, 255, 0.8)",
-              borderRadius: "50%",
-              border: "1px solid rgba(255, 255, 255, 0.3)",
+              opacity: 0,
+              backgroundColor: "rgba(59, 130, 246, 0)",
+              borderColor: "rgba(59, 130, 246, 0)",
             },
             project: {
               width: 48,
               height: 48,
-              backgroundColor: "rgba(59, 130, 246, 0.15)",
-              borderRadius: "50%",
-              border: "2px solid rgba(59, 130, 246, 0.6)",
+              opacity: 1,
+              backgroundColor: "rgba(59, 130, 246, 0.12)",
+              borderColor: "rgba(59, 130, 246, 0.55)",
             },
+            // Size carries the distinction, not hue. The emerald ring this
+            // replaces was a second accent doing decorative work — the palette
+            // pass kept green for status only.
             link: {
-              width: 32,
-              height: 32,
-              backgroundColor: "rgba(16, 185, 129, 0.15)",
-              borderRadius: "50%",
-              border: "2px solid rgba(16, 185, 129, 0.6)",
+              width: 28,
+              height: 28,
+              opacity: 1,
+              backgroundColor: "rgba(96, 165, 250, 0.16)",
+              borderColor: "rgba(147, 197, 253, 0.75)",
             }
           }}
+          style={{ borderWidth: 2, borderStyle: 'solid' }}
           animate={cursorVariant}
           transition={{ type: "spring", damping: 25, stiffness: 200 }}
         />
