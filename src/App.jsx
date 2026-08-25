@@ -1,6 +1,8 @@
 import { Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom';
 import Navbar from './Components/Navbar';
 import Footer from './Components/Footer';
+import CursorPresenceProvider from './Components/CursorPresenceProvider';
+import GhostCursors from './Components/GhostCursors';
 import { useEffect, Suspense, lazy } from 'react';
 import { AnimatePresence, motion, MotionConfig, useReducedMotion } from 'framer-motion';
 import { gsap } from 'gsap';
@@ -109,21 +111,27 @@ const App = () => {
           main content is the entire page" — which is the same as saying
           nothing. The real <main> is below, around the routed page only. */}
       <div className="bg-[#020617] text-white relative min-h-screen">
-        <Router>
-          {/* Scroll-driven, no JS. Gives a long page a sense of journey. */}
-          <div className="scroll-progress" aria-hidden="true" />
-          {/* Off-screen until focused. Without it, every keyboard visitor tabs
-              through the whole nav again on every page (WCAG 2.4.1). */}
-          <a href="#main-content" className="skip-link">Skip to main content</a>
-          <Navbar />
-          <ScrollToTop />
-          {/* tabIndex={-1} so the skip link can actually move focus here;
-              without it the browser scrolls but focus stays in the nav. */}
-          <main id="main-content" tabIndex={-1}>
-            <AnimatedRoutes />
-          </main>
-          <Footer />
-        </Router>
+        <CursorPresenceProvider>
+          <Router>
+            {/* Scroll-driven, no JS. Gives a long page a sense of journey. */}
+            <div className="scroll-progress" aria-hidden="true" />
+            {/* Off-screen until focused. Without it, every keyboard visitor tabs
+                through the whole nav again on every page (WCAG 2.4.1). */}
+            <a href="#main-content" className="skip-link">Skip to main content</a>
+            <Navbar />
+            <ScrollToTop />
+            {/* Inside the Router because it keys everything to the current
+                route, and outside <main> because it is decoration layered over
+                the page rather than part of its content. */}
+            <GhostCursors />
+            {/* tabIndex={-1} so the skip link can actually move focus here;
+                without it the browser scrolls but focus stays in the nav. */}
+            <main id="main-content" tabIndex={-1}>
+              <AnimatedRoutes />
+            </main>
+            <Footer />
+          </Router>
+        </CursorPresenceProvider>
       </div>
     </MotionConfig>
   );
