@@ -142,8 +142,14 @@ const HeroAnimation = () => {
 
   return (
     <div className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 0 }}>
-      {/* Subtle overlay to ensure text readability */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#020617]/20 to-[#020617]/80 z-10"></div>
+      {/* Readability scrim.
+          It used to start at `from-transparent`, which put its weakest point at
+          the top of the hero — exactly where the globe's wireframe is densest
+          and where the headline sits. At 375px the grid ran straight through
+          "I'm Yuvraj Singh Nain". A veil across the top costs very little of the
+          globe and buys back the headline; the heavy bottom fade is unchanged,
+          since that is what blends the sphere into the section below. */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#020617]/45 via-[#020617]/30 to-[#020617]/80 z-10"></div>
 
       <Canvas camera={{ position: [0, 0, 7], fov: 45 }} dpr={[1, 1.5]} gl={{ alpha: true }} frameloop={reduce ? 'demand' : 'always'}>
         <ambientLight intensity={0.5} />
