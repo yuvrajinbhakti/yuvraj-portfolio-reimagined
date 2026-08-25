@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { caseStudies } from '../constants/caseStudies';
+import { useCursorPresence } from '../contexts/cursorPresence';
 
 // The nav links that used to live here duplicated a bar that is fixed to the
 // top of every page — the visitor could already see them without scrolling. A
@@ -48,6 +49,45 @@ const formatIST = () =>
     minute: '2-digit',
     hour12: true,
   }).format(new Date());
+
+/**
+ * The way back.
+ *
+ * The pill over the cursor layer can turn the cursors off, and if that were
+ * the only control it would be a one-way door — the switch would vanish along
+ * with the thing it switches. This is the counterpart: always present, states
+ * plainly that the data is local, and hidden entirely on touch devices where
+ * there is no pointer to mirror in the first place.
+ */
+const CursorSetting = () => {
+  const { enabled, setEnabled, supported } = useCursorPresence();
+  if (!supported) return null;
+
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={enabled}
+      onClick={() => setEnabled(!enabled)}
+      className="group inline-flex items-center gap-2 py-1.5 -my-1.5 text-white/40 hover:text-white/80 transition-colors"
+      title="Cursor trails stay in this browser — nothing is sent anywhere"
+    >
+      <span
+        aria-hidden="true"
+        className={`relative h-3.5 w-6 flex-none rounded-full transition-colors duration-200 ${
+          enabled ? 'bg-blue-500/70' : 'bg-white/15'
+        }`}
+      >
+        <span
+          className={`absolute top-0.5 h-2.5 w-2.5 rounded-full bg-white transition-all duration-200 ${
+            enabled ? 'left-3' : 'left-0.5'
+          }`}
+        />
+      </span>
+      <span className="text-xs">Cursor trails</span>
+    </button>
+  );
+};
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -158,7 +198,10 @@ const Footer = () => {
 
           {/* Copyright */}
           <div className="mt-8 pt-6 border-t border-white/10 flex flex-col sm:flex-row gap-2 sm:gap-4 items-center justify-between text-white/50 text-sm">
-            <span>&copy; {currentYear} Yuvraj Singh Nain</span>
+            <div className="flex items-center gap-4">
+              <span>&copy; {currentYear} Yuvraj Singh Nain</span>
+              <CursorSetting />
+            </div>
             <a
               href={`mailto:${EMAIL}`}
               onClick={copyEmail}
