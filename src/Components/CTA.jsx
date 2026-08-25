@@ -212,4 +212,9 @@ const CTA = () => {
   );
 };
 
+// A false positive, verified by renaming: the rule decides what is a component
+// from the identifier, and an all-caps acronym reads to it as a constant rather
+// than PascalCase. `Cta` silences it and `CTA` does not, for a file that exports
+// exactly one thing and that thing is a component. Keeping the better name.
+// eslint-disable-next-line react-refresh/only-export-components
 export default CTA;

@@ -10,7 +10,7 @@ import CTA from "../Components/CTA";
 import AnimatedBackground from "../Components/AnimatedBackground";
 import ScrollReveal from "../Components/ScrollReveal";
 import GlassCard from "../Components/GlassCard";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import useDocumentMeta from '../hooks/useDocumentMeta';
 import { DrawnName } from '../Components/DrawnUnderline';
 
