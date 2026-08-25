@@ -7,11 +7,15 @@ export { SITE_URL };
  * Keeps <title>, description, canonical and the OG/Twitter mirrors in sync with
  * the active route.
  *
- * Note this runs client-side, so it does not help crawlers that don't execute
- * JS — those read the static tags in index.html. The real per-route SEO fix is
- * prerendering the app. This exists so browser tabs, history entries and
- * bookmarks are meaningful, and so link previews are right for the crawlers
- * that do run JS.
+ * This runs client-side, so it is not what fixes link previews — crawlers that
+ * don't execute JS read the static tags in the prerendered file the build
+ * writes for each route (see the plugin in vite.config.js). Both read the same
+ * array in constants/routeMeta.js, so the two cannot disagree.
+ *
+ * What this covers is the part prerendering cannot: navigation. Moving between
+ * routes in an already-loaded app never fetches a new document, so without this
+ * the tab title, the history entry and a bookmark would all keep saying
+ * whatever the first page said.
  */
 const upsert = (selector, create, attr, value) => {
   if (!value) return;

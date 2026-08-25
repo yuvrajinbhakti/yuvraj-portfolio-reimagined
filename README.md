@@ -12,7 +12,7 @@ React 18 + Vite. One continuous scroll on the landing page, long-form case studi
 
 The parts of this build that involved an actual decision, rather than reaching for the default.
 
-### Bundle: 443 kB → 158 kB gzip on first load
+### Bundle: 26 MB of images that nothing rendered
 
 The original barrel file in `src/assets/images/index.js` imported every image in the
 directory. Vite emits an asset for each `import x from './x.png'` regardless of whether
@@ -25,6 +25,19 @@ the barrel would pull every page, and three.js with them, back into the entry ch
 `manualChunks` deliberately does **not** name the three.js chunk: the object form of that
 option wires a chunk into the entry's static graph, which silently undoes the lazy
 boundary you just drew.
+
+What that leaves, gzipped, from the current build:
+
+| | |
+|---|---|
+| Shell — preloaded on every route | `react-vendor` 53.5 + `motion-vendor` 42.0 + `gsap-vendor` 27.7 + entry 32.0 + CSS 14.3 = **169.5 kB** |
+| `/` route chunk | 14.0 kB |
+| Hero globe (three.js), lazy inside Home | 225.5 kB |
+
+Known gap: the globe is above the fold but sits three requests deep — entry, then `Home`,
+then `HeroAnimation` — so the largest thing on the landing page is also the last one asked
+for. Preloading that chunk, or holding it behind an idle callback with a static poster,
+would decouple the two.
 
 ### One WebGL context, not four
 
@@ -81,13 +94,30 @@ Keyboard and screen-reader support is deliberate, not incidental:
 Verified: 22 distinct text styles, zero contrast failures against the page background; no
 horizontal overflow from 375 px up.
 
-### SEO
+### SEO: a real HTML file per route
 
 Per-route `<title>`/description/canonical via a `useDocumentMeta` hook, Open Graph and
 Twitter card tags, `Person` JSON-LD, sitemap and robots.
 
-Known gap: nothing is prerendered, so link-preview scrapers that don't execute JS see the
-homepage card on every route.
+The hook alone was not enough. This is a single-page app, so the server returned the same
+`index.html` for every URL and React filled in the rest — which means anything that does not
+execute JavaScript (LinkedIn, WhatsApp, Slack, iMessage, the Twitter card fetcher) read that
+file and stopped. Every link shared from the site showed the homepage's card, including links
+to the case studies, which are the best writing on it.
+
+A build-time plugin in `vite.config.js` now copies `dist/index.html` once per route and swaps
+the tags, so `/about` is served from `dist/about/index.html` with About's own meta already in
+the markup. Humans get the identical React app; the crawler gets the truth on the first
+request.
+
+It is deliberately meta-only. Rendering each route's *body* to static HTML needs a headless
+browser, which is slow, adds a heavy dependency, and breaks whenever a component touches
+`window` during render — and Google executes JS, so it already sees the content. The meta was
+the part that was actually broken.
+
+Routes and the sitemap come from one array (`src/constants/routeMeta.js`), which the hook and
+the plugin both read, so a route cannot be prerendered and then forgotten in the sitemap —
+which is exactly what had happened before.
 
 ---
 
