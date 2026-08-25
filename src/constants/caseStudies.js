@@ -16,13 +16,23 @@ export const caseStudies = [
     role: 'Solo project — design, build, deploy',
     stack: ['React', 'Node.js', 'Socket.IO', 'Redis', 'Docker', 'Nginx', 'Bull', 'Prometheus', 'Grafana'],
     links: {
+      // NOTE: this host was measured unresponsive — 100s with no reply, so not
+      // a Render cold start. Kept in place pending a redeploy. Until it
+      // answers, it is the weakest link on the site: the demo is the most
+      // clicked thing on a portfolio, and one that goes nowhere costs more
+      // credibility than the case study earns.
       demo: 'https://real-time-code-editor-codebuddy.onrender.com/',
       code: 'https://github.com/yuvrajinbhakti/Real-Time-Collaborative-Code-Editor',
     },
+    // Each of these is a load-test result and is labelled as one. "99.95%
+    // verified uptime" was the one number here that could not survive the
+    // question "verified how, over what window?" — and it sat directly above a
+    // demo link that did not answer. Error rate under load is measured, from
+    // the same test as the rest, and defensible in a room.
     metrics: [
-      { value: '1000+', label: 'concurrent users' },
+      { value: '1000+', label: 'concurrent clients, load-tested' },
       { value: '75ms', label: 'P95 latency' },
-      { value: '99.95%', label: 'verified uptime' },
+      { value: '<0.5%', label: 'error rate at peak load' },
       { value: '10,000/s', label: 'operations processed' },
     ],
     sections: [
@@ -40,7 +50,7 @@ export const caseStudies = [
       },
       {
         heading: 'Proving it actually holds',
-        body: 'The claims above are only worth something if they are measured, so the stack ships with Prometheus and Grafana and was put under sustained load testing. Under stress it processed over 10,000 operations per second with an error rate below 0.5%, and incidents surface in under 30 seconds rather than being discovered by users.',
+        body: 'The claims above are only worth something if they are measured, so the stack ships with Prometheus and Grafana and was put under sustained load testing. At 1,000 concurrent clients it processed over 10,000 operations per second at 75ms P95, with an error rate below 0.5%, and instrumentation surfaces an incident in under 30 seconds rather than leaving it to be discovered by users.',
       },
     ],
     takeaway:
@@ -74,7 +84,7 @@ export const caseStudies = [
       },
       {
         heading: 'Making it auditable',
-        body: 'Every access is written to an audit log in MongoDB automatically, and rate limiting middleware blunts brute-force and scraping attempts. The point was to make the system answerable: being able to say exactly who touched a document and when is what moves it from "a file host" toward SOC 2 readiness, and it cut manual security monitoring by about 80%.',
+        body: 'Every access is written to an audit log in MongoDB automatically, and rate limiting middleware blunts brute-force and scraping attempts. The point was to make the system answerable: being able to say exactly who touched a document and when is the difference between a file host and something you would send a signed contract through, and it cut manual security monitoring by about 80%.',
       },
       {
         heading: 'Keeping it fast',

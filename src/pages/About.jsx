@@ -312,7 +312,13 @@ const About = () => {
                       Outside work, the one I&apos;m proudest of is a collaborative code editor
                       where I implemented Operational Transform by hand — the algorithm that
                       lets two people type in the same line without either losing a keystroke.
-                      It holds 1,000 concurrent users at 10,000 operations a second, 75ms P95.
+                      {/* "It holds" was present tense about a service that is not
+                          currently up, and it read as production traffic when the
+                          numbers come from a load test. Naming the method is also
+                          simply the stronger sentence: a number on its own is a
+                          boast, a number with a methodology behind it is evidence. */}
+                      I load-tested it to 1,000 concurrent clients — 10,000 operations a
+                      second at 75ms P95, with an error rate under 0.5%.
                     </p>
                   </motion.div>
                 </div>
