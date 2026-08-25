@@ -1,4 +1,6 @@
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&family=Work+Sans:wght@100;200;300;400;500;600;700;800;900&display=swap");
+/* Fonts load from a <link> in index.html, not from here. An @import cannot be
+   discovered until this file has been fetched and parsed, which put the
+   typeface behind the stylesheet in the waterfall for no reason. */
 
 @tailwind base;
 @tailwind components;
@@ -238,12 +240,16 @@ body:has(.card[data-color="green"]:hover) {
     @apply max-w-5xl mx-auto sm:p-16 pb-12 !pt-[126px] px-4 sm:px-8 min-h-[calc(100vh-80px)];
   }
 
+  /* font-poppins dropped from both: these two rules were the only thing on the
+     site naming that family, and no component uses either class — so the page
+     was downloading a second typeface to render nothing. They now inherit Work
+     Sans like everything else, which is what they were already rendering as. */
   .head-text {
-    @apply text-2xl sm:text-3xl md:text-5xl font-semibold sm:leading-snug font-poppins;
+    @apply text-2xl sm:text-3xl md:text-5xl font-semibold sm:leading-snug;
   }
 
   .subhead-text {
-    @apply font-semibold text-lg sm:text-xl md:text-3xl relative font-poppins;
+    @apply font-semibold text-lg sm:text-xl md:text-3xl relative;
   }
 
   .blue-gradient_text {

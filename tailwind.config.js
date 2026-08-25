@@ -20,7 +20,6 @@ export default {
       },
       fontFamily: {
         worksans: ["Work Sans", "sans-serif"],
-        poppins: ['Poppins', "sans-serif"]
       },
       // Optical sizing. Tailwind's default scale ships every size at
       // letter-spacing: normal, which is only correct in the middle of the
