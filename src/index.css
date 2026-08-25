@@ -11,6 +11,12 @@ html {
   width: 100%;
   margin: 0;
   padding: 0;
+  /* The scrolling element is the container every useScroll() measures against,
+     and framer-motion warns in development that it cannot compute offsets
+     reliably against a static one. Costs nothing here: body is already
+     position: relative, so it intercepts every absolutely positioned
+     descendant before the root can affect one. */
+  position: relative;
 }
 body {
   background-color: #020617;
