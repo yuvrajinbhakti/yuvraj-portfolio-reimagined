@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import PropTypes from 'prop-types'
 import DrawnUnderline from './DrawnUnderline'
+import { useCommandPalette } from '../contexts/commandPalette'
+import { MOD_KEY } from '../utils/platform'
 
 const navItems = [
   { to: '/about', label: 'About' },
@@ -49,8 +51,17 @@ const Navbar = () => {
   const [markHovered, setMarkHovered] = useState(false)
   const menuRef = useRef(null)
   const triggerRef = useRef(null)
+  const { open: openPalette, prefetch: prefetchPalette } = useCommandPalette()
 
   const closeMenu = useCallback(() => setIsMenuOpen(false), [])
+
+  // On a phone the menu is the only way in, so it has to hand off rather than
+  // sit open behind the palette — two stacked dialogs, each with its own focus
+  // trap, is a way to lose a keyboard user entirely.
+  const openPaletteFromMenu = useCallback(() => {
+    setIsMenuOpen(false)
+    openPalette()
+  }, [openPalette])
 
   // Check if device is mobile
   useEffect(() => {
@@ -210,12 +221,48 @@ const Navbar = () => {
           </span>
         </NavLink>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex text-sm gap-7 font-medium">
-          {navItems.map((item) => (
-            <NavItem key={item.to} {...item} />
-          ))}
-        </nav>
+        {/* Desktop Navigation.
+            Wrapped with the search control rather than sitting beside it: the
+            header is justify-between, so a third top-level child would push the
+            nav into the middle of the bar instead of leaving it on the right
+            where it has always been. */}
+        <div className="hidden md:flex items-center gap-6">
+          <nav className="flex text-sm gap-7 font-medium">
+            {navItems.map((item) => (
+              <NavItem key={item.to} {...item} />
+            ))}
+          </nav>
+
+          {/* The palette is worth nothing if nobody knows it is there, and a
+              keyboard shortcut with no visible affordance is a secret. Quiet
+              enough not to reintroduce the furniture this bar had removed: no
+              fill, no shadow, and it only gains a border on hover. */}
+          <button
+            type="button"
+            onClick={openPalette}
+            onMouseEnter={prefetchPalette}
+            onFocus={prefetchPalette}
+            aria-label={`Search this site — press ${MOD_KEY} K`}
+            className="group inline-flex items-center gap-2 h-9 pl-2.5 pr-2 rounded-lg border border-transparent text-white/50 hover:text-white hover:border-white/15 hover:bg-white/5 transition-colors duration-200"
+          >
+            <svg
+              className="w-4 h-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <path d="M21 21l-4.2-4.2" />
+            </svg>
+            <span className="text-sm">Search</span>
+            <kbd className="inline-flex items-center h-5 px-1.5 rounded border border-white/15 bg-white/5 text-[11px] font-sans text-white/50 group-hover:text-white/70 group-hover:border-white/25 transition-colors">
+              {MOD_KEY}K
+            </kbd>
+          </button>
+        </div>
 
         {/* Mobile Hamburger Button */}
         <motion.button
@@ -298,6 +345,35 @@ const Navbar = () => {
                   <div className="w-12 h-0.5 bg-blue-500 mx-auto rounded-full"></div>
                 </div>
                 
+                {/* Search leads on a phone, where it is the difference between
+                    four nav links and the whole site. There is no keyboard to
+                    show a shortcut for, so it is a plain control. */}
+                <motion.div
+                  initial={{ x: 50, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <button
+                    type="button"
+                    onClick={openPaletteFromMenu}
+                    className="w-full flex items-center gap-3 min-h-[44px] px-4 py-3 mb-2 rounded-xl bg-white/5 border border-white/10 text-white/70 hover:text-white hover:border-blue-400/40 hover:bg-white/10 transition-all"
+                  >
+                    <svg
+                      className="w-4 h-4 shrink-0"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      strokeLinecap="round"
+                      aria-hidden="true"
+                    >
+                      <circle cx="11" cy="11" r="7" />
+                      <path d="M21 21l-4.2-4.2" />
+                    </svg>
+                    <span className="text-sm font-medium">Search everything</span>
+                  </button>
+                </motion.div>
+
                 {navItems.map((item, index) => (
                   <motion.div
                     key={item.to}
