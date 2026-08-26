@@ -119,6 +119,52 @@ Routes and the sitemap come from one array (`src/constants/routeMeta.js`), which
 the plugin both read, so a route cannot be prerendered and then forgotten in the sitemap —
 which is exactly what had happened before.
 
+### ⌘K: search, not just navigation
+
+Five pages, six projects, two long case studies and three playground examples, and until
+recently the only way to any of them was clicking through the nav bar. `Cmd/Ctrl-K` — or `/`
+outside a text field — opens a palette over every one of them, plus each *section* of each
+case study, which is the smallest unit anyone is actually looking for: "how did you handle
+conflicts" is a heading, not a page, and linking to the heading puts the answer on screen.
+
+The index (`src/constants/commandIndex.js`) is built from the data the pages already render,
+so adding a case study gives it a palette entry with no further edits and renaming a project
+cannot leave a result pointing at the old name.
+
+It costs nothing until used: the component and the index are one lazy chunk (5.8 kB gzip), and
+the import is warmed on the keydown of Cmd or Ctrl — which arrives before the K does, so the
+first press opens it rather than showing a blank frame.
+
+Results are one flat list in score order, deliberately ungrouped. Grouping looked tidier and
+ranked worse: whichever group held the best match got drawn first *in its entirety*, so ten
+passing mentions inside case-study prose pushed an exactly-named result below the fold.
+The matcher (`src/utils/search.js`) scores a verbatim substring an order of magnitude above a
+scattered one, and requires a scattered match to begin a word — the line between an
+abbreviation and a coincidence, and the difference between "aes" finding the encryption
+section and "aes" finding *C·a·re Car R·e·ntal Web·s·ite*.
+
+### Live cursors that are actually other people
+
+The cursor layer draws two things: peers reading the same page right now, and a replay of the
+visitor's own earlier pointer path. The ghost half exists because a portfolio is usually being
+read by exactly one person, and it means nothing is ever faked — the page never stages a crowd
+that does not exist.
+
+The live half used to be BroadcastChannel only, which reaches the visitor's own tabs and
+nothing else. `presence/` is the relay that makes it real: a Cloudflare Worker holding one
+hibernating Durable Object, forwarding positions between people on the same route and storing
+nothing. `src/utils/presenceTransport.js` fans identical messages over both pipes at once, so
+the rest of the feature never learned there was a network.
+
+**The site does not depend on it.** With `VITE_PRESENCE_URL` unset no socket is opened and the
+layer is exactly the local-only feature it was — which is also the failure mode if the relay
+is down. See [`presence/README.md`](presence/README.md) to deploy it.
+
+Positions travel normalised — `x` against the viewport width, `y` against the full document
+height — so a peer on a different window size and scroll position lands on the same paragraph
+rather than the same pixel. Someone scrolled elsewhere is simply off-screen, which is the
+honest answer.
+
 ---
 
 ## Running it
@@ -150,6 +196,17 @@ VITE_EMAILJS_PUBLIC_KEY=...
 ```
 
 See [ENV_SETUP_GUIDE.md](ENV_SETUP_GUIDE.md) and [EMAILJS_SETUP.md](EMAILJS_SETUP.md).
+
+### Cursor presence (optional)
+
+```
+VITE_PRESENCE_URL=wss://ysn-presence.<subdomain>.workers.dev/presence
+```
+
+Unset, the cursor layer falls back to BroadcastChannel and nothing is sent anywhere. Vite
+inlines `VITE_` variables at build time, so setting this on the host needs a rebuild, not a
+restart. `.env.example` lists both groups; [`presence/README.md`](presence/README.md) covers
+deploying the relay.
 
 ---
 
