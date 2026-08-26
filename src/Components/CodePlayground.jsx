@@ -481,12 +481,22 @@ const CodePlayground = () => {
               )}
             </div>
             
+            {/* allow-scripts only. Paired with allow-same-origin — which this
+                carried until now — the frame runs with this page's origin, and
+                script inside it can reach out and strip the sandbox attribute
+                off its own iframe element, which leaves no sandbox at all. The
+                browser warns about exactly this combination on every run.
+
+                Nothing here needed it: the parent only ever writes srcdoc and
+                never reads back through contentWindow, and none of the examples
+                touch storage, cookies or the network. So the frame gets an
+                opaque origin and the isolation is real. */}
             <iframe
               ref={iframeRef}
               className="w-full bg-white"
               style={{ height: 'calc(100% - 3rem)' }}
               title="Code Playground Output"
-              sandbox="allow-scripts allow-same-origin"
+              sandbox="allow-scripts"
             />
           </div>
         </div>
