@@ -1,15 +1,32 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 // Examples live in their own module — a 1,500-line object of template
 // literals is content, not component logic.
 import { EXAMPLES, BLANK_PROJECT } from '../constants/playgroundExamples';
+
+// The one example that opens by default. Named rather than repeated, because
+// it is referenced twice below and the second reference is easy to miss.
+const DEFAULT_EXAMPLE = 'operational-transform';
 
 const CodePlayground = () => {
   const [activeTab, setActiveTab] = useState('html');
   // Opens on the Operational Transform demo rather than a Hello World. It is
   // the most interesting thing in here and there is no reason to make anyone
   // click to find it.
-  const [code, setCode] = useState(EXAMPLES['operational-transform'].code);
+  const [code, setCode] = useState(EXAMPLES[DEFAULT_EXAMPLE].code);
+
+  // ?example=<key> loads that example instead, which is how the command palette
+  // opens one directly. Only ever on a change of the parameter itself, so an
+  // unrelated re-render cannot throw away edits someone has made — and picking
+  // the same example twice is deliberately a no-op rather than a silent reset.
+  const [searchParams] = useSearchParams();
+  const requestedExample = searchParams.get('example');
+  useEffect(() => {
+    if (!requestedExample) return;
+    const example = EXAMPLES[requestedExample];
+    if (example) setCode(example.code);
+  }, [requestedExample]);
 
   const [isRunning, setIsRunning] = useState(false);
   const [theme, setTheme] = useState('dark');
@@ -329,7 +346,10 @@ const CodePlayground = () => {
                       className="group flex items-center gap-2 px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-md transition-all duration-200 text-xs whitespace-nowrap shrink-0"
                       title={example.description}
                     >
-                      <span className="text-sm">{example.icon}</span>
+                      {/* The emoji that used to sit here was removed a while
+                          back but left an `icon: ''` field and an empty span
+                          behind it. Both are gone now the metadata lives in
+                          playgroundCatalog.js. */}
                       <span className="font-medium">{example.name}</span>
                     </button>
                   ))}
