@@ -2,6 +2,7 @@ import { Route, BrowserRouter as Router, Routes, useLocation, useNavigationType 
 import Navbar from './Components/Navbar';
 import Footer from './Components/Footer';
 import CursorPresenceProvider from './Components/CursorPresenceProvider';
+import CommandPaletteProvider from './Components/CommandPaletteProvider';
 import GhostCursors from './Components/GhostCursors';
 import { useEffect, useRef, Suspense, lazy } from 'react';
 import { AnimatePresence, motion, MotionConfig, useReducedMotion } from 'framer-motion';
@@ -100,7 +101,7 @@ const refreshTriggersWhenSettled = () => {
  * loads; a client-side router has to do it by hand.
  */
 const ScrollManager = () => {
-  const { key } = useLocation();
+  const { key, hash } = useLocation();
   const navigationType = useNavigationType();
   const reduce = useReducedMotion();
   const positions = useRef(new Map());
@@ -122,6 +123,47 @@ const ScrollManager = () => {
   }, [key]);
 
   useEffect(() => {
+    // A URL with a fragment is a request to land somewhere specific, so neither
+    // of the behaviours below is right for it. Handled here rather than in each
+    // page that has anchors, because the hard parts — waiting out the route
+    // transition, waiting for a lazy chunk to actually render the target — are
+    // the same everywhere and are exactly what a page-level effect gets wrong.
+    //
+    // How far below the navbar to land is the target's business: every anchor
+    // carries its own scroll-margin-top, so scrollIntoView needs no offset
+    // arithmetic here and stays correct if the bar ever changes height.
+    if (hash) {
+      const id = decodeURIComponent(hash.slice(1));
+      let frame;
+      let stopRefresh;
+      const start = performance.now();
+      const exitMs = reduce ? 100 : 200; // mirrors PageTransition's exit duration
+      const deadline = start + 1500;
+
+      const attempt = () => {
+        const now = performance.now();
+        if (now - start >= exitMs) {
+          const target = document.getElementById(id);
+          if (target) {
+            target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+            stopRefresh = refreshTriggersWhenSettled();
+            return;
+          }
+          // The anchor never appeared — a stale link, or a heading that has
+          // been renamed. Leaving the page at the top is the honest outcome;
+          // scrolling somewhere arbitrary would be worse.
+          if (now > deadline) return;
+        }
+        frame = requestAnimationFrame(attempt);
+      };
+
+      frame = requestAnimationFrame(attempt);
+      return () => {
+        cancelAnimationFrame(frame);
+        stopRefresh?.();
+      };
+    }
+
     const saved = navigationType === 'POP' ? positions.current.get(key) : undefined;
 
     if (saved == null) {
@@ -168,7 +210,7 @@ const ScrollManager = () => {
     };
     frame = requestAnimationFrame(attempt);
     return () => cancelAnimationFrame(frame);
-  }, [key, navigationType, reduce]);
+  }, [key, hash, navigationType, reduce]);
 
   return null;
 };
@@ -204,23 +246,29 @@ const App = () => {
       <div className="bg-[#020617] text-white relative min-h-screen">
         <CursorPresenceProvider>
           <Router>
-            {/* Scroll-driven, no JS. Gives a long page a sense of journey. */}
-            <div className="scroll-progress" aria-hidden="true" />
-            {/* Off-screen until focused. Without it, every keyboard visitor tabs
-                through the whole nav again on every page (WCAG 2.4.1). */}
-            <a href="#main-content" className="skip-link">Skip to main content</a>
-            <Navbar />
-            <ScrollManager />
-            {/* Inside the Router because it keys everything to the current
-                route, and outside <main> because it is decoration layered over
-                the page rather than part of its content. */}
-            <GhostCursors />
-            {/* tabIndex={-1} so the skip link can actually move focus here;
-                without it the browser scrolls but focus stays in the nav. */}
-            <main id="main-content" tabIndex={-1}>
-              <AnimatedRoutes />
-            </main>
-            <Footer />
+            {/* Inside the Router because the palette navigates, and around
+                everything because the navbar, the mobile menu and the footer
+                all offer a way into it. The palette itself is not loaded until
+                it is opened. */}
+            <CommandPaletteProvider>
+              {/* Scroll-driven, no JS. Gives a long page a sense of journey. */}
+              <div className="scroll-progress" aria-hidden="true" />
+              {/* Off-screen until focused. Without it, every keyboard visitor tabs
+                  through the whole nav again on every page (WCAG 2.4.1). */}
+              <a href="#main-content" className="skip-link">Skip to main content</a>
+              <Navbar />
+              <ScrollManager />
+              {/* Inside the Router because it keys everything to the current
+                  route, and outside <main> because it is decoration layered over
+                  the page rather than part of its content. */}
+              <GhostCursors />
+              {/* tabIndex={-1} so the skip link can actually move focus here;
+                  without it the browser scrolls but focus stays in the nav. */}
+              <main id="main-content" tabIndex={-1}>
+                <AnimatedRoutes />
+              </main>
+              <Footer />
+            </CommandPaletteProvider>
           </Router>
         </CursorPresenceProvider>
       </div>
