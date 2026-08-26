@@ -992,6 +992,54 @@ body:has(.card[data-color="green"]:hover) {
 }
 
 /* ---------------------------------------------------------------------------
+   Command palette
+
+   Same case as the terminal prompt above, and resolved the same way. This input
+   takes focus the instant the dialog opens, so the global ring is never a
+   discovery — it is a hard-edged rectangle drawn inside a rounded panel, around
+   the only element in the dialog that can hold focus at all.
+
+   Nothing is lost by removing it: the panel is a modal sitting over a dimmed
+   page, the caret is blinking in the field, and there is nowhere else focus
+   could be. Arrow keys move a highlight that is drawn on the rows themselves,
+   which is the indicator that actually carries information here.
+--------------------------------------------------------------------------- */
+.command-palette__input:focus-visible,
+.command-palette__input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* The results list scrolls, and the platform scrollbar is an opaque slab
+   against a translucent dark panel — it reads as a piece of the design rather
+   than as chrome. Thinned and dimmed until the pointer is over the list. */
+.command-palette__results {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+}
+
+.command-palette__results::-webkit-scrollbar {
+  width: 10px;
+}
+
+.command-palette__results::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.command-palette__results::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.14);
+  border-radius: 9999px;
+  /* Transparent border plus content-box clipping insets the thumb without
+     needing a narrower track, so it never touches the panel edge. */
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+.command-palette__results:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.26);
+}
+
+/* ---------------------------------------------------------------------------
    Glass card content passthrough
 
    GlassCard wraps whatever you give it in a positioning div. That div sits
