@@ -16,6 +16,8 @@
  * component is not a reasonable place for content to live.
  */
 
+import { catalogFor } from './playgroundCatalog';
+
 // Base styling every example starts from, so the preview looks like it belongs
 // to this site rather than to 1996. Composed into each example's CSS rather
 // than injected behind the scenes: this is a playground, so what is in the CSS
@@ -56,12 +58,7 @@ const withBase = (css) => BASE_CSS + `
 
 export const EXAMPLES = {
   'operational-transform': {
-    name: 'Operational Transform',
-    icon: '',
-    category: 'Algorithms',
-    description: 'How two people type in the same line without either losing a keystroke',
-    difficulty: 'Advanced',
-    tags: ['JS', 'Algorithms', 'Real-time'],
+    ...catalogFor('operational-transform'),
     code: {
       html: `<div class="ot">
   <h2>Operational Transform</h2>
@@ -186,12 +183,7 @@ function resetDemo() {
   },
 
   'rupee-input': {
-    name: 'Rupee Input',
-    icon: '',
-    category: 'Payments',
-    description: 'Lakh/crore grouping with the caret where you left it',
-    difficulty: 'Intermediate',
-    tags: ['JS', 'i18n', 'Forms'],
+    ...catalogFor('rupee-input'),
     code: {
       html: `<div class="amt">
   <h2>Indian amount input</h2>
@@ -309,12 +301,7 @@ input.addEventListener('input', format);`,
   },
 
   'payment-states': {
-    name: 'Payment Lifecycle',
-    icon: '',
-    category: 'Payments',
-    description: 'Authorised, captured, settled — and every way it goes wrong',
-    difficulty: 'Intermediate',
-    tags: ['JS', 'State machines', 'Payments'],
+    ...catalogFor('payment-states'),
     code: {
       html: `<div class="pay">
   <h2>What happens after you tap Pay</h2>
