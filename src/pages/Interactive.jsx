@@ -11,13 +11,18 @@ const Interactive = () => {
   const containerRef = useRef(null);
 
 
+  // The ids are anchors. The command palette links straight at them — picking
+  // a playground example from ⌘K should land on the editor, not at the top of
+  // a page the editor happens to be near the bottom of.
   const features = [
     {
+      id: "interactive-terminal",
       title: "Interactive Terminal",
       description: "A shell that answers questions about my background. Type help to see what it knows.",
       component: <InteractiveTerminal />,
     },
     {
+      id: "code-playground",
       title: "Code Playground",
       description: "A live HTML, CSS and JavaScript editor with an instant preview. Edit anything; it re-runs as you type.",
       component: <CodePlayground />,
@@ -84,9 +89,10 @@ const Interactive = () => {
             >
               {features.map((feature) => (
                 <motion.div
-                  key={feature.title}
+                  key={feature.id}
+                  id={feature.id}
                   variants={itemVariants}
-                  className="bg-white/[0.03] backdrop-blur-sm rounded-xl p-6 md:p-8 border border-white/10 relative overflow-hidden max-w-5xl mx-auto"
+                  className="scroll-mt-24 md:scroll-mt-28 bg-white/[0.03] backdrop-blur-sm rounded-xl p-6 md:p-8 border border-white/10 relative overflow-hidden max-w-5xl mx-auto"
                 >
                   <div className="text-center mb-8 relative z-10">
                     {/* The heading used to open with a wobbling emoji. Emoji as

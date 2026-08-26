@@ -96,6 +96,27 @@ export const caseStudies = [
   },
 ];
 
+/**
+ * The DOM id for a section heading, derived from the heading text.
+ *
+ * Lives here rather than in either of the two places that need it — the case
+ * study page, which writes the ids, and the command palette, which links to
+ * them — because an anchor is only worth having if both halves agree on it.
+ * Two independent slugify functions is exactly how you end up shipping a
+ * "Jump to section" result that lands at the top of the page.
+ *
+ * Headings are authored in this file, so this only has to handle the prose that
+ * appears above: no transliteration, no collision suffixes. A duplicate heading
+ * within one study would produce a duplicate id, which is invalid HTML and
+ * would be visible immediately in the outline.
+ */
+export const sectionId = (heading) =>
+  `s-${heading
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')}`;
+
 export const getCaseStudy = (slug) => caseStudies.find((c) => c.slug === slug);
 
 export const caseStudyForProject = (projectId) =>
