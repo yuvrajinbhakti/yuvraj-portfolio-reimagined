@@ -2,21 +2,24 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { useCursorPresence } from '../contexts/cursorPresence';
+import { createPresenceTransport } from '../utils/presenceTransport';
 
 /**
  * Two kinds of cursor, drawn the same way and meaning different things.
  *
- *   live  — someone else with this page open right now, over BroadcastChannel.
- *           Real, and same-origin only: the browser routes these between tabs
- *           and windows on this machine and nothing touches the network.
+ *   live  — someone else with this page open right now. Their tabs and windows
+ *           on this machine over BroadcastChannel, and other people entirely
+ *           over the relay in presence/ when one is configured.
  *   ghost — a path this visitor's own pointer took, replayed back at them.
  *
  * The ghost half is what makes the feature work on a portfolio, which is a
- * site that is usually being read by exactly one person. It also means there
- * is nothing to fake: within about twenty seconds of arriving you have moved
- * enough for your own trail to start replaying, so the page is never staging a
- * crowd that does not exist. Previous visits are kept in localStorage, so a
- * second visit starts populated.
+ * site that is usually being read by exactly one person — and that is still
+ * true with the relay running, because most of the time there genuinely is
+ * nobody else. It also means there is nothing to fake: within about twenty
+ * seconds of arriving you have moved enough for your own trail to start
+ * replaying, so the page is never staging a crowd that does not exist.
+ * Previous visits are kept in localStorage, so a second visit starts
+ * populated.
  *
  * Positions travel normalised — x against the viewport width, y against the
  * full document height — so a peer on a different window size and scroll
@@ -25,7 +28,6 @@ import { useCursorPresence } from '../contexts/cursorPresence';
  * the honest answer.
  */
 
-const CHANNEL_NAME = 'ysn-presence';
 const TRAILS_KEY = 'ysn:trails';
 
 const SEND_INTERVAL = 60;        // ms between broadcasts
@@ -96,7 +98,8 @@ const CursorLayer = () => {
   const [liveCount, setLiveCount] = useState(0);
 
   const selfId = useRef(uid());
-  const channel = useRef(null);
+  // Holds the combined transport, not a BroadcastChannel — see presenceTransport.
+  const transport = useRef(null);
   const trail = useRef([]);
   const lastSample = useRef(0);
   const lastSend = useRef(0);
@@ -189,18 +192,19 @@ const CursorLayer = () => {
     };
   }, []);
 
-  // Live peers. BroadcastChannel is same-origin and same-browser — it reaches
-  // other tabs and windows, and nothing else. If it is missing, ghosts still
-  // run; there is no fallback worth adding, because every alternative involves
-  // sending a stranger's pointer position to a server.
+  // Live peers, over both pipes at once — BroadcastChannel for this browser's
+  // other tabs, and a WebSocket relay for actual other people when one is
+  // configured. Both carry the same message shape and the same sender id, so
+  // everything below is unchanged from when this was BroadcastChannel alone,
+  // and a visitor with two tabs open still appears once rather than twice.
+  //
+  // With no relay configured the socket half does not exist and this is exactly
+  // the local-only feature it was. The relay is a separate deployment, and the
+  // page should not care whether it is up.
   useEffect(() => {
-    if (typeof BroadcastChannel === 'undefined') return undefined;
-    const bc = new BroadcastChannel(CHANNEL_NAME);
-    channel.current = bc;
     const me = selfId.current;
 
-    bc.onmessage = (event) => {
-      const msg = event.data;
+    const onMessage = (msg) => {
       if (!msg || msg.id === me) return;
       if (msg.type === 'leave') {
         if (cursors.current.delete(msg.id)) syncIds();
@@ -231,15 +235,29 @@ const CursorLayer = () => {
       }
     };
 
-    const leave = () => bc.postMessage({ type: 'leave', id: me });
+    const transport = createPresenceTransport({
+      onMessage,
+      // Read at call time, not captured: the socket re-announces on every open,
+      // and a reconnect can land long after this effect ran.
+      hello: () => ({ type: 'hello', id: me, route: pathname }),
+    });
+    transport.current = transport;
+
+    // The relay tracks each connection's route from what that connection sends,
+    // and a visitor sitting still sends nothing. Without this, arriving on a
+    // page without moving the mouse would leave the relay thinking they were
+    // still on the previous one.
+    transport.send({ type: 'hello', id: me, route: pathname });
+
+    const leave = () => transport.send({ type: 'leave', id: me });
     // pagehide rather than unload: unload is ignored on iOS and blocks the
     // back/forward cache everywhere else.
     window.addEventListener('pagehide', leave);
     return () => {
       leave();
       window.removeEventListener('pagehide', leave);
-      bc.close();
-      channel.current = null;
+      transport.close();
+      transport.current = null;
     };
   }, [pathname, syncIds]);
 
@@ -247,7 +265,7 @@ const CursorLayer = () => {
   // rather than being left to time out.
   useEffect(() => {
     const onVisibility = () => {
-      if (document.hidden) channel.current?.postMessage({ type: 'leave', id: selfId.current });
+      if (document.hidden) transport.current?.send({ type: 'leave', id: selfId.current });
     };
     document.addEventListener('visibilitychange', onVisibility);
     return () => document.removeEventListener('visibilitychange', onVisibility);
@@ -292,7 +310,7 @@ const CursorLayer = () => {
         const due = moving ? SEND_INTERVAL : HEARTBEAT_MS;
         if (now - lastSend.current > due) {
           lastSend.current = now;
-          channel.current?.postMessage({
+          transport.current?.send({
             type: 'move',
             id: selfId.current,
             route: pathname,

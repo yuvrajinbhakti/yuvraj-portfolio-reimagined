@@ -1,0 +1,21 @@
+name = "ysn-presence"
+main = "src/index.js"
+compatibility_date = "2024-11-01"
+
+# Which origins may open a socket. Without this the endpoint is a free
+# WebSocket relay for anyone who finds the URL. Add a localhost entry while
+# developing against a local site build.
+[vars]
+ALLOWED_ORIGINS = "https://yuvraj-portfolio-reimagined.vercel.app,http://localhost:5173"
+
+[[durable_objects.bindings]]
+name = "PRESENCE_ROOM"
+class_name = "PresenceRoom"
+
+# new_sqlite_classes rather than new_classes: SQLite-backed Durable Objects are
+# the ones available on the free plan. Nothing here writes to storage — every
+# piece of per-connection state lives in the socket attachment — but the
+# migration still has to declare which backing the class uses.
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["PresenceRoom"]

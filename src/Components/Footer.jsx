@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { caseStudies } from '../constants/caseStudies';
 import { useCursorPresence } from '../contexts/cursorPresence';
+import { HAS_PRESENCE_RELAY } from '../utils/presenceTransport';
 
 // The nav links that used to live here duplicated a bar that is fixed to the
 // top of every page — the visitor could already see them without scrolling. A
@@ -56,9 +57,19 @@ const formatIST = () =>
  * The pill over the cursor layer can turn the cursors off, and if that were
  * the only control it would be a one-way door — the switch would vanish along
  * with the thing it switches. This is the counterpart: always present, states
- * plainly that the data is local, and hidden entirely on touch devices where
+ * plainly where the data goes, and hidden entirely on touch devices where
  * there is no pointer to mirror in the first place.
+ *
+ * The description is derived from the build rather than written down, because
+ * it used to read "nothing is sent anywhere" and that stopped being true the
+ * moment a relay was configured. A privacy claim that a config change can
+ * quietly falsify is worse than no claim, so this one cannot drift: no relay
+ * URL, no network sentence.
  */
+const CURSOR_EXPLANATION = HAS_PRESENCE_RELAY
+  ? 'Your pointer position is shared with other people reading this same page, and nothing else is. Trails stay in this browser.'
+  : 'Cursor trails stay in this browser — nothing is sent anywhere';
+
 const CursorSetting = () => {
   const { enabled, setEnabled, supported } = useCursorPresence();
   if (!supported) return null;
@@ -70,7 +81,7 @@ const CursorSetting = () => {
       aria-checked={enabled}
       onClick={() => setEnabled(!enabled)}
       className="group inline-flex items-center gap-2 py-1.5 -my-1.5 text-white/40 hover:text-white/80 transition-colors"
-      title="Cursor trails stay in this browser — nothing is sent anywhere"
+      title={CURSOR_EXPLANATION}
     >
       <span
         aria-hidden="true"
