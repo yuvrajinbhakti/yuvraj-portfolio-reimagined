@@ -39,28 +39,48 @@ body {
   z-index: 0;
 }
 
-/* Custom scrollbar */
+/* ---------------------------------------------------------------------------
+   Scrollbar
+
+   Was a solid brand-blue bar the full height of the window. On a long page
+   that is a saturated accent-coloured stripe running down the edge of every
+   screen — the single loudest element on a site that had everything else
+   deliberately turned down, and competing with the actual accents it matched.
+
+   Now it recedes: a translucent white thumb that brightens when the pointer is
+   over the page, which is the convention every dark interface uses and the one
+   thing a scrollbar has to do — say where you are without asking to be looked
+   at. Firefox gets the same treatment through the standard property.
+--------------------------------------------------------------------------- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+}
+
 ::-webkit-scrollbar {
-  width: 6px;
-  }
-  
-  @media (min-width: 768px) {
-    ::-webkit-scrollbar {
-    width: 8px;
-    }
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #3b82f6;
-  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.14);
+  border-radius: 9999px;
+  /* A transparent border with content-box clipping insets the thumb, so it
+     never touches the edge of the viewport or the panel it sits in. */
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.24);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #2563eb;
+  background-color: rgba(255, 255, 255, 0.34);
 }
 
 /* Mobile-first responsive text sizes */
@@ -1008,35 +1028,6 @@ body:has(.card[data-color="green"]:hover) {
 .command-palette__input:focus {
   outline: none;
   box-shadow: none;
-}
-
-/* The results list scrolls, and the platform scrollbar is an opaque slab
-   against a translucent dark panel — it reads as a piece of the design rather
-   than as chrome. Thinned and dimmed until the pointer is over the list. */
-.command-palette__results {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
-}
-
-.command-palette__results::-webkit-scrollbar {
-  width: 10px;
-}
-
-.command-palette__results::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.command-palette__results::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.14);
-  border-radius: 9999px;
-  /* Transparent border plus content-box clipping insets the thumb without
-     needing a narrower track, so it never touches the panel edge. */
-  border: 3px solid transparent;
-  background-clip: content-box;
-}
-
-.command-palette__results:hover::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.26);
 }
 
 /* ---------------------------------------------------------------------------
