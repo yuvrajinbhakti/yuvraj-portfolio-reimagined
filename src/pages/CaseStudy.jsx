@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import AnimatedBackground from '../Components/AnimatedBackground';
 import GlassCard from '../Components/GlassCard';
 import useDocumentMeta from '../hooks/useDocumentMeta';
-import { getCaseStudy, caseStudies } from '../constants/caseStudies';
+import { getCaseStudy, caseStudies, sectionId } from '../constants/caseStudies';
 
 const Metric = ({ value, label }) => (
   <div className="text-center px-4 py-5 rounded-xl bg-white/5 border border-white/10">
@@ -122,7 +122,18 @@ const CaseStudy = () => {
             {/* Body */}
             <div className="space-y-10">
               {study.sections.map((section, i) => (
-                <motion.section key={section.heading} {...fade(0.15 + i * 0.05)}>
+                // The id makes each section addressable, which is what the
+                // command palette's "jump to section" results link to.
+                // scroll-mt clears the fixed navbar so an anchored heading
+                // lands below the bar instead of behind it — kept on the target
+                // rather than as an offset in the scrolling code, so it stays
+                // right if the bar ever changes height.
+                <motion.section
+                  key={section.heading}
+                  id={sectionId(section.heading)}
+                  className="scroll-mt-28 md:scroll-mt-32"
+                  {...fade(0.15 + i * 0.05)}
+                >
                   <h2 className="text-xl md:text-2xl font-bold text-white mb-3">
                     {section.heading}
                   </h2>
