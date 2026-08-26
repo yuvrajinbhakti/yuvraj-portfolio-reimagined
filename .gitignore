@@ -34,3 +34,7 @@ dist-ssr
 .claude/
 AGENTS.md
 .gstack/
+
+# Local state for `wrangler dev` — a simulated Durable Object's SQLite file.
+# Machine-specific, and it reappears every time the relay is run locally.
+presence/.wrangler

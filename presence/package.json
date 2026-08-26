@@ -1,0 +1,15 @@
+{
+  "name": "ysn-presence",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cursor presence relay for the portfolio — a Cloudflare Worker with one hibernating Durable Object.",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail"
+  },
+  "devDependencies": {
+    "wrangler": "^3.90.0"
+  }
+}
