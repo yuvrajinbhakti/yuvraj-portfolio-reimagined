@@ -38,6 +38,10 @@ const SERVICES = [
     description:
       'React and TypeScript in production at Razorpay — merchant-facing analytics dashboards and an A/B testing framework with client-side caching.',
     proof: '+25% platform adoption',
+    // Where the claim is substantiated. /about opens on the experience tab by
+    // default, which is the Razorpay role in full.
+    to: '/about',
+    linkLabel: 'The work at Razorpay',
   },
   {
     type: 'backend',
@@ -45,6 +49,10 @@ const SERVICES = [
     description:
       'Node.js and Go services, change-data-capture pipelines, and containerised deploys on Docker and Kubernetes.',
     proof: 'Onboarding: 2 weeks → 24 hours',
+    // The deepest backend build on this site that can actually be read: Node,
+    // Redis, Docker, and the reasoning behind each.
+    to: '/work/secure-file-sharing',
+    linkLabel: 'Read a backend build',
   },
   {
     type: 'ml',
@@ -52,6 +60,8 @@ const SERVICES = [
     description:
       'Amazon ML Summer School alumnus. Built an ML-powered fraud detection system for real-time transaction monitoring.',
     proof: 'Top 0.2% of 91,000 applicants',
+    to: '/about',
+    linkLabel: 'Background and coursework',
   },
 ];
 
@@ -64,10 +74,23 @@ const ServiceCard = ({ service }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <div
-      className="h-full"
+    // A link, not a div. Each of these cards makes a specific claim — +25%
+    // adoption, two weeks down to twenty-four hours, top 0.2% of 91,000 — and
+    // until now there was nothing to click on any of them. A number with no
+    // route to its evidence is just an assertion, and three of them in a row
+    // read as a brochure.
+    //
+    // aria-label rather than letting the accessible name fall out of the
+    // contents: unlabelled, a screen reader announces the heading, the whole
+    // description and the statistic as one link name.
+    <Link
+      to={service.to}
+      aria-label={`${service.title} — ${service.linkLabel}`}
+      className="h-full block rounded-2xl focus-visible:outline-none"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onFocus={() => setIsHovered(true)}
+      onBlur={() => setIsHovered(false)}
     >
       {/* Left-aligned throughout. Centred body copy is measurably harder to
           read — every line starts at a different x, so the eye has to hunt for
@@ -84,10 +107,29 @@ const ServiceCard = ({ service }) => {
           {service.description}
         </p>
         <div className="relative z-10 mt-5 pt-4 border-t border-white/10">
-          <span className="text-sm font-semibold text-blue-300">{service.proof}</span>
+          <span className="block text-sm font-semibold text-blue-300">{service.proof}</span>
+          {/* Its own line, not beside the statistic. Side by side, the two
+              longer proofs — "Onboarding: 2 weeks → 24 hours" and "Top 0.2% of
+              91,000 applicants" — wrapped mid-phrase and left the three card
+              footers at three different heights. */}
+          <span
+            aria-hidden="true"
+            className="mt-2 text-xs text-white/40 group-hover:text-blue-300 transition-colors inline-flex items-center gap-1"
+          >
+            {service.linkLabel}
+            <svg
+              className="w-3 h-3 transition-transform duration-200 group-hover:translate-x-0.5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </span>
         </div>
       </GlassCard>
-    </div>
+    </Link>
   );
 };
 
@@ -96,6 +138,8 @@ ServiceCard.propTypes = {
     title: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
     proof: PropTypes.string.isRequired,
+    to: PropTypes.string.isRequired,
+    linkLabel: PropTypes.string.isRequired,
     type: PropTypes.oneOf(['frontend', 'backend', 'ml']).isRequired,
   }).isRequired,
 };
