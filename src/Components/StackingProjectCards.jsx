@@ -24,6 +24,11 @@ import GlassCard from './GlassCard';
 
 const ProjectCard = ({ project }) => {
   const study = caseStudyForProject(project.id);
+  // Same lookup the Projects page cards use, and for the same reason: the
+  // working demo URLs live on the case studies, so a card reading only
+  // project.demo_link finds null and offers nothing — on two projects whose
+  // demos are deployed and answering.
+  const demoUrl = project.demo_link ?? study?.links?.demo ?? null;
 
   // No h-full on the card. It is sized by min-height now, and a percentage
   // height does not resolve against that — worse, specifying any height at all
@@ -125,6 +130,16 @@ const ProjectCard = ({ project }) => {
                 Code
               </a>
             )}
+            {demoUrl && (
+              <a
+                href={demoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 py-1.5 -my-1.5 text-emerald-400 hover:text-emerald-300 transition-colors text-sm font-medium"
+              >
+                Demo
+              </a>
+            )}
           </div>
         </div>
       </div>
@@ -142,6 +157,7 @@ ProjectCard.propTypes = {
     status: PropTypes.string,
     tags: PropTypes.arrayOf(PropTypes.string).isRequired,
     source_code_link: PropTypes.string,
+    demo_link: PropTypes.string,
   }).isRequired,
 };
 
