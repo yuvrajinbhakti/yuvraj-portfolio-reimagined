@@ -229,6 +229,21 @@ const CaseStudy = () => {
                 </div>
 
                 <div className="flex flex-wrap gap-3">
+                  {/* An internal Link, not an anchor with target="_blank". This
+                      goes to a page of this site, so it should be a client-side
+                      navigation like every other link here — opening a new tab
+                      would be the affordance for leaving, which it is not. */}
+                  {study.tryIt && (
+                    <Link
+                      to={study.tryIt.to}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium"
+                    >
+                      {study.tryIt.label}
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                    </Link>
+                  )}
                   {study.links.demo && (
                     <a
                       href={study.links.demo}
