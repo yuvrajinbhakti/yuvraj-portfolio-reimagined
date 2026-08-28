@@ -234,7 +234,18 @@ export const projects = [
         description: 'Full rebuild and relaunch of the Care car rental site, rewriting the booking flow around fewer steps and a clearer interface.',
         source_code_link: 'https://github.com/yuvrajinbhakti/Care-Car-Rental-Website',
         demo_link: null,
-        tags: ['HTML', 'CSS', 'JavaScript', 'Responsive', 'UI/UX'],
+        // Checked against the repository rather than remembered. package.json
+        // pins react 18.2, react-dom, react-router-dom 6.8 and react-scripts,
+        // and the booking flow this description describes is react-datepicker;
+        // the language split is JavaScript 65 kB and SCSS 40 kB against 1.4 kB
+        // of HTML, which is just the Create React App shell.
+        //
+        // So "HTML, CSS, JavaScript" was not merely imprecise, it undersold the
+        // project — it read as a static page when it is a routed React
+        // application, which is the one thing on this card a reader would care
+        // about. UI/UX went with it: every project here involves interface
+        // work, so the tag separates nothing.
+        tags: ['React', 'React Router', 'SCSS', 'Responsive'],
         status: 'Completed',
         gradient: 'from-red-500 to-pink-500'
     },
