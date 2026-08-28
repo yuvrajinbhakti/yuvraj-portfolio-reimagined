@@ -16,27 +16,29 @@ export const caseStudies = [
     role: 'Solo project — design, build, deploy',
     stack: ['React', 'Node.js', 'Socket.IO', 'Redis', 'Docker', 'Nginx', 'Bull', 'Prometheus', 'Grafana'],
     links: {
-      // No `demo`. The deployed app at real-time-code-editor-codebuddy.onrender.com
-      // was measured unresponsive — 65 seconds, no reply at all, which is not a
-      // Render cold start (those answer in 30-50s). It sat behind a "View live
-      // demo" button on the best writing on this site, and a demo that goes
-      // nowhere costs more credibility than the case study earns. Removed
-      // rather than left hopeful: the button is conditional, so deleting the
-      // URL deletes the dead end. Put it back the day the host answers.
+      // Verified answering: 200 in ~450ms across four spaced probes.
+      //
+      // Worth knowing that this host sleeps. It was measured completely
+      // unresponsive once — 65 seconds, no reply — and came back on its own
+      // minutes later, so the first visitor after a quiet spell may wait
+      // through a cold start of half a minute or more while the free tier
+      // wakes the container. That is not a broken link, but it is the reason
+      // the second button below exists: something that answers instantly and
+      // cannot sleep.
+      demo: 'https://real-time-code-editor-codebuddy.onrender.com/',
       code: 'https://github.com/yuvrajinbhakti/Real-Time-Collaborative-Code-Editor',
     },
-    // What replaces it, and arguably what should have been there all along.
+    // Alongside the demo rather than instead of it.
     //
     // A live demo of a *collaborative* editor, opened by one person, shows
     // nothing — two cursors converging on one line is the whole point, and a
-    // single visitor cannot produce that. The playground already runs this
-    // project's actual algorithm, interactively, with both edits applied side
-    // by side. It needs no server, cannot go down, and demonstrates the part
-    // the write-up is actually about.
+    // single visitor cannot produce that. The playground runs this project's
+    // actual algorithm, interactively, with both edits applied side by side.
+    // It loads instantly, never sleeps, and demonstrates the part the write-up
+    // is actually about.
     //
     // Deliberately not labelled "live demo": it is the algorithm, not the
-    // deployed application, and saying otherwise would be the same overclaim
-    // in a different costume.
+    // deployed application, and saying otherwise would be an overclaim.
     tryIt: {
       to: '/playground?example=operational-transform#code-playground',
       label: 'Run the algorithm',

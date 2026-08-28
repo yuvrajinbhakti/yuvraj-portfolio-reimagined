@@ -229,21 +229,6 @@ const CaseStudy = () => {
                 </div>
 
                 <div className="flex flex-wrap gap-3">
-                  {/* An internal Link, not an anchor with target="_blank". This
-                      goes to a page of this site, so it should be a client-side
-                      navigation like every other link here — opening a new tab
-                      would be the affordance for leaving, which it is not. */}
-                  {study.tryIt && (
-                    <Link
-                      to={study.tryIt.to}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium"
-                    >
-                      {study.tryIt.label}
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                      </svg>
-                    </Link>
-                  )}
                   {study.links.demo && (
                     <a
                       href={study.links.demo}
@@ -256,6 +241,21 @@ const CaseStudy = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                       </svg>
                     </a>
+                  )}
+                  {/* Secondary to the demo, which is the real thing. An
+                      internal Link rather than a new tab, because it goes to a
+                      page of this site — a new tab is the affordance for
+                      leaving, which this is not. */}
+                  {study.tryIt && (
+                    <Link
+                      to={study.tryIt.to}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 border border-white/25 hover:bg-white/10 text-white rounded-lg transition-colors text-sm font-medium"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                      {study.tryIt.label}
+                    </Link>
                   )}
                   {study.links.code && (
                     <a
