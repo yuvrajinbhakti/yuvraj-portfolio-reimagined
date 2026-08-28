@@ -5,6 +5,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import PropTypes from 'prop-types';
 import { COMMAND_ITEMS, DEFAULT_ITEMS, GROUPS, itemById } from '../constants/commandIndex';
 import { highlight, scoreFields } from '../utils/search';
+import { SPEECH_SUPPORTED, cleanSpeech, createRecognizer } from '../utils/speech';
 
 /**
  * ⌘K. Search everything on the site and go there without touching the mouse.
@@ -30,6 +31,17 @@ import { highlight, scoreFields } from '../utils/search';
 const RECENT_KEY = 'ysn:cmdk-recent';
 const MAX_RECENT = 4;
 const MAX_RESULTS = 24;
+
+// When a spoken phrase runs its top result without asking.
+//
+// A transcript is a guess, so acting on one needs more than "something
+// matched". Both tests have to pass: the winner has to be a real name match
+// rather than a few letters landing in the right order, and it has to be
+// clearly ahead of whatever came second. Say "contact" and there is exactly one
+// answer, so it just happens. Say something the site half-recognises and the
+// results stay on screen to be picked from, which is the honest outcome.
+const VOICE_MIN_SCORE = 900;
+const VOICE_MARGIN = 1.4;
 
 const readRecent = () => {
   try {
@@ -131,12 +143,19 @@ const CommandPalette = ({ onClose }) => {
   const [active, setActive] = useState(0);
   const [copied, setCopied] = useState(null);
   const [recentIds, setRecentIds] = useState(readRecent);
+  const [listening, setListening] = useState(false);
+  const [voiceError, setVoiceError] = useState(null);
 
   const inputRef = useRef(null);
   const optionRefs = useRef([]);
   // Captured on mount, because by the time this unmounts the element that had
   // focus is whatever the browser fell back to — usually <body>.
   const opener = useRef(null);
+  const recognizer = useRef(null);
+  // Set when a spoken phrase has just filled the query, and read once the
+  // results for it have been computed. The scoring runs in a memo on `query`,
+  // so the decision cannot be made in the same tick the transcript arrives.
+  const pendingVoice = useRef(false);
 
   const sections = useMemo(() => {
     const q = query.trim();
@@ -300,6 +319,88 @@ const CommandPalette = ({ onClose }) => {
     return () => clearTimeout(timer);
   }, [copied, onClose]);
 
+  /**
+   * A spoken phrase becomes a search, and a search that has an obvious winner
+   * runs itself.
+   *
+   * This is what the old VoiceNavigation did, minus its thirty hand-written
+   * phrases. "Contact" reaches the contact page because the palette already
+   * ranks it first, and the same sentence structure gets you "operational
+   * transform" or "encryption" for free — destinations the phrase map could
+   * never have held.
+   */
+  const handleTranscript = useCallback(
+    (raw) => {
+      const spoken = cleanSpeech(raw);
+      if (!spoken) return;
+
+      // Two things the index cannot express, because they are verbs about the
+      // palette itself rather than places on the site.
+      if (/^(close|cancel|dismiss|stop|never mind|nevermind)$/.test(spoken)) {
+        onClose();
+        return;
+      }
+      if (/^(top|scroll to top|back to top|go up)$/.test(spoken)) {
+        onClose();
+        window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+        return;
+      }
+
+      pendingVoice.current = true;
+      setVoiceError(null);
+      setQuery(spoken);
+    },
+    [onClose, reduce]
+  );
+
+  const toggleListening = useCallback(() => {
+    if (listening) {
+      recognizer.current?.stop();
+      setListening(false);
+      return;
+    }
+    setVoiceError(null);
+    setQuery('');
+    if (!recognizer.current) {
+      recognizer.current = createRecognizer({
+        // Interim results stream straight into the box, so the words appear as
+        // they are spoken and it is obvious the microphone is working. They are
+        // never acted on — only a final result can navigate.
+        onInterim: (text) => setQuery(cleanSpeech(text)),
+        onFinal: handleTranscript,
+        onError: (message) => {
+          setVoiceError(message);
+          setListening(false);
+        },
+        onEnd: () => setListening(false),
+      });
+    }
+    if (!recognizer.current) return;
+    recognizer.current.start();
+    setListening(true);
+  }, [handleTranscript, listening]);
+
+  // Acts on a spoken phrase once its results exist.
+  //
+  // Runs the winner only when it is unambiguous — otherwise the transcript is
+  // left in the box with the results below it, which is the right outcome for a
+  // half-heard sentence: it shows what was understood instead of guessing.
+  useEffect(() => {
+    if (!pendingVoice.current) return;
+    pendingVoice.current = false;
+    if (!flat.length) return;
+
+    const [top, second] = flat;
+    const decisive =
+      top.score >= VOICE_MIN_SCORE && (!second || top.score >= second.score * VOICE_MARGIN);
+    if (decisive) run(top);
+  }, [flat, run]);
+
+  // Stop the microphone when the palette goes away. Without this the recogniser
+  // outlives the dialog that owns it and keeps the browser's recording
+  // indicator lit after the thing that asked for it has closed.
+  useEffect(() => () => recognizer.current?.stop(), []);
+
   const move = useCallback(
     (delta) => {
       setActive((current) => {
@@ -376,7 +477,7 @@ const CommandPalette = ({ onClose }) => {
         exit={reduce ? { opacity: 0 } : { opacity: 0, y: -8, scale: 0.985 }}
         transition={{ duration: reduce ? 0.12 : 0.22, ease: [0.16, 1, 0.3, 1] }}
       >
-        <div className="flex items-center gap-3 px-4 border-b border-white/10">
+        <div className="flex items-center gap-2 sm:gap-3 px-4 border-b border-white/10">
           <svg
             className="w-4 h-4 text-white/40 shrink-0"
             viewBox="0 0 24 24"
@@ -395,7 +496,7 @@ const CommandPalette = ({ onClose }) => {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             onKeyDown={onKeyDown}
-            placeholder="Search pages, projects, case studies…"
+            placeholder={listening ? 'Listening… say where you want to go' : 'Search pages, projects, case studies…'}
             className="command-palette__input flex-1 bg-transparent py-4 text-base text-white placeholder:text-white/35 outline-none"
             role="combobox"
             aria-expanded="true"
@@ -409,6 +510,48 @@ const CommandPalette = ({ onClose }) => {
             spellCheck={false}
             enterKeyHint="go"
           />
+          {/* Only where the API exists. Firefox has no implementation at all,
+              so it gets no control rather than a dead one. */}
+          {SPEECH_SUPPORTED && (
+            <button
+              type="button"
+              onClick={toggleListening}
+              aria-pressed={listening}
+              aria-label={listening ? 'Stop listening' : 'Search by voice'}
+              title={listening ? 'Stop listening' : 'Search by voice'}
+              className={`relative shrink-0 w-7 h-7 rounded-md flex items-center justify-center transition-colors ${
+                listening
+                  ? 'bg-blue-500/20 text-blue-300'
+                  : 'text-white/40 hover:text-white/80 hover:bg-white/5'
+              }`}
+            >
+              <svg
+                className="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.8}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <rect x="9" y="2" width="6" height="11" rx="3" />
+                <path d="M5 11a7 7 0 0014 0M12 18v4" />
+              </svg>
+              {/* The ring is the "we are recording" signal, and it is the one
+                  thing on this site that should keep moving under
+                  prefers-reduced-motion — a microphone that is on needs to look
+                  on. It pulses opacity rather than scale, which carries the
+                  same meaning without the movement. */}
+              {listening && (
+                <span
+                  className="absolute inset-0 rounded-md ring-2 ring-blue-400/60 animate-pulse"
+                  aria-hidden="true"
+                />
+              )}
+            </button>
+          )}
+
           <button
             type="button"
             onClick={onClose}
@@ -424,6 +567,11 @@ const CommandPalette = ({ onClose }) => {
           aria-label="Results"
           className="command-palette__results max-h-[min(24rem,50vh)] overflow-y-auto overscroll-contain py-2"
         >
+          {voiceError && (
+            <p className="px-4 py-2 text-xs text-amber-300/80" role="status">
+              {voiceError}
+            </p>
+          )}
           {flat.length === 0 ? (
             <p className="px-4 py-8 text-center text-sm text-white/45">
               Nothing matches <span className="text-white/80">“{query.trim()}”</span>. Try a project
@@ -522,6 +670,7 @@ const CommandPalette = ({ onClose }) => {
             <Key>esc</Key>
             close
           </span>
+          {SPEECH_SUPPORTED && <span className="ml-auto text-white/30">or say it</span>}
         </div>
       </motion.div>
 
