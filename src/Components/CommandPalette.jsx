@@ -77,6 +77,21 @@ const fieldsFor = (item) => [
 // overriding relevance.
 const groupBias = (group) => (GROUPS.length - GROUPS.indexOf(group)) * 8;
 
+// Module scope, because two callers need it and only one of them is a render.
+// The memo below uses it to draw the list; the voice handler uses it to decide
+// whether a spoken phrase has an obvious answer — and that decision has to be
+// available the moment the words arrive, not one render later.
+const rankItems = (query) => {
+  const scored = [];
+  for (const item of COMMAND_ITEMS) {
+    const hit = scoreFields(query, fieldsFor(item));
+    if (!hit) continue;
+    scored.push({ item, ranges: hit.ranges, score: hit.score + groupBias(item.group) });
+  }
+  scored.sort((a, b) => b.score - a.score);
+  return scored;
+};
+
 const ICONS = {
   page: 'M4 5a1 1 0 011-1h9l6 6v9a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10-1v6h6',
   'case-study': 'M4 6h16M4 12h16M4 18h10',
@@ -152,10 +167,11 @@ const CommandPalette = ({ onClose }) => {
   // focus is whatever the browser fell back to — usually <body>.
   const opener = useRef(null);
   const recognizer = useRef(null);
-  // Set when a spoken phrase has just filled the query, and read once the
-  // results for it have been computed. The scoring runs in a memo on `query`,
-  // so the decision cannot be made in the same tick the transcript arrives.
-  const pendingVoice = useRef(false);
+  // The last thing the microphone reported, and whether the engine ever marked
+  // it final. Together they let a session that ends without a final result
+  // still act on what it heard.
+  const heard = useRef('');
+  const finalArrived = useRef(false);
 
   const sections = useMemo(() => {
     const q = query.trim();
@@ -181,13 +197,7 @@ const CommandPalette = ({ onClose }) => {
       return out;
     }
 
-    const scored = [];
-    for (const item of COMMAND_ITEMS) {
-      const hit = scoreFields(q, fieldsFor(item));
-      if (!hit) continue;
-      scored.push({ item, ranges: hit.ranges, score: hit.score + groupBias(item.group) });
-    }
-    scored.sort((a, b) => b.score - a.score);
+    const scored = rankItems(q);
 
     // One flat list in score order, deliberately ungrouped.
     //
@@ -320,14 +330,20 @@ const CommandPalette = ({ onClose }) => {
   }, [copied, onClose]);
 
   /**
-   * A spoken phrase becomes a search, and a search that has an obvious winner
-   * runs itself.
+   * A spoken phrase becomes a search, and a search with an obvious winner runs
+   * itself.
    *
    * This is what the old VoiceNavigation did, minus its thirty hand-written
    * phrases. "Contact" reaches the contact page because the palette already
-   * ranks it first, and the same sentence structure gets you "operational
-   * transform" or "encryption" for free — destinations the phrase map could
-   * never have held.
+   * ranks it first, and the same sentence gets you "operational transform" or
+   * "encryption" for free — destinations the phrase map could never have held.
+   *
+   * The decision is made here rather than in an effect watching the results,
+   * and that is not a style preference. Interim results stream into the box as
+   * you speak, so by the time the final transcript arrives the query is usually
+   * *already* the same string. Setting identical state is a no-op that React
+   * skips, so the effect never re-ran and a perfectly clear "contact" sat in
+   * the box doing nothing. Ranking the phrase directly has no such dependency.
    */
   const handleTranscript = useCallback(
     (raw) => {
@@ -346,11 +362,18 @@ const CommandPalette = ({ onClose }) => {
         return;
       }
 
-      pendingVoice.current = true;
       setVoiceError(null);
       setQuery(spoken);
+
+      const [top, second] = rankItems(spoken);
+      const decisive =
+        top && top.score >= VOICE_MIN_SCORE && (!second || top.score >= second.score * VOICE_MARGIN);
+      // Not decisive? The transcript stays in the box with the results under
+      // it, which is the honest outcome for a half-heard sentence: it shows
+      // what was understood instead of guessing.
+      if (decisive) run(top);
     },
-    [onClose, reduce]
+    [onClose, reduce, run]
   );
 
   const toggleListening = useCallback(() => {
@@ -361,40 +384,40 @@ const CommandPalette = ({ onClose }) => {
     }
     setVoiceError(null);
     setQuery('');
+    heard.current = '';
+    finalArrived.current = false;
+
     if (!recognizer.current) {
       recognizer.current = createRecognizer({
         // Interim results stream straight into the box, so the words appear as
         // they are spoken and it is obvious the microphone is working. They are
-        // never acted on — only a final result can navigate.
-        onInterim: (text) => setQuery(cleanSpeech(text)),
-        onFinal: handleTranscript,
+        // never acted on — only a final transcript can navigate.
+        onInterim: (text) => {
+          heard.current = text;
+          setQuery(cleanSpeech(text));
+        },
+        onFinal: (text) => {
+          finalArrived.current = true;
+          handleTranscript(text);
+        },
         onError: (message) => {
           setVoiceError(message);
           setListening(false);
         },
-        onEnd: () => setListening(false),
+        onEnd: () => {
+          setListening(false);
+          // Some engines end the session without ever marking a result final.
+          // The words were still heard, so they still count — otherwise the
+          // transcript would sit in the box and nothing would happen, which is
+          // precisely the failure this whole handler exists to avoid.
+          if (!finalArrived.current && heard.current) handleTranscript(heard.current);
+        },
       });
     }
     if (!recognizer.current) return;
     recognizer.current.start();
     setListening(true);
   }, [handleTranscript, listening]);
-
-  // Acts on a spoken phrase once its results exist.
-  //
-  // Runs the winner only when it is unambiguous — otherwise the transcript is
-  // left in the box with the results below it, which is the right outcome for a
-  // half-heard sentence: it shows what was understood instead of guessing.
-  useEffect(() => {
-    if (!pendingVoice.current) return;
-    pendingVoice.current = false;
-    if (!flat.length) return;
-
-    const [top, second] = flat;
-    const decisive =
-      top.score >= VOICE_MIN_SCORE && (!second || top.score >= second.score * VOICE_MARGIN);
-    if (decisive) run(top);
-  }, [flat, run]);
 
   // Stop the microphone when the palette goes away. Without this the recogniser
   // outlives the dialog that owns it and keeps the browser's recording
