@@ -18,6 +18,12 @@ const ProjectCard = ({ project, index, setCursorVariant }) => {
   // reachable only from the four stacked cards on the homepage — this page
   // linked out to GitHub and nowhere else.
   const study = caseStudyForProject(project.id);
+  // The working demo URLs were only ever recorded on the case studies, so every
+  // card fell through to `demo_link: null` and said "Demo soon" — including the
+  // two projects whose demos are deployed and answering right now. Read from
+  // the case study rather than copying the URL into the project data, so there
+  // stays one place to change it.
+  const demoUrl = project.demo_link ?? study?.links?.demo ?? null;
   
   // Use once: true and larger margin for better performance
   const isInView = useInView(cardRef, { 
@@ -254,9 +260,9 @@ const ProjectCard = ({ project, index, setCursorVariant }) => {
                 </motion.a>
               )}
               
-              {project.demo_link && (
+              {demoUrl && (
                 <motion.a
-                  href={project.demo_link}
+                  href={demoUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="py-1.5 -my-1.5 flex items-center gap-1.5 text-emerald-400 hover:text-emerald-300 transition-colors font-medium text-sm group/link cursor-pointer"
@@ -274,12 +280,12 @@ const ProjectCard = ({ project, index, setCursorVariant }) => {
                   <span>Demo</span>
                 </motion.a>
               )}
-              
-              {!project.demo_link && (
-                <span className="text-gray-400 text-sm italic">
-                  Demo soon
-                </span>
-              )}
+
+              {/* Nothing where there is no demo. "Demo soon" used to sit here,
+                  which is a promise — and for a Flutter app, a published
+                  DockerHub image and a Python code generator it is one nobody
+                  intends to keep. An absent affordance says "there isn't one"
+                  perfectly well; a permanent "soon" says the site is unfinished. */}
             </motion.div>
           </div>
         </GlassCard>
