@@ -16,13 +16,30 @@ export const caseStudies = [
     role: 'Solo project — design, build, deploy',
     stack: ['React', 'Node.js', 'Socket.IO', 'Redis', 'Docker', 'Nginx', 'Bull', 'Prometheus', 'Grafana'],
     links: {
-      // NOTE: this host was measured unresponsive — 100s with no reply, so not
-      // a Render cold start. Kept in place pending a redeploy. Until it
-      // answers, it is the weakest link on the site: the demo is the most
-      // clicked thing on a portfolio, and one that goes nowhere costs more
-      // credibility than the case study earns.
-      demo: 'https://real-time-code-editor-codebuddy.onrender.com/',
+      // No `demo`. The deployed app at real-time-code-editor-codebuddy.onrender.com
+      // was measured unresponsive — 65 seconds, no reply at all, which is not a
+      // Render cold start (those answer in 30-50s). It sat behind a "View live
+      // demo" button on the best writing on this site, and a demo that goes
+      // nowhere costs more credibility than the case study earns. Removed
+      // rather than left hopeful: the button is conditional, so deleting the
+      // URL deletes the dead end. Put it back the day the host answers.
       code: 'https://github.com/yuvrajinbhakti/Real-Time-Collaborative-Code-Editor',
+    },
+    // What replaces it, and arguably what should have been there all along.
+    //
+    // A live demo of a *collaborative* editor, opened by one person, shows
+    // nothing — two cursors converging on one line is the whole point, and a
+    // single visitor cannot produce that. The playground already runs this
+    // project's actual algorithm, interactively, with both edits applied side
+    // by side. It needs no server, cannot go down, and demonstrates the part
+    // the write-up is actually about.
+    //
+    // Deliberately not labelled "live demo": it is the algorithm, not the
+    // deployed application, and saying otherwise would be the same overclaim
+    // in a different costume.
+    tryIt: {
+      to: '/playground?example=operational-transform#code-playground',
+      label: 'Run the algorithm',
     },
     // Each of these is a load-test result and is labelled as one. "99.95%
     // verified uptime" was the one number here that could not survive the
