@@ -143,6 +143,31 @@ scattered one, and requires a scattered match to begin a word — the line betwe
 abbreviation and a coincidence, and the difference between "aes" finding the encryption
 section and "aes" finding *C·a·re Car R·e·ntal Web·s·ite*.
 
+### The background is the real sky
+
+Not a random scatter. 5,044 real stars from the standard astronomical
+catalogues, each at its true right ascension and declination, drawn at its true
+visual magnitude and coloured by its actual B–V index — so Arcturus is orange
+because Arcturus *is* orange, and Sirius is the brightest thing on the page
+because it is the brightest thing in the sky.
+
+They are placed for **Chandigarh, at your local time**. The conversion from
+catalogue coordinates to what an observer sees runs through local sidereal time
+(`src/utils/sky.js`), so the sky turns as the Earth does — about 61% of it
+changes over twelve hours, and someone opening the site at 3am sees a genuinely
+different one from someone opening it at 8pm. Constellation figures are drawn
+underneath at the edge of visible.
+
+The maths is checked against invariants rather than eyeballed: Polaris sits at
+the observer's latitude at every hour (deviating by 0.74°, which is Polaris's
+true distance from the pole), a star culminates at exactly 90° − |lat − dec|,
+sidereal time gains 0.9856° a day on solar, and GMST at J2000.0 comes out at the
+published 280.46°.
+
+Star and constellation data from [d3-celestial](https://github.com/ofrohn/d3-celestial)
+(BSD-3, Olaf Frohn), trimmed by `scripts/make-star-catalog.py` from 656 kB of
+GeoJSON to a flat integer array.
+
 ### Live cursors that are actually other people
 
 The cursor layer draws two things: peers reading the same page right now, and a replay of the
