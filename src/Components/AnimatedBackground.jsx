@@ -11,7 +11,6 @@ const AnimatedBackground = ({ children }) => {
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
     let width, height, stars = [], meteors = [];
-    let mouseX = 0, mouseY = 0;
     // Tracked so the loop and the meteor scheduler can actually be torn down —
     // previously neither was cancelled on unmount.
     let rafId = null;
@@ -36,8 +35,6 @@ const AnimatedBackground = ({ children }) => {
       return Math.min(1, Math.max(0, window.scrollY / max));
     };
     let meteorTimeoutId = null;
-    let isMouseMoving = false;
-    let mouseTimeout;
     
     // Set canvas dimensions
     const updateDimensions = () => {
@@ -69,40 +66,23 @@ const AnimatedBackground = ({ children }) => {
         this.twinkleAmplitude = Math.random() * 0.3 + 0.1;
       }
       
-      update(deltaTime, mouseInfluence = false) {
+      update(deltaTime) {
         this.timePassed += deltaTime;
         
         // Oscillating opacity (twinkle effect)
         this.opacity = 0.5 + Math.sin(this.timePassed * this.twinkleSpeed) * this.twinkleAmplitude;
         
-        // Mouse influence
-        if (mouseInfluence && isMouseMoving) {
-          const dx = mouseX - this.x;
-          const dy = mouseY - this.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-          const maxDistance = 250;
-          
-          if (distance < maxDistance) {
-            const force = (1 - distance / maxDistance) * 3;
-            this.x -= (dx / distance) * force;
-            this.y -= (dy / distance) * force;
-          }
-        } else {
-          // Slowly return to original position
-          this.x += (this.originalX - this.x) * 0.03;
-          this.y += (this.originalY - this.y) * 0.03;
-        }
-        
-        // Movement
-        const oscillation = Math.sin(this.timePassed * 0.001) * 0.5;
-        this.x += Math.cos(this.angle) * this.speed * (1 + oscillation) * deltaTime * 0.01;
-        this.y += Math.sin(this.angle) * this.speed * (1 + oscillation) * deltaTime * 0.01;
-        
-        // Wrap around edges
-        if (this.x < -50) this.x = width + 50;
-        if (this.x > width + 50) this.x = -50;
-        if (this.y < -50) this.y = height + 50;
-        if (this.y > height + 50) this.y = -50;
+        // Stars do not move, and this is the whole of why the sky read as
+        // wrong. Every star used to drift in its own random direction and
+        // wrap at the edges, while the cursor shoved nearby ones aside — so
+        // the field was in constant, directionless motion. That is what dust
+        // does, or snow, or a screensaver. A night sky is fixed: the only
+        // thing that changes is how brightly each point burns, which is the
+        // twinkle above.
+        //
+        // Removing the motion also removes the reason `angle`, `speed`,
+        // `originalX/Y` and the wrap existed, and the mouse-repulsion pass
+        // that ran against every star on every frame.
         
         // Trail
         if (this.trailLength > 0) {
@@ -230,12 +210,24 @@ const AnimatedBackground = ({ children }) => {
     // Create stars
     const createStars = () => {
       stars = [];
-      const starCount = Math.min(Math.max(width, height) * 0.07, 250); // Responsive star count
+      // Roughly triple the old density, and much smaller. A real sky is
+      // overwhelmingly faint points with a handful of bright ones; 250 fat
+      // dots is a scattering of confetti, and no amount of colour correction
+      // fixes the count.
+      const starCount = Math.min(Math.max(width, height) * 0.22, 760);
       
       for (let i = 0; i < starCount; i++) {
-        const x = Math.random() * width;
-        const y = Math.random() * height;
-        const radius = Math.random() * 1.8 + 0.5;
+        // Clustered rather than evenly spread. Uniform random is the giveaway
+        // — real skies have dense patches and voids, and an even scatter is
+        // the one distribution nature never produces.
+        const clustered = Math.random() < 0.55;
+        const cx = Math.random() * width;
+        const cy = Math.random() * height;
+        const spread = width * 0.09;
+        const x = clustered ? cx + (Math.random() - 0.5) * spread : Math.random() * width;
+        const y = clustered ? cy + (Math.random() - 0.5) * spread : Math.random() * height;
+        // Cubed, so the distribution is weighted hard towards the very small.
+        const radius = 0.25 + Math.random() ** 3 * 1.5;
         const speed = Math.random() * 0.5 + 0.1;
         
         // The same blue band the cursor layer uses (196-238), not 220-280.
@@ -324,7 +316,7 @@ const AnimatedBackground = ({ children }) => {
         
         // Only draw stars that are in the visible viewport area
         if (effectiveY > -50 && effectiveY < window.innerHeight + 50) {
-          star.update(deltaTime, true);
+          star.update(deltaTime);
           
           // Temporarily adjust y-position for drawing
           const originalY = star.y;
@@ -386,24 +378,11 @@ const AnimatedBackground = ({ children }) => {
       ctx.fillRect(0, 0, width, height);
     };
     
-    // Mouse move handler
-    const handleMouseMove = (e) => {
-      const rect = canvas.getBoundingClientRect();
-      mouseX = e.clientX - rect.left;
-      mouseY = e.clientY - rect.top + window.scrollY; // Adjust for scroll
-
-      // The canvas reads mouseX/mouseY directly out of this closure. There was
-      // also a `mousePosition` state setter here, writing normalised
-      // coordinates that nothing ever read — a React re-render of every page
-      // that uses this background, on every mouse move, for no output.
-      isMouseMoving = true;
-      
-      // Reset timeout
-      clearTimeout(mouseTimeout);
-      mouseTimeout = setTimeout(() => {
-        isMouseMoving = false;
-      }, 150);
-    };
+    // The mousemove handler that used to live here is gone with the star
+    // repulsion it fed. It tracked the pointer, ran a distance check against
+    // every star on every frame, and set a 150ms timeout on each event — all
+    // so the field could scatter away from the cursor, which is the effect
+    // that made this read as a particle toy rather than a sky.
     
     // Scroll handler to reposition canvas
     const handleScroll = () => {
@@ -417,7 +396,6 @@ const AnimatedBackground = ({ children }) => {
     updateDimensions();
     fillBackground(getDepth()); // Ensure the background is filled immediately
     window.addEventListener('resize', updateDimensions);
-    window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('scroll', handleScroll);
     
     // Start animation and meteors. `animate` paints one frame either way; only
@@ -430,7 +408,6 @@ const AnimatedBackground = ({ children }) => {
     // Cleanup
     return () => {
       window.removeEventListener('resize', updateDimensions);
-      window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('scroll', handleScroll);
       if (rafId !== null) cancelAnimationFrame(rafId);
       if (meteorTimeoutId !== null) clearTimeout(meteorTimeoutId);
