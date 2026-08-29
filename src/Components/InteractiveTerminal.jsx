@@ -241,6 +241,25 @@ const InteractiveTerminal = () => {
         setHistoryIndex(newIndex);
         setInput(commandHistory[newIndex]);
       }
+    } else if (e.key === 'Tab') {
+      // Tab is the one thing every shell does that this did not, and its
+      // absence is felt immediately: the key does nothing useful in a text
+      // field, so pressing it moved focus out of the terminal entirely.
+      e.preventDefault();
+      const typed = input.trim().toLowerCase();
+      if (!typed) return;
+      const matches = Object.keys(commands).filter((c) => c.startsWith(typed));
+      if (matches.length === 1) {
+        setInput(matches[0]);
+      } else if (matches.length > 1) {
+        // Print the candidates and leave the line alone, which is what bash
+        // does — completing to a common prefix nobody asked for is worse.
+        setHistory((prev) => [
+          ...prev,
+          { type: 'input', content: `visitor@yuvraj-portfolio:~$ ${input}` },
+          { type: 'output', content: [matches.join('   ')] },
+        ]);
+      }
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
       if (historyIndex !== -1) {
@@ -302,7 +321,13 @@ const InteractiveTerminal = () => {
       {/* Terminal Content */}
       <div 
         ref={terminalRef}
-        className="h-96 overflow-y-auto p-4 bg-black text-green-400"
+        // text-left is load-bearing, not decoration. The page wrapper is
+        // text-center, and it was cascading in here — so every line of output
+        // sat centred while the prompt below it, which sets its own alignment,
+        // sat left. A terminal is the most left-aligned artefact in computing:
+        // output starts at column zero and stays there, and centring it breaks
+        // the one illusion this component exists to create.
+        className="h-96 overflow-y-auto p-4 bg-black text-green-400 text-left"
         onClick={() => inputRef.current?.focus()}
       >
         <AnimatePresence>
