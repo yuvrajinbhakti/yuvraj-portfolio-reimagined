@@ -214,16 +214,16 @@ const AnimatedBackground = ({ children }) => {
       // overwhelmingly faint points with a handful of bright ones; 250 fat
       // dots is a scattering of confetti, and no amount of colour correction
       // fixes the count.
-      const starCount = Math.min(Math.max(width, height) * 0.22, 760);
+      const starCount = Math.min(Math.max(width, height) * 0.75, 1600);
       
       for (let i = 0; i < starCount; i++) {
         // Clustered rather than evenly spread. Uniform random is the giveaway
         // — real skies have dense patches and voids, and an even scatter is
         // the one distribution nature never produces.
-        const clustered = Math.random() < 0.55;
+        const clustered = Math.random() < 0.65;
         const cx = Math.random() * width;
         const cy = Math.random() * height;
-        const spread = width * 0.09;
+        const spread = width * 0.055;
         const x = clustered ? cx + (Math.random() - 0.5) * spread : Math.random() * width;
         const y = clustered ? cy + (Math.random() - 0.5) * spread : Math.random() * height;
         // Cubed, so the distribution is weighted hard towards the very small.
