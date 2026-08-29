@@ -3,6 +3,9 @@ import { Link } from 'react-router-dom';
 import { caseStudies } from '../constants/caseStudies';
 import { useCursorPresence } from '../contexts/cursorPresence';
 import { HAS_PRESENCE_RELAY } from '../utils/presenceTransport';
+// The same city and the same clock the sky in the background is drawn for.
+// Two independent copies of "where he is" is how one of them ends up wrong.
+import { OBSERVER, formatLocalTime } from '../constants/observer';
 
 // The nav links that used to live here duplicated a bar that is fixed to the
 // top of every page — the visitor could already see them without scrolling. A
@@ -40,16 +43,6 @@ const footerSocials = [
 ];
 
 const EMAIL = 'yuvrajsinghnain03@gmail.com';
-
-// Always IST, whatever timezone the reader is in — the point is where
-// he is, not where they are.
-const formatIST = () =>
-  new Intl.DateTimeFormat('en-IN', {
-    timeZone: 'Asia/Kolkata',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  }).format(new Date());
 
 /**
  * The way back.
@@ -108,10 +101,10 @@ const Footer = () => {
   // Ticks on the minute rather than every second: a seconds display is a
   // moving element in the corner of every page, which is exactly the kind of
   // thing this site just spent a day removing.
-  const [localTime, setLocalTime] = useState(() => formatIST());
+  const [localTime, setLocalTime] = useState(() => formatLocalTime());
 
   useEffect(() => {
-    const tick = () => setLocalTime(formatIST());
+    const tick = () => setLocalTime(formatLocalTime());
     const now = new Date();
     const msToNextMinute = (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
     let interval;
@@ -142,10 +135,40 @@ const Footer = () => {
   useEffect(() => () => clearTimeout(timer.current), []);
 
   return (
-    <footer className="relative border-t border-white/10">
-      <div className="backdrop-blur-lg bg-white/5">
-        <div className="container mx-auto px-4 md:px-8 py-8 md:py-12">
-          <div className="grid grid-cols-1 gap-10 md:grid-cols-[1.4fr_1fr_auto] md:gap-12">
+    <footer className="relative">
+      {/* The sky runs the length of the page now, and this used to end it with
+          a hard line: a 1px border over `backdrop-blur-lg bg-white/5`, which
+          smeared the stars behind it into grey and lifted the black. Against a
+          flat background that glass read as a panel; against a real star field
+          it read as frosted glass taped over the window.
+          A gradient instead — transparent at the top, deepening downward —
+          which lets the field carry through and simply thickens under the type. */}
+      <div
+        className="pointer-events-none absolute inset-0 -top-24 bg-gradient-to-b from-transparent via-[#070c1c]/60 to-[#070c1c]/90"
+        aria-hidden="true"
+      />
+      <div className="relative">
+        {/* pb-24 on phones, where the last row is the email address and two
+            fixed controls live in the bottom corners. Measured at 390x844,
+            scrolled to the very end: the link ran 38→352 at y 784–818 and the
+            audio button (16→52) and cursor pill (343→374) both sat on top of
+            it, from 792 down. The primary way to contact him was covered at
+            both ends, and half its tap target was unreachable. The controls
+            occupy the bottom 52px; this clears them. */}
+        <div className="container mx-auto px-4 md:px-8 pt-8 pb-24 md:py-12">
+          {/* Was a three-track grid, `[1.4fr_1fr_auto]`, which handed the brand
+              column 595px to hold 310px of text and flung three 20px icons into
+              the far corner under a full section heading. Measured: 459 of
+              1216px — 38% of the row — was gap, and it read as three blocks
+              that failed to meet rather than as whitespace.
+              A grid cannot fix this by sizing tracks either: `auto` tracks
+              absorb the leftover space, so packing the content just moved the
+              chasms rather than closing them. So: two groups, pushed to the two
+              edges. One deliberate gutter in the middle instead of two
+              accidental ones, and it puts the brand above the copyright and the
+              links above the email — the row below is anchored to the same two
+              edges, which is what makes the whole block read as one thing. */}
+          <div className="flex flex-col gap-10 md:flex-row md:items-start md:justify-between md:gap-16">
             {/* Brand */}
             <div>
               <Link to="/" className="inline-block text-xl font-bold tracking-tight text-white hover:text-blue-300 transition-colors duration-200">
@@ -161,13 +184,16 @@ const Footer = () => {
                   place here rather than another line of copy. */}
               <p className="mt-4 text-white/35 text-xs flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/70" aria-hidden="true" />
-                India
+                {OBSERVER.city}
                 <span aria-hidden="true">&middot;</span>
                 <time className="font-mono tabular-nums">{localTime}</time>
                 <span className="text-white/25">local time</span>
               </p>
             </div>
 
+            {/* The two link columns travel together, so the gutter above stays
+                between the groups rather than opening up inside one. */}
+            <div className="grid grid-cols-1 gap-10 sm:grid-cols-[auto_auto] sm:gap-x-16 md:flex-none">
             {/* Read next */}
             <div>
               <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-label">Case studies</h3>
@@ -187,23 +213,31 @@ const Footer = () => {
               </nav>
             </div>
 
-            {/* Social */}
+            {/* Social.
+                A row of three bare glyphs under a full section heading was the
+                narrowest thing on the page carrying the widest label, and it
+                gave the eye nothing to line up with. Stacked with their names,
+                it is the same shape as Case Studies beside it — one column of
+                links, not a column and a stray cluster. */}
             <div>
               <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-label">Connect</h3>
-              <div className="flex gap-5">
+              <nav className="flex flex-col gap-2">
                 {footerSocials.map((social) => (
                   <a
                     key={social.name}
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-2 -m-2 text-white/45 hover:text-white transition-colors duration-200"
-                    aria-label={social.name}
+                    className="group inline-flex w-fit items-center gap-2.5 py-1 -my-1 text-white/50 hover:text-white transition-colors duration-200 text-sm"
                   >
-                    {social.icon}
+                    <span className="text-white/35 transition-colors group-hover:text-blue-300" aria-hidden="true">
+                      {social.icon}
+                    </span>
+                    {social.name}
                   </a>
                 ))}
-              </div>
+              </nav>
+            </div>
             </div>
           </div>
 
