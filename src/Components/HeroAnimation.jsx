@@ -84,20 +84,53 @@ OrganicShape.propTypes = {
   mouse: mouseRef.isRequired,
 };
 
+/**
+ * A soft round sprite, drawn once and shared by every point.
+ *
+ * The alternative is what this used to be: 150 octahedron meshes. An
+ * octahedron seen from anywhere near head-on is a diamond, so the sky was
+ * scattered with crystals rather than stars — and each one was its own draw
+ * call. One texture and one geometry replaces all of it.
+ */
+const starTexture = () => {
+  const size = 64;
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+  // A bright core falling off fast, then a long faint skirt. Starlight is
+  // mostly the skirt; a hard-edged dot reads as a pixel, not a light.
+  g.addColorStop(0, 'rgba(255,255,255,1)');
+  g.addColorStop(0.25, 'rgba(255,255,255,0.55)');
+  g.addColorStop(0.55, 'rgba(255,255,255,0.12)');
+  g.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, size, size);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.needsUpdate = true;
+  return texture;
+};
+
 const OrbitingParticles = ({ count = 150, mouse }) => {
   const groupRef = useRef();
 
-  const particles = useMemo(() => {
-    return Array.from({ length: count }).map(() => ({
-      position: [
-        (Math.random() - 0.5) * 12,
-        (Math.random() - 0.5) * 12,
-        (Math.random() - 0.5) * 12,
-      ],
-      speed: 0.2 + Math.random() * 0.5,
-      size: 0.03 + Math.random() * 0.05
-    }));
+  const { positions, sizes, sprite } = useMemo(() => {
+    const positions = new Float32Array(count * 3);
+    const sizes = new Float32Array(count);
+    for (let i = 0; i < count; i += 1) {
+      positions[i * 3] = (Math.random() - 0.5) * 12;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 12;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 12;
+      // Heavily weighted small. A real field is mostly faint points with a few
+      // bright ones; a uniform distribution gives an evenly-lit sky, which is
+      // the thing that reads as generated.
+      sizes[i] = 0.05 + Math.random() ** 3 * 0.22;
+    }
+    return { positions, sizes, sprite: starTexture() };
   }, [count]);
+
+  // Textures hold GPU memory until they are told not to.
+  useEffect(() => () => sprite.dispose(), [sprite]);
 
   useFrame(({ clock }) => {
     if (groupRef.current) {
@@ -115,16 +148,27 @@ const OrbitingParticles = ({ count = 150, mouse }) => {
 
   return (
     <group ref={groupRef}>
-      {particles.map((p, i) => (
-        <mesh key={i} position={p.position}>
-          <octahedronGeometry args={[p.size, 0]} />
-          {/* Every other one of these was violet-500 — which is what the
-              purple diamonds scattered across the hero were. Alternating two
-              values of the same blue keeps the depth the alternation was for
-              without leaving the palette to get it. */}
-          <meshBasicMaterial color={i % 2 === 0 ? "#3b82f6" : "#60a5fa"} transparent opacity={0.5} />
-        </mesh>
-      ))}
+      <points>
+        <bufferGeometry>
+          <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+          <bufferAttribute attach="attributes-size" args={[sizes, 1]} />
+        </bufferGeometry>
+        {/* Additive, so overlapping points brighten each other the way real
+            light does rather than compositing into a flat disc — and with
+            depthWrite off, so a near star never punches a hole in the glow of
+            one behind it. sizeAttenuation keeps the far ones small, which is
+            where the depth comes from now the shapes are gone. */}
+        <pointsMaterial
+          map={sprite}
+          size={0.16}
+          sizeAttenuation
+          color="#9ec5ff"
+          transparent
+          opacity={0.85}
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+        />
+      </points>
     </group>
   );
 };
