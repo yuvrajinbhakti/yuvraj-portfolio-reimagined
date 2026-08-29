@@ -1,5 +1,11 @@
 import { useEffect, useRef } from 'react';
-import { STARS, STAR_STRIDE, CONSTELLATION_LINES } from '../constants/starCatalog';
+import {
+  STARS,
+  STAR_STRIDE,
+  STAR_LABELS,
+  CONSTELLATION_NAMES,
+  CONSTELLATION_LINES,
+} from '../constants/starCatalog';
 import {
   localSiderealTime,
   horizontal,
@@ -9,6 +15,7 @@ import {
   radiusForT,
   alphaForT,
 } from '../utils/sky';
+import { OBSERVER } from '../constants/observer';
 import PropTypes from 'prop-types';
 import { useReducedMotion } from 'framer-motion';
 
@@ -33,6 +40,9 @@ const AnimatedBackground = ({ children }) => {
     // Capped rather than uncapped because a 3x phone would quadruple the fill
     // cost for a difference nobody can see at that density.
     let dpr = 1;
+    // Measured rather than assumed, so a change to the nav's padding cannot
+    // silently start hiding star labels behind it.
+    let headerHeight = 0;
     // Tracked so the loop and the meteor scheduler can actually be torn down —
     // previously neither was cancelled on unmount.
     let rafId = null;
@@ -73,6 +83,8 @@ const AnimatedBackground = ({ children }) => {
       // Resizing a canvas resets its context state, so the scale has to be
       // re-established here and nowhere else.
       context.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      headerHeight = document.querySelector('header')?.getBoundingClientRect().height || 0;
 
       // The sprites were baked for the old ratio, and a sprite drawn at the
       // wrong one is soft in exactly the way this change exists to fix.
@@ -164,14 +176,6 @@ const AnimatedBackground = ({ children }) => {
       }
     }
     
-    // Create stars
-    /**
-     * Chandigarh, which is where the footer says the author is. The sky is
-     * genuinely different from anywhere else, so the coordinates have to be
-     * somebody's rather than a default.
-     */
-    const OBSERVER = { latitude: 30.7333, longitude: 76.7794 };
-
     // Looking due south, which is the richest part of the sky from 30 degrees
     // north and puts the galactic plane through the frame for much of the year.
     // How far *up* is not a constant — see cameraBasis.
@@ -379,6 +383,7 @@ const AnimatedBackground = ({ children }) => {
         const dec = STARS[i + 1] / 100;
         const mag = STARS[i + 2] / 100;
         const bv = STARS[i + 3] / 100;
+        const label = STAR_LABELS[i / STAR_STRIDE];
 
         const { altitude, azimuth } = horizontal(ra, dec, OBSERVER.latitude, lst);
         // Everything under the horizon is behind the planet.
@@ -411,6 +416,12 @@ const AnimatedBackground = ({ children }) => {
           // effect rather than an atmosphere.
           twinkle: Math.max(0, 1 - altitude / 50) * 0.5,
           phase: (ra + dec) * 0.7,
+          // Undefined for all but the 519 stars bright enough to aim at, which
+          // is what makes the hit test below cheap: it is a property check
+          // before it is any arithmetic.
+          label,
+          altitude,
+          azimuth,
         });
       }
 
@@ -450,6 +461,119 @@ const AnimatedBackground = ({ children }) => {
       projectSky(Date.now());
       constellationSegments = projectConstellations();
     };
+
+    // --- Naming ---------------------------------------------------------
+    // The sky is real and, until this existed, unprovably so — it looked
+    // exactly like a particle field with a good palette. Pointing at a star
+    // names it, which turns the claim into something a visitor can check
+    // against any sky app.
+    //
+    // A previous pass deleted a pointer handler from this file for running a
+    // distance check against every star on every frame. This one does not: the
+    // nearest labelled star is found inside the draw loop that is already
+    // walking the projected list, and only for the 519 that carry a name.
+    let pointer = null;
+    let hover = null;       // the star currently named
+    let hoverAlpha = 0;     // eased, so it does not flicker between neighbours
+
+    // Generous, because a magnitude-3 star is about two pixels across and
+    // nobody can put a cursor on that. Small enough that it still feels aimed.
+    const HIT_RADIUS = 26;
+
+    const finePointer =
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(pointer: fine)').matches;
+
+    const onPointerMove = (e) => {
+      // The canvas is fixed at the viewport origin, so client coordinates are
+      // already canvas coordinates. No getBoundingClientRect per move.
+      pointer = { x: e.clientX, y: e.clientY };
+      requestPaintIfStill();
+    };
+    const onPointerLeave = () => {
+      pointer = null;
+      requestPaintIfStill();
+    };
+
+    /**
+     * Under reduced motion the loop paints one frame and stops, so the label
+     * would never appear. Naming a star on demand is a discrete response to an
+     * intentional action rather than ambient movement, so it still runs — it
+     * just costs one frame per pointer move instead of sixty a second.
+     */
+    let stillFrame = null;
+    const requestPaintIfStill = () => {
+      if (!reduce || stillFrame !== null) return;
+      stillFrame = requestAnimationFrame((t) => {
+        stillFrame = null;
+        animate(t);
+      });
+    };
+
+    const drawLabel = (ctx, star) => {
+      const [name, constellation] = star.label;
+      const full = CONSTELLATION_NAMES[constellation] || constellation;
+      const x = star.x;
+      const y = star.drawnY;
+
+      ctx.save();
+      ctx.globalAlpha = hoverAlpha;
+
+      // A ring rather than a highlight on the star itself: brightening the dot
+      // would be a lie about its magnitude, and the whole point of the field is
+      // that the magnitudes are true.
+      ctx.strokeStyle = 'rgba(147, 197, 253, 0.5)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(x, y, 10, 0, TAU);
+      ctx.stroke();
+
+      const NAME_FONT = '600 13px ui-sans-serif, system-ui, -apple-system, sans-serif';
+      const META_FONT = '11px ui-monospace, SFMono-Regular, Menlo, monospace';
+      const meta = `${full} · ${Math.round(star.altitude)}° ${compass(star.azimuth)}`;
+
+      ctx.font = NAME_FONT;
+      const nameWidth = ctx.measureText(name).width;
+      ctx.font = META_FONT;
+      const metaWidth = ctx.measureText(meta).width;
+
+      const boxW = Math.max(nameWidth, metaWidth) + 20;
+      const boxH = 44;
+      // Flip to the other side rather than let the card leave the viewport.
+      const left = x + 18 + boxW > width ? x - 18 - boxW : x + 18;
+      // The ceiling is the bottom of the nav bar, not the top of the viewport.
+      // A star near the top of the screen put the card under the fixed header,
+      // which is opaque and sits above the canvas — the name was simply gone.
+      const top = Math.min(Math.max(headerHeight + 8, y - boxH / 2), height - boxH - 8);
+
+      ctx.fillStyle = 'rgba(8, 13, 30, 0.82)';
+      ctx.strokeStyle = 'rgba(147, 197, 253, 0.18)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      // roundRect landed in Safari 16.4; a square card is a fine thing to fall
+      // back to and a thrown TypeError is not.
+      if (ctx.roundRect) ctx.roundRect(left, top, boxW, boxH, 6);
+      else ctx.rect(left, top, boxW, boxH);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
+      ctx.font = NAME_FONT;
+      ctx.fillText(name, left + 10, top + 20);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+      ctx.font = META_FONT;
+      ctx.fillText(meta, left + 10, top + 35);
+
+      ctx.restore();
+    };
+
+    // Duplicated from constants/observer rather than imported, because that one
+    // returns prose for a sentence ("north-east") and this wants the compact
+    // form a chart uses.
+    const COMPASS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+    const compass = (azimuth) =>
+      COMPASS[Math.round((((azimuth % 360) + 360) % 360) / 45) % 8];
 
     const createMeteor = () => {
       // Clean up inactive meteors
@@ -548,6 +672,11 @@ const AnimatedBackground = ({ children }) => {
       context.globalCompositeOperation = 'lighter';
 
       const seconds = time * 0.001;
+      // Nearest named star to the pointer, found in the loop that is already
+      // computing every drawn position rather than in a pass of its own.
+      let nearest = null;
+      let nearestD2 = HIT_RADIUS * HIT_RADIUS;
+
       for (const star of projected) {
         const sprite = star.sprite;
         // Parallax by brightness. Brighter stars carry bigger sprites, so tying
@@ -556,6 +685,17 @@ const AnimatedBackground = ({ children }) => {
         // page.
         const y = star.y - scrollY * (0.02 + sprite.half * 0.004);
         if (y + sprite.half < 0 || y - sprite.half > height) continue;
+
+        if (pointer && star.label) {
+          const dx = star.x - pointer.x;
+          const dy = y - pointer.y;
+          const d2 = dx * dx + dy * dy;
+          if (d2 < nearestD2) {
+            nearestD2 = d2;
+            star.drawnY = y;   // the parallaxed position, which is where it is
+            nearest = star;
+          }
+        }
 
         context.globalAlpha = star.twinkle
           ? 1 - star.twinkle * 0.5 * (0.5 + 0.5 * Math.sin(seconds * 2.1 + star.phase))
@@ -577,6 +717,18 @@ const AnimatedBackground = ({ children }) => {
       });
 
       context.globalCompositeOperation = 'source-over';
+
+      // The name, over the sky but under the page — a card cannot be seen
+      // through, and neither can a star behind one.
+      if (nearest) hover = nearest;
+      if (reduce) {
+        hoverAlpha = nearest ? 1 : 0;
+      } else {
+        hoverAlpha = nearest
+          ? Math.min(1, hoverAlpha + 0.14)
+          : Math.max(0, hoverAlpha - 0.09);
+      }
+      if (hover && hoverAlpha > 0.01) drawLabel(context, hover);
 
 
       // Under reduced motion the scene is painted once and left static: the
@@ -634,6 +786,12 @@ const AnimatedBackground = ({ children }) => {
     updateDimensions();
     fillBackground(getDepth()); // Ensure the background is filled immediately
     window.addEventListener('resize', updateDimensions);
+    // Touch devices have no hover, and a label that appears under your thumb
+    // and follows it around is not the feature.
+    if (finePointer) {
+      window.addEventListener('pointermove', onPointerMove, { passive: true });
+      document.documentElement.addEventListener('pointerleave', onPointerLeave);
+    }
 
     // Start animation and meteors. `animate` paints one frame either way; only
     // the repeat is conditional. Meteors are skipped entirely under reduced
@@ -645,7 +803,10 @@ const AnimatedBackground = ({ children }) => {
     // Cleanup
     return () => {
       window.removeEventListener('resize', updateDimensions);
+      window.removeEventListener('pointermove', onPointerMove);
+      document.documentElement.removeEventListener('pointerleave', onPointerLeave);
       if (rafId !== null) cancelAnimationFrame(rafId);
+      if (stillFrame !== null) cancelAnimationFrame(stillFrame);
       if (meteorTimeoutId !== null) clearTimeout(meteorTimeoutId);
     };
   }, [reduce]);
