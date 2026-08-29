@@ -122,7 +122,11 @@ export const caseStudies = [
     stack: ['JavaScript', 'Node.js', 'Property testing', 'GitHub Actions', 'npm'],
     links: {
       demo: 'https://www.npmjs.com/package/ot-core',
-      demoLabel: 'View on npm',
+      // Names the destination, not the format. The case study composes
+      // "View on npm" from it and the project cards just say "npm" — because a
+      // card button reading "Demo" that lands on a package page is the same
+      // small dishonesty these write-ups avoid everywhere else.
+      demoLabel: 'npm',
       code: 'https://github.com/yuvrajinbhakti/ot-core',
     },
     // The algorithm this library is, running in the browser. Same demo the

@@ -29,6 +29,7 @@ const ProjectCard = ({ project }) => {
   // project.demo_link finds null and offers nothing — on two projects whose
   // demos are deployed and answering.
   const demoUrl = project.demo_link ?? study?.links?.demo ?? null;
+  const demoLabel = study?.links?.demoLabel ?? 'Demo';
 
   // No h-full on the card. It is sized by min-height now, and a percentage
   // height does not resolve against that — worse, specifying any height at all
@@ -137,7 +138,7 @@ const ProjectCard = ({ project }) => {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 py-1.5 -my-1.5 text-emerald-400 hover:text-emerald-300 transition-colors text-sm font-medium"
               >
-                Demo
+                {demoLabel}
               </a>
             )}
           </div>
@@ -187,8 +188,9 @@ const ViewAll = () => (
 );
 
 // Four is enough to establish range without turning the landing page into a
-// tunnel; the rest live on /projects. The first four include both projects
-// that have a full case study.
+// tunnel; the rest live on /projects. The order is chosen so those four carry
+// all three case studies, and so ot-core sits directly beneath the editor it
+// was extracted from — the write-ups read in that order.
 const FEATURED_COUNT = 4;
 
 const StackingProjectCards = () => {
