@@ -83,53 +83,115 @@ export function horizontal(ra, dec, latitude, lst) {
 }
 
 /**
- * B-V colour index to something a canvas can fill with.
+ * B-V colour index to an RGB triple.
  *
  * B-V is the difference between a star's brightness through a blue filter and
  * through a visual one, and it is a direct read on surface temperature: about
  * -0.3 for a 30,000K blue giant, 0.00 for Vega by definition, 0.65 for the
  * sun, 1.4 and up for a cool red giant like Betelgeuse.
  *
- * The mapping below is deliberately gentle. Real star colours are far less
- * saturated than photographs suggest — the eye sees almost all of them as
- * white, because at those brightnesses colour vision has barely engaged. A
- * sky of vividly coloured dots is a false-colour image, not a night.
+ * These are the standard tabulated values rather than a formula. The previous
+ * version interpolated three linear ramps, which put its green channel out of
+ * step with the other two around B-V 0.3 and gave the solar-type stars — much
+ * the largest group in any catalogue — a faint sickly cast. A table costs
+ * nothing here: it is read once per colour bucket at startup, not per star.
  */
-export function starColor(bv) {
-  const t = Math.max(0, Math.min(1, (bv + 0.4) / 2.4)); // -0.4..2.0 → 0..1
-  // Blue-white through white to amber, staying close to white throughout.
-  const r = Math.round(190 + 65 * t);
-  const g = Math.round(215 - 35 * Math.abs(t - 0.35) * 2);
-  const b = Math.round(255 - 120 * t);
-  return `${r},${Math.max(150, Math.min(235, g))},${b}`;
+const BV_TABLE = [
+  [-0.4, 155, 176, 255],
+  [-0.2, 170, 191, 255],
+  [0.0, 202, 215, 255],
+  [0.2, 225, 230, 255],
+  [0.4, 248, 247, 255],
+  [0.6, 255, 244, 234],
+  [0.8, 255, 235, 213],
+  [1.0, 255, 224, 188],
+  [1.2, 255, 210, 161],
+  [1.4, 255, 199, 142],
+  [1.6, 255, 187, 123],
+  [2.0, 255, 166, 95],
+];
+
+function starRGB(bv) {
+  const v = Math.max(BV_TABLE[0][0], Math.min(BV_TABLE[BV_TABLE.length - 1][0], bv));
+  let i = 0;
+  while (i < BV_TABLE.length - 2 && v > BV_TABLE[i + 1][0]) i++;
+  const [a0, ar, ag, ab] = BV_TABLE[i];
+  const [b0, br, bg, bb] = BV_TABLE[i + 1];
+  const f = b0 === a0 ? 0 : (v - a0) / (b0 - a0);
+  return [ar + (br - ar) * f, ag + (bg - ag) * f, ab + (bb - ab) * f];
 }
 
 /**
- * How bright to draw a star of a given magnitude.
+ * The star's own colour, as the eye would have it: close to white.
+ *
+ * Real star colours are far less saturated than photographs suggest, because
+ * at those brightnesses colour vision has barely engaged. A sky of vividly
+ * coloured dots is a false-colour image, not a night.
+ */
+export function starColor(bv) {
+  const [r, g, b] = starRGB(bv);
+  return `${Math.round(r)},${Math.round(g)},${Math.round(b)}`;
+}
+
+/**
+ * The same colour, pushed, for the halo around a bright star.
+ *
+ * Not decoration for its own sake. A bright point source overwhelms the centre
+ * of whatever is receiving it — retina or sensor — and reads as white there,
+ * while the light spread into the wings stays under that ceiling and keeps its
+ * hue. So the honest way to draw a bright star is a white core inside a
+ * coloured glow, which is also why Betelgeuse looks orange to the naked eye
+ * and a magnitude-5 star of identical temperature does not.
+ *
+ * The push is a move away from the brightest channel rather than a saturation
+ * multiply, so the hue is unchanged and only its depth grows.
+ */
+export function starGlowColor(bv) {
+  const rgb = starRGB(bv);
+  const m = Math.max(...rgb);
+  return rgb.map((c) => Math.round(Math.max(0, m - (m - c) * 1.7))).join(',');
+}
+
+/**
+ * Magnitude to a 0..1 brightness, where 0 is the faintest star in the
+ * catalogue and 1 is Sirius.
  *
  * The magnitude scale is logarithmic and backwards: every 5 steps down is a
  * hundredfold increase in received light, so Sirius at -1.4 is roughly 700
- * times brighter than the faintest star here at 5.5. Drawing that literally
- * would leave one blazing dot and 2,850 invisible ones.
- *
- * So this compresses hard. What survives is the ordering and a sense that some
- * stars are obviously brighter, which is what the eye actually takes from a
- * sky.
+ * times brighter than a magnitude 6 star. Drawing that literally would leave
+ * one blazing dot and five thousand invisible ones, so what follows compresses
+ * it hard. What survives is the ordering and a strong sense that some stars
+ * are obviously brighter, which is what the eye actually takes from a sky.
  */
-export function magnitudeToAlpha(mag, limit = 6.0) {
-  const t = Math.max(0, Math.min(1, (limit - mag) / (limit + 1.5)));
-  // The floor is doing most of the work, and it took two passes to believe
-  // that. Magnitudes are heavily skewed faint — most of a catalogue sits near
-  // its own limit — so a curve tuned for the bright end put the median star at
-  // alpha 0.19 under a pixel wide, and 611 correctly-placed stars rendered as
-  // an empty screen. Counting them proved the projection was right and the
-  // drawing was not.
-  return 0.5 + 0.5 * t ** 1.1;
+export function magnitudeT(mag, limit = 6.0) {
+  return Math.max(0, Math.min(1, (limit - mag) / (limit + 1.5)));
 }
 
-export function magnitudeToRadius(mag, limit = 6.0) {
-  const t = Math.max(0, Math.min(1, (limit - mag) / (limit + 1.5)));
-  // 0.6 is about the smallest arc that still reads as a point rather than as
-  // faint noise, so that is the floor and everything else is headroom above it.
-  return 0.7 + 2.0 * t ** 2;
+/**
+ * The floor is doing most of the work in both curves below, and it took two
+ * passes to believe that. Magnitudes are heavily skewed faint — most of a
+ * catalogue sits near its own limit — so a curve tuned for the bright end put
+ * the median star at alpha 0.19 under a pixel wide, and 611 correctly-placed
+ * stars rendered as an empty screen. Counting them proved the projection was
+ * right and the drawing was not.
+ *
+ * The exponents are steeper than that fix left them. With the canvas now
+ * rendering at device resolution a sub-pixel star is a crisp point rather than
+ * a grey smear, which buys back the room to make the bright end genuinely
+ * bigger: the spread across the visible sky is roughly 0.6px to 3.7px, where
+ * it used to be 0.7 to 2.65.
+ *
+ * The floor is passed in rather than fixed because it is not really a length —
+ * it is "the smallest mark the rasteriser still draws as a point", and that is
+ * measured in *device* pixels. Hard-coding it in CSS pixels tunes it for one
+ * display and abandons the other: 0.62 is a solid dot on a 2x screen and an
+ * almost invisible one on a 1x monitor, where the whole faint half of the
+ * catalogue disappeared.
+ */
+export function radiusForT(t, floor = 0.62) {
+  return floor + 3.1 * t ** 2.4;
+}
+
+export function alphaForT(t) {
+  return 0.62 + 0.38 * t ** 0.85;
 }

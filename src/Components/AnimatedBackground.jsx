@@ -1,6 +1,14 @@
 import { useEffect, useRef } from 'react';
 import { STARS, STAR_STRIDE, CONSTELLATION_LINES } from '../constants/starCatalog';
-import { localSiderealTime, horizontal, starColor, magnitudeToAlpha, magnitudeToRadius } from '../utils/sky';
+import {
+  localSiderealTime,
+  horizontal,
+  starColor,
+  starGlowColor,
+  magnitudeT,
+  radiusForT,
+  alphaForT,
+} from '../utils/sky';
 import PropTypes from 'prop-types';
 import { useReducedMotion } from 'framer-motion';
 
@@ -14,6 +22,17 @@ const AnimatedBackground = ({ children }) => {
     const context = canvas.getContext('2d');
     let width, height, meteors = [];
     let constellationSegments = [];
+    // Device pixels per CSS pixel, capped at 2. Everything below is written in
+    // CSS pixels and the context carries the scale.
+    //
+    // This was the single largest thing wrong with the sky. The backing store
+    // was sized in CSS pixels, so on any 2x display the whole field was drawn
+    // at half resolution and then bilinearly upscaled by the compositor — and
+    // most of a star catalogue is sub-pixel. A 0.7px point became a 1.4px grey
+    // smudge, which is exactly the difference between "stars" and "noise".
+    // Capped rather than uncapped because a 3x phone would quadruple the fill
+    // cost for a difference nobody can see at that density.
+    let dpr = 1;
     // Tracked so the loop and the meteor scheduler can actually be torn down —
     // previously neither was cancelled on unmount.
     let rafId = null;
@@ -26,7 +45,12 @@ const AnimatedBackground = ({ children }) => {
     // Deliberately subtle — it should be felt, not noticed. Both ends stay very
     // dark so text contrast never shifts (white-on-near-black at every depth).
     const SKY_TOP = [[2, 6, 23], [15, 23, 42]];   // cold near-black blue
-    const SKY_DEEP = [[5, 4, 24], [26, 16, 56]];  // indigo, further down
+    // Deeper and warmer-toward-blue, not indigo. The old bottom stop was
+    // (26, 16, 56) — red above green with blue well clear of both, which is
+    // violet, and with the canvas finally staying on screen past the hero it
+    // turned the entire lower half of the page purple. Green now leads red, so
+    // the descent deepens within the blue this site actually uses.
+    const SKY_DEEP = [[3, 7, 28], [16, 30, 72]];
 
     const lerp = (a, b, t) => a + (b - a) * t;
     const mixRGB = (c1, c2, t) =>
@@ -43,9 +67,17 @@ const AnimatedBackground = ({ children }) => {
     const updateDimensions = () => {
       width = window.innerWidth;
       height = window.innerHeight; // Remove the 1.1 multiplier to prevent extra height
-      canvas.width = width;
-      canvas.height = height;
-      
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+      // Resizing a canvas resets its context state, so the scale has to be
+      // re-established here and nowhere else.
+      context.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      // The sprites were baked for the old ratio, and a sprite drawn at the
+      // wrong one is soft in exactly the way this change exists to fix.
+      sprites.clear();
+
       // Recreate stars when dimensions change
       createStars();
     };
@@ -140,15 +172,16 @@ const AnimatedBackground = ({ children }) => {
      */
     const OBSERVER = { latitude: 30.7333, longitude: 76.7794 };
 
-    // Looking south and a little up, which is the richest part of the sky from
-    // 30 degrees north and puts the galactic plane through the frame for much
-    // of the year.
-    const VIEW = { altitude: 34, azimuth: 180 };
+    // Looking due south, which is the richest part of the sky from 30 degrees
+    // north and puts the galactic plane through the frame for much of the year.
+    // How far *up* is not a constant — see cameraBasis.
+    const VIEW_AZIMUTH = 180;
 
     const DEG = Math.PI / 180;
+    const TAU = Math.PI * 2;
 
     /**
-     * Project the visible sky onto the canvas.
+     * Where the camera points and how much sky it holds.
      *
      * Stereographic rather than gnomonic. Gnomonic keeps great circles
      * straight, which is right for a star chart and wrong here: it stretches
@@ -157,9 +190,180 @@ const AnimatedBackground = ({ children }) => {
      * constellations stay recognisable at the edges — which is the entire point
      * of drawing real ones.
      *
+     * The tilt is derived rather than chosen. Everything below the horizon is
+     * culled, correctly — but at a fixed 34 degrees of elevation the horizon
+     * itself fell inside the frame on every common viewport, leaving a starless
+     * band across the bottom fifth of the page. Solving the stereographic
+     * relation for the frame's own half-height gives the angle the bottom edge
+     * reaches, and pointing six degrees above that keeps the horizon just out
+     * of shot at any aspect ratio. Tall phone screens see much more vertical
+     * sky than a laptop does, so this is the one number that cannot be a
+     * constant.
+     */
+    const cameraBasis = () => {
+      // Scale is degrees-to-pixels, and it is deliberately *not* proportional
+      // to the viewport. It used to be `max(width, height) * 0.34`, which holds
+      // the field of view constant and therefore magnifies the same sky onto a
+      // bigger screen — so a 1920px monitor got the same 1,250 stars spread
+      // over 2.9x the area as a laptop, and read as an empty one. Counted:
+      //
+      //   rule                      1920x1080   1440x900   390x844
+      //   max*0.34 (field-locked)        1250       1379      1191
+      //   this one                       1867       1495       946
+      //
+      // Pinning the scale instead means a larger window shows *more sky*, which
+      // is what a larger window does. The clamp stops the two ends running
+      // away: below 340 the distortion at the corners of a phone screen starts
+      // to matter, above 460 a wide monitor is back to magnifying.
+      const scale = Math.min(460, Math.max(340, Math.min(width, height) * 0.75));
+
+      // In a stereographic projection a star theta from centre lands
+      // 2*tan(theta/2) away, so this inverts to the angle at the frame edge.
+      const edge = (2 * Math.atan(height / 2 / (2 * scale))) / DEG;
+      const altitude = Math.min(74, edge + 6);
+
+      const fAlt = altitude * DEG;
+      const fAz = VIEW_AZIMUTH * DEG;
+      const fx = Math.cos(fAlt) * Math.sin(fAz);
+      const fy = Math.cos(fAlt) * Math.cos(fAz);
+      const fz = Math.sin(fAlt);
+      // right = forward x world-up, normalised; up = forward x right.
+      const horiz = Math.hypot(fx, fy) || 1;
+      const rx = -fy / horiz;
+      const ry = fx / horiz;
+      return {
+        scale,
+        fx, fy, fz,
+        rx, ry,
+        ux: -fz * ry,
+        uy: fz * rx,
+        uz: fx * ry - fy * rx,
+      };
+    };
+
+    /**
+     * Stars are pre-rendered once and blitted, not drawn.
+     *
+     * A star that reads as a light source rather than a dot needs three things
+     * layered: a white core, a coloured halo, and — on the genuinely bright
+     * ones — diffraction spikes. Composed live that is two radial gradients and
+     * four polygons per star, and `createRadialGradient` is not free: at 2,300
+     * stars and 60fps it is roughly a quarter of a million gradient objects a
+     * second, which is a frame budget spent on garbage collection.
+     *
+     * So each distinct (brightness, colour) pair is drawn once into its own
+     * small canvas and then copied per frame. Buckets are coarse — 16 steps of
+     * brightness, 10 of colour — because the eye cannot separate adjacent ones
+     * at these sizes, and built on demand rather than up front: the largest
+     * sprites are also the rarest, since there are four stars in the entire sky
+     * brighter than magnitude zero, and pre-building all 160 would spend
+     * megabytes on combinations no star occupies.
+     */
+    const BRIGHT_BUCKETS = 16;
+    const COLOR_BUCKETS = 10;
+    const sprites = new Map();
+
+    const buildSprite = (t, bv) => {
+      // 1.15 *device* pixels is about the smallest dot that still reads as a
+      // point rather than as grain, so the floor is that constant converted
+      // back into the CSS pixels everything else is written in.
+      const radius = radiusForT(t, Math.max(0.62, 1.15 / dpr));
+      const alpha = alphaForT(t);
+      const core = starColor(bv);
+      const glow = starGlowColor(bv);
+
+      // Faint stars get no halo at all. Two thousand of them each wearing a
+      // glow is not a sky, it is fog: under additive blending those halos sum
+      // across the whole frame and lift the black the bright stars need to
+      // stand against.
+      const haloT = Math.max(0, (t - 0.12) / 0.88);
+      const haloR = radius * (2.2 + 4.8 * haloT);
+
+      // Spikes start around magnitude 1.9 — about two dozen stars in the whole
+      // sky, which is the point. They are a lens artefact rather than anything
+      // an eye produces, but they are the universal visual shorthand for "this
+      // one is bright", and rationing them to the stars that genuinely are
+      // keeps that shorthand true.
+      const spikeLen = t > 0.55 ? Math.min(radius * (5 + 15 * ((t - 0.55) / 0.45)), 52) : 0;
+
+      const half = Math.ceil(Math.max(haloR, spikeLen)) + 1;
+      const side = half * 2;
+
+      const c = document.createElement('canvas');
+      c.width = c.height = Math.ceil(side * dpr);
+      const g = c.getContext('2d');
+      g.scale(dpr, dpr);
+      g.translate(half, half);
+      // Additive inside the sprite too, so the core sits *on top of* the halo's
+      // light rather than punching a hole in it.
+      g.globalCompositeOperation = 'lighter';
+
+      if (spikeLen > 0) {
+        const w = Math.max(0.7, radius * 0.3);
+        for (let i = 0; i < 2; i++) {
+          g.save();
+          g.rotate((i * Math.PI) / 2);
+          const grad = g.createLinearGradient(-spikeLen, 0, spikeLen, 0);
+          grad.addColorStop(0, `rgba(${glow},0)`);
+          grad.addColorStop(0.5, `rgba(${glow},${(alpha * 0.4).toFixed(3)})`);
+          grad.addColorStop(1, `rgba(${glow},0)`);
+          g.fillStyle = grad;
+          // A lens rather than a rectangle: thickest at the star, tapering to
+          // nothing. A constant-width bar reads as a drawn cross.
+          g.beginPath();
+          g.moveTo(-spikeLen, 0);
+          g.lineTo(0, -w);
+          g.lineTo(spikeLen, 0);
+          g.lineTo(0, w);
+          g.closePath();
+          g.fill();
+          g.restore();
+        }
+      }
+
+      if (haloT > 0) {
+        const halo = g.createRadialGradient(0, 0, 0, 0, 0, haloR);
+        halo.addColorStop(0, `rgba(${glow},${(alpha * 0.5 * haloT).toFixed(3)})`);
+        halo.addColorStop(0.22, `rgba(${glow},${(alpha * 0.18 * haloT).toFixed(3)})`);
+        halo.addColorStop(1, `rgba(${glow},0)`);
+        g.fillStyle = halo;
+        g.beginPath();
+        g.arc(0, 0, haloR, 0, TAU);
+        g.fill();
+      }
+
+      const disc = g.createRadialGradient(0, 0, 0, 0, 0, radius);
+      disc.addColorStop(0, `rgba(255,255,255,${alpha.toFixed(3)})`);
+      disc.addColorStop(0.45, `rgba(${core},${alpha.toFixed(3)})`);
+      disc.addColorStop(1, `rgba(${core},0)`);
+      g.fillStyle = disc;
+      g.beginPath();
+      g.arc(0, 0, radius, 0, TAU);
+      g.fill();
+
+      return { canvas: c, half, side };
+    };
+
+    const spriteFor = (t, bv) => {
+      const tb = Math.round(t * (BRIGHT_BUCKETS - 1));
+      const cb = Math.round(
+        Math.max(0, Math.min(1, (bv + 0.4) / 2.4)) * (COLOR_BUCKETS - 1)
+      );
+      const key = tb * COLOR_BUCKETS + cb;
+      let sprite = sprites.get(key);
+      if (!sprite) {
+        sprite = buildSprite(tb / (BRIGHT_BUCKETS - 1), (cb / (COLOR_BUCKETS - 1)) * 2.4 - 0.4);
+        sprites.set(key, sprite);
+      }
+      return sprite;
+    };
+
+    /**
+     * Project the visible sky onto the canvas.
+     *
      * Recomputed only when the clock moves on, not per frame. The sky turns 15
      * degrees an hour; at 60fps that is four ten-thousandths of a degree
-     * between frames, and projecting 2,851 stars to discover that would be the
+     * between frames, and projecting 5,044 stars to discover that would be the
      * most expensive thing on the page.
      */
     let projected = [];
@@ -167,29 +371,7 @@ const AnimatedBackground = ({ children }) => {
 
     const projectSky = (now) => {
       const lst = localSiderealTime(new Date(now), OBSERVER.longitude);
-
-      // Camera basis. Forward is where we are looking; right and up come from
-      // it and the world vertical.
-      const fAlt = VIEW.altitude * DEG;
-      const fAz = VIEW.azimuth * DEG;
-      const fx = Math.cos(fAlt) * Math.sin(fAz);
-      const fy = Math.cos(fAlt) * Math.cos(fAz);
-      const fz = Math.sin(fAlt);
-      const horiz = Math.hypot(fx, fy) || 1;
-      const rx = -fy / horiz;
-      const ry = fx / horiz;
-      // up = forward x right
-      const ux = fy * 0 - fz * ry;
-      const uy = fz * rx - fx * 0;
-      const uz = fx * ry - fy * rx;
-
-      // Field of view, as a scale factor. In a stereographic projection a star
-      // theta from centre lands 2*tan(theta/2) away, so 0.62 put only about 44
-      // degrees on screen in each direction — a keyhole, through which a
-      // 1,289-star sky arrived as a few dozen widely spaced points. 0.34 opens
-      // it to roughly the whole visible hemisphere, which is both what you see
-      // standing outside and what makes the field look like a field.
-      const scale = Math.max(width, height) * 0.34;
+      const cam = cameraBasis();
       const out = [];
 
       for (let i = 0; i < STARS.length; i += STAR_STRIDE) {
@@ -208,20 +390,21 @@ const AnimatedBackground = ({ children }) => {
         const sy = Math.cos(a) * Math.cos(z);
         const sz = Math.sin(a);
 
-        const dot = sx * fx + sy * fy + sz * fz;
+        const dot = sx * cam.fx + sy * cam.fy + sz * cam.fz;
         if (dot < -0.2) continue; // behind the viewer
 
         const k = 2 / (1 + dot);
-        const px = width / 2 + k * (sx * rx + sy * ry) * scale;
-        const py = height / 2 - k * (sx * ux + sy * uy + sz * uz) * scale;
-        if (px < -60 || px > width + 60 || py < -60 || py > height + 60) continue;
+        const px = width / 2 + k * (sx * cam.rx + sy * cam.ry) * cam.scale;
+        const py = height / 2 - k * (sx * cam.ux + sy * cam.uy + sz * cam.uz) * cam.scale;
+        if (px < -80 || px > width + 80 || py < -80 || py > height + 80) continue;
 
         out.push({
           x: px,
           y: py,
-          radius: magnitudeToRadius(mag),
-          alpha: magnitudeToAlpha(mag),
-          color: starColor(bv),
+          // Which pre-rendered sprite to blit. Bucketing here rather than at
+          // draw time means the quantisation happens once a second for the
+          // whole sky instead of 60 times a second per star.
+          sprite: spriteFor(magnitudeT(mag), bv),
           // Twinkle is atmospheric scintillation, and it is strongest for
           // stars low in the sky, where you are looking through the most air.
           // Giving every star the same shimmer is the giveaway that it is an
@@ -237,18 +420,7 @@ const AnimatedBackground = ({ children }) => {
 
     const projectConstellations = () => {
       const lst = localSiderealTime(new Date(projectedAt), OBSERVER.longitude);
-      const fAlt = VIEW.altitude * DEG;
-      const fAz = VIEW.azimuth * DEG;
-      const fx = Math.cos(fAlt) * Math.sin(fAz);
-      const fy = Math.cos(fAlt) * Math.cos(fAz);
-      const fz = Math.sin(fAlt);
-      const horiz = Math.hypot(fx, fy) || 1;
-      const rx = -fy / horiz;
-      const ry = fx / horiz;
-      const ux = -fz * ry;
-      const uy = fz * rx;
-      const uz = fx * ry - fy * rx;
-      const scale = Math.max(width, height) * 0.34;
+      const cam = cameraBasis();
 
       const segments = [];
       for (const line of CONSTELLATION_LINES) {
@@ -261,12 +433,12 @@ const AnimatedBackground = ({ children }) => {
           const sx = Math.cos(a) * Math.sin(z);
           const sy = Math.cos(a) * Math.cos(z);
           const sz = Math.sin(a);
-          const dot = sx * fx + sy * fy + sz * fz;
+          const dot = sx * cam.fx + sy * cam.fy + sz * cam.fz;
           if (dot < 0.1) { points.length = 0; break; }
           const k = 2 / (1 + dot);
           points.push([
-            width / 2 + k * (sx * rx + sy * ry) * scale,
-            height / 2 - k * (sx * ux + sy * uy + sz * uz) * scale,
+            width / 2 + k * (sx * cam.rx + sy * cam.ry) * cam.scale,
+            height / 2 - k * (sx * cam.ux + sy * cam.uy + sz * cam.uz) * cam.scale,
           ]);
         }
         if (points.length > 1) segments.push(points);
@@ -326,7 +498,11 @@ const AnimatedBackground = ({ children }) => {
         width / 2, height / 2 - scrollYForSky, 0,
         width / 2, height / 2 - scrollYForSky, Math.max(width, height) / 1.5
       );
-      gradient.addColorStop(0, 'rgba(25, 33, 68, 0.2)');
+      // Was 0.2. Lifting the black is the one thing that cannot be undone by
+      // brightening the stars: contrast is a ratio, so a wash that raises the
+      // floor flattens the whole field no matter how much light is added on
+      // top of it.
+      gradient.addColorStop(0, 'rgba(22, 30, 64, 0.13)');
       gradient.addColorStop(1, 'rgba(9, 12, 25, 0)');
       context.fillStyle = gradient;
       context.fillRect(0, 0, width, height);
@@ -346,7 +522,11 @@ const AnimatedBackground = ({ children }) => {
       // The figures, under everything, at the edge of visible. They are there
       // for the moment somebody recognises Orion, not to be read.
       context.save();
-      context.strokeStyle = 'rgba(120, 165, 235, 0.07)';
+      // The figures have to stay subordinate to the stars. Any brighter and the
+      // hero reads as a network diagram rather than a sky — the lines are
+      // regular and the stars are not, so the eye finds them first at equal
+      // weight.
+      context.strokeStyle = 'rgba(120, 165, 235, 0.075)';
       context.lineWidth = 1;
       context.translate(0, -scrollY * 0.06);
       for (const segment of constellationSegments) {
@@ -357,45 +537,47 @@ const AnimatedBackground = ({ children }) => {
       }
       context.restore();
 
-      // The stars themselves.
+      // The stars themselves, and the meteors, added rather than painted.
+      //
+      // 'lighter' is what light does: two overlapping halos are brighter than
+      // either, and nothing drawn later can dim what is underneath it. Under
+      // the default 'source-over' a meteor's own faint trail erased every star
+      // it crossed, and the dense parts of the field looked no denser than the
+      // sparse parts, because each star was replacing its neighbour's glow
+      // instead of adding to it.
+      context.globalCompositeOperation = 'lighter';
+
       const seconds = time * 0.001;
       for (const star of projected) {
-        // Parallax by brightness. Brighter stars are drawn larger, so tying the
-        // shift to radius makes the big ones lead — which is backwards for real
-        // distance and right for the illusion of depth on a scrolling page.
-        const y = star.y - scrollY * (0.02 + star.radius * 0.012);
-        if (y < -40 || y > height + 40) continue;
+        const sprite = star.sprite;
+        // Parallax by brightness. Brighter stars carry bigger sprites, so tying
+        // the shift to sprite size makes the big ones lead — which is backwards
+        // for real distance and right for the illusion of depth on a scrolling
+        // page.
+        const y = star.y - scrollY * (0.02 + sprite.half * 0.004);
+        if (y + sprite.half < 0 || y - sprite.half > height) continue;
 
-        const shimmer = star.twinkle
+        context.globalAlpha = star.twinkle
           ? 1 - star.twinkle * 0.5 * (0.5 + 0.5 * Math.sin(seconds * 2.1 + star.phase))
           : 1;
-        const alpha = star.alpha * shimmer;
-
-        context.beginPath();
-        context.arc(star.x, y, star.radius, 0, Math.PI * 2);
-        context.fillStyle = `rgba(${star.color}, ${alpha.toFixed(3)})`;
-        context.fill();
-
-        // A halo on the few genuinely bright ones. This is the airy disc a
-        // camera and an eye both produce, and it is most of what makes Sirius
-        // look like Sirius rather than a slightly larger dot.
-        if (star.radius > 1.5) {
-          const glow = context.createRadialGradient(star.x, y, 0, star.x, y, star.radius * 4.5);
-          glow.addColorStop(0, `rgba(${star.color}, ${(alpha * 0.35).toFixed(3)})`);
-          glow.addColorStop(1, `rgba(${star.color}, 0)`);
-          context.beginPath();
-          context.arc(star.x, y, star.radius * 4.5, 0, Math.PI * 2);
-          context.fillStyle = glow;
-          context.fill();
-        }
+        context.drawImage(
+          sprite.canvas,
+          star.x - sprite.half,
+          y - sprite.half,
+          sprite.side,
+          sprite.side
+        );
       }
+      context.globalAlpha = 1;
 
       // Update and draw meteors
       meteors.forEach(meteor => {
         meteor.update();
         meteor.draw(context);
       });
-      
+
+      context.globalCompositeOperation = 'source-over';
+
 
       // Under reduced motion the scene is painted once and left static: the
       // starfield still reads as a backdrop, but nothing drifts or streaks.
@@ -435,20 +617,24 @@ const AnimatedBackground = ({ children }) => {
     // so the field could scatter away from the cursor, which is the effect
     // that made this read as a particle toy rather than a sky.
     
-    // Scroll handler to reposition canvas
-    const handleScroll = () => {
-      // We'll use CSS transform for performance instead of repositioning
-      if (canvas) {
-        canvas.style.transform = `translateY(${window.scrollY}px)`;
-      }
-    };
-    
+    // A scroll handler used to live here writing `translateY(scrollY)` onto the
+    // canvas. The canvas is `position: fixed`, so that translated it out of the
+    // viewport at exactly the rate the page scrolled: measured at scrollY 1215
+    // its bounding box was at y=1215, entirely off screen. The sky existed on
+    // the first screenful and nowhere else, and everything written to make the
+    // descent mean something — the depth gradient from cold blue to indigo, the
+    // nebula thickening, the per-star parallax — was computed every frame for a
+    // surface nobody could see. It went unnoticed because the hero globe used to
+    // carry the rest of the page on its own.
+    //
+    // A fixed canvas needs no scroll handling at all. Removing the one line is
+    // the whole fix.
+
     // Initialize
     updateDimensions();
     fillBackground(getDepth()); // Ensure the background is filled immediately
     window.addEventListener('resize', updateDimensions);
-    window.addEventListener('scroll', handleScroll);
-    
+
     // Start animation and meteors. `animate` paints one frame either way; only
     // the repeat is conditional. Meteors are skipped entirely under reduced
     // motion — objects streaking across the viewport are the most aggressive
@@ -459,7 +645,6 @@ const AnimatedBackground = ({ children }) => {
     // Cleanup
     return () => {
       window.removeEventListener('resize', updateDimensions);
-      window.removeEventListener('scroll', handleScroll);
       if (rafId !== null) cancelAnimationFrame(rafId);
       if (meteorTimeoutId !== null) clearTimeout(meteorTimeoutId);
     };
@@ -478,9 +663,11 @@ const AnimatedBackground = ({ children }) => {
       <canvas
         ref={canvasRef} 
         className="fixed top-0 left-0 w-full h-screen pointer-events-none"
-        style={{ 
+        style={{
           background: 'linear-gradient(to bottom, #020617, #0f172a)',
-          willChange: 'transform',
+          // `willChange: transform` went with the scroll handler that used to
+          // write one. Nothing transforms this element now, and promising the
+          // compositor a change that never comes just holds a layer open.
           zIndex: 0,
           overflow: 'hidden' // Add overflow hidden to prevent scrollbars
         }}
