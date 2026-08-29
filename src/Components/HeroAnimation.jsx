@@ -61,7 +61,10 @@ const OrganicShape = ({ mouse }) => {
       {/* Inner glowing solid core */}
       <mesh>
         <Sphere args={[1.2, 32, 32]}>
-          <meshBasicMaterial color="#8b5cf6" transparent opacity={0.6} />
+          {/* Was violet-500. The core sits behind a translucent wireframe, so
+              its colour is what the whole globe glows — and it was glowing a
+              hue this site does not otherwise use. */}
+          <meshBasicMaterial color="#2563eb" transparent opacity={0.6} />
         </Sphere>
       </mesh>
     </Float>
@@ -115,7 +118,11 @@ const OrbitingParticles = ({ count = 150, mouse }) => {
       {particles.map((p, i) => (
         <mesh key={i} position={p.position}>
           <octahedronGeometry args={[p.size, 0]} />
-          <meshBasicMaterial color={i % 2 === 0 ? "#3b82f6" : "#8b5cf6"} transparent opacity={0.5} />
+          {/* Every other one of these was violet-500 — which is what the
+              purple diamonds scattered across the hero were. Alternating two
+              values of the same blue keeps the depth the alternation was for
+              without leaving the palette to get it. */}
+          <meshBasicMaterial color={i % 2 === 0 ? "#3b82f6" : "#60a5fa"} transparent opacity={0.5} />
         </mesh>
       ))}
     </group>
@@ -159,7 +166,11 @@ const HeroAnimation = () => {
         <Canvas camera={{ position: [0, 0, 7], fov: 45 }} dpr={[1, 1.5]} gl={{ alpha: true }} frameloop={reduce ? 'demand' : 'always'}>
           <ambientLight intensity={0.5} />
           <directionalLight position={[10, 10, 5]} intensity={1.5} color="#3b82f6" />
-          <directionalLight position={[-10, -10, -5]} intensity={1} color="#8b5cf6" />
+          {/* The fill light. A violet fill against a blue key tints every
+              surface it reaches, so this was tinting the entire globe rather
+              than just the few meshes named above. Cyan is the cool
+              counterpoint the wireframe already uses. */}
+          <directionalLight position={[-10, -10, -5]} intensity={1} color="#06b6d4" />
 
           <OrganicShape mouse={mouse} />
           <OrbitingParticles count={150} mouse={mouse} />
