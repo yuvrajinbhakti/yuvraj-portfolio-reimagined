@@ -630,14 +630,30 @@ const Projects = () => {
               ))}
             </motion.div>
 
-            {/* Optimized Projects Grid */}
-            <motion.div 
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6"
+            {/* Flex-wrap, not grid.
+                CSS grid has no way to centre a short final row: every item
+                lands in a column track whether or not the row is full, so
+                seven projects in three columns left the seventh hard against
+                the left edge with two empty cells beside it — which reads as
+                a card that failed to load rather than as the end of a list.
+                Wrapping flex items centre naturally, and a filter that leaves
+                one or two results now centres them too, which is when the
+                orphan looked worst.
+                The widths restate the three breakpoints the grid had. The
+                subtraction is the gap: at three across each item gives up
+                two-thirds of one 1.5rem gap. */}
+            <motion.div
+              className="flex flex-wrap justify-center gap-4 md:gap-6"
               layout
               transition={{ duration: 0.3 }}
             >
               {filteredProjects.map((project, index) => (
-                <ProjectCard key={project.id} project={project} index={index} setCursorVariant={handleSetCursorVariant} />
+                <div
+                  key={project.id}
+                  className="w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]"
+                >
+                  <ProjectCard project={project} index={index} setCursorVariant={handleSetCursorVariant} />
+                </div>
               ))}
             </motion.div>
 
