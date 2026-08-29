@@ -1,4 +1,4 @@
-import { useState, useEffect, Suspense, useRef, lazy } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import PropTypes from 'prop-types';
@@ -14,19 +14,17 @@ import StackingProjectCards from "../Components/StackingProjectCards";
 // carries no WebGL context, unlike the three.js version it replaced.
 import ServiceIcon from "../Components/ServiceIcon";
 
-// Deferred: the hero is now the only thing on this page pulling in three.js
-// (~227kB gzip). Loading it lazily keeps three off the critical path so the
-// headline and CTAs paint first.
-const HeroAnimation = lazy(() => import("../Components/HeroAnimation"));
+// The three.js hero globe used to be lazy-loaded here. It is gone, and with it
+// three.js, @react-three/fiber and drei — 225 kB gzip that was the largest
+// thing on the landing page and the only WebGL context on the site. Two
+// decorative skies were competing above the fold, and the one behind it is the
+// real one.
 
 // Icons and media
 import { socialLinks } from "../constants";
 import sakura from '../assets/sakura.mp3';
 import { soundoff, soundon } from "../assets/icons";
 import useDocumentMeta from '../hooks/useDocumentMeta';
-// A plain function with no imports of its own, so naming it here does not drag
-// three.js back onto the entry path.
-import { supportsWebGL } from "../utils/webgl";
 
 // Each card carries a concrete proof point rather than a capability claim.
 // "Creating responsive, performant user interfaces" is something anyone can
@@ -150,48 +148,20 @@ const Home = () => {
   const [isPlayingMusic, setIsPlayingMusic] = useState(false);
   const audioRef = useRef(null);
   const heroRef = useRef(null);
-  const heroSectionRef = useRef(null);
   const { scrollYProgress } = useScroll({
     target: heroRef,
     offset: ["start start", "end start"]
   });
 
-  // Measured against the hero *section* rather than the whole content block, so
-  // progress 0 -> 1 spans exactly one viewport of scroll. Using heroRef here
-  // would stretch the journey across four screens.
-  const { scrollYProgress: heroProgress } = useScroll({
-    target: heroSectionRef,
-    offset: ["start start", "end start"]
-  });
-  
   // Layered parallax — each layer moves at a different speed.
   // Parallax is a scroll-bound style binding rather than an animation, so
   // MotionConfig can't switch it off; the ranges are flattened to 0 instead.
   // Decoupled scroll movement is a classic vestibular trigger.
   const reduce    = useReducedMotion();
-  // Resolved after mount rather than during render: the prerendered HTML is
-  // built in Node, where there is no canvas to probe, and deciding this during
-  // render would make the build output disagree with the first client render.
-  const [globeSupported, setGlobeSupported] = useState(false);
-  useEffect(() => setGlobeSupported(supportsWebGL()), []);
   const p         = (distance) => (reduce ? 0 : distance);
   const midY      = useTransform(scrollYProgress, [0, 1], [0, p(220)]);  // medium: subtitle
   const y         = useTransform(scrollYProgress, [0, 1], [0, p(320)]);  // fast: headline
   const opacity   = useTransform(scrollYProgress, [0, 0.5], [1, 0]);     // fade only — kept
-
-  // Globe journey: centre-stage in the hero, then shrinks into the bottom-right
-  // and holds there. useTransform clamps outside the input range, so once the
-  // hero has scrolled past, the globe simply stays put.
-  const globeScale = useTransform(heroProgress, [0, 1], [1, reduce ? 1 : 0.32]);
-  const globeX = useTransform(heroProgress, [0, 1], ['0vw', reduce ? '0vw' : '30vw']);
-  const globeY = useTransform(heroProgress, [0, 1], ['0vh', reduce ? '0vh' : '28vh']);
-  // Under reduced motion nothing moves, so the globe is faded out instead of
-  // being left sitting behind the page content.
-  const globeOpacity = useTransform(
-    heroProgress,
-    reduce ? [0, 0.6] : [0, 0.85, 1],
-    reduce ? [1, 0] : [1, 0.6, 0.5]
-  );
 
   // Build the audio element on first use. `new Audio(src)` defaults to
   // preload="auto", which would pull the whole track down on mount even for the
@@ -284,56 +254,15 @@ const Home = () => {
     <div className="min-h-screen w-full bg-transparent text-white">
       <AnimatedBackground>
         <div ref={heroRef} className="relative w-full bg-transparent">
-          {/* Persistent globe.
-              Lifted out of the hero so it survives past it: as the hero scrolls
-              away the globe shrinks and settles into the bottom-right, carrying
-              through the whole page instead of being hero decoration that
-              disappears.
-
-              Sticky rather than fixed. `position: fixed` is neutralised by any
-              transformed ancestor, and the page-transition wrapper in App.jsx is
-              a motion.div that carries a transform — measured breaking it. Sticky
-              is unaffected by that, and it pins for as long as this container
-              (hero + services + featured) is on screen, which is the whole page.
-
-              h-0 so it claims no layout space; the inner h-screen simply
-              overflows. z-10 sits above the starfield (z-0), below content (z-20). */}
-          <div className="sticky top-0 h-0 z-10 pointer-events-none" aria-hidden="true">
-            {/* `relative` is what makes the globe render at all. HeroAnimation's
-                root is `absolute inset-0 h-full`, and this element is the only
-                thing between it and the sticky wrapper above, which is
-                deliberately h-0. Static, it is not a containing block, so those
-                offsets resolved against that zero-height ancestor and the canvas
-                collapsed to its 300x150 default in the corner. A transform would
-                also make it one, which is why this looked fine in passing: the
-                globe appears the moment you scroll and framer-motion writes a
-                real transform, and vanishes again at the top of the page where an
-                identity transform is serialised as `none`. */}
-            <motion.div
-              className="relative w-full h-screen"
-              style={{ scale: globeScale, x: globeX, y: globeY, opacity: globeOpacity }}
-            >
-              {/* Checked before the lazy import is triggered, so a device that
-                  cannot render the globe never downloads the 226 kB gzip needed
-                  to discover that. WebGLBoundary inside HeroAnimation still
-                  catches the other case — a context that is advertised, then
-                  fails to allocate. */}
-              {globeSupported && (
-                // fallback={null}, not a spinner. The globe is aria-hidden
-                // decoration sitting behind the headline; a spinner and the
-                // words "Loading 3D Experience..." announced a wait for
-                // something nobody asked for, on top of the content they did.
-                // Nothing is the honest placeholder for decoration.
-                <Suspense fallback={null}>
-                  <HeroAnimation />
-                </Suspense>
-              )}
-            </motion.div>
-          </div>
+          {/* The sticky three.js globe used to live here, above the hero and
+              carrying through the rest of the page. Removing it also removed
+              the readability scrim it needed — a four-stop dark gradient across
+              the entire viewport, which existed to keep the headline legible
+              over a dense wireframe and which was, incidentally, dimming the
+              sky behind it everywhere else. */}
 
           {/* Hero Section */}
           <motion.section
-            ref={heroSectionRef}
             className="relative h-screen flex flex-col items-center justify-center px-4 md:px-8 bg-transparent"
           >
             {/* Content Overlay — parallax foreground (moves fast) */}
