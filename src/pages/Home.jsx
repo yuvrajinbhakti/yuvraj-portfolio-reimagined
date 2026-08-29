@@ -13,6 +13,7 @@ import StackingProjectCards from "../Components/StackingProjectCards";
 // Plain SVG — imported directly because it is a couple of hundred bytes and
 // carries no WebGL context, unlike the three.js version it replaced.
 import ServiceIcon from "../Components/ServiceIcon";
+import SkyReadout from "../Components/SkyReadout";
 
 // The three.js hero globe used to be lazy-loaded here. It is gone, and with it
 // three.js, @react-three/fiber and drei — 225 kB gzip that was the largest
@@ -341,8 +342,26 @@ const Home = () => {
               </motion.div>
             </motion.div>
 
+            {/* What the background actually is.
+                Bottom-left of the hero, in the container's own gutter — which
+                also clears the fixed audio button in the page corner, the
+                reason this is not simply pinned to the viewport edge. Desktop
+                only: on a phone the two would collide, and the hover naming it
+                hints at needs a pointer anyway. */}
+            <motion.div
+              className="absolute bottom-8 left-0 right-0 hidden md:block"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 2.4, duration: 0.8 }}
+              style={{ zIndex: 20 }}
+            >
+              <div className="container mx-auto px-4 md:px-8">
+                <SkyReadout />
+              </div>
+            </motion.div>
+
             {/* Scroll Indicator */}
-            <motion.div 
+            <motion.div
               className="absolute bottom-6 md:bottom-10 left-0 right-0 flex justify-center"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
