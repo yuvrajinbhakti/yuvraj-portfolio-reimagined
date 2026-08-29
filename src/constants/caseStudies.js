@@ -113,6 +113,55 @@ export const caseStudies = [
     takeaway:
       'Security features are easy to list and hard to make usable. The constraint that shaped this build was keeping responses under 100ms while still encrypting, authenticating and logging every single request.',
   },
+  {
+    slug: 'ot-core',
+    projectId: 7,
+    title: 'ot-core',
+    tagline: 'I property-tested the algorithm I had already shipped, and 16% of concurrent edits diverged.',
+    role: 'Solo — published to npm',
+    stack: ['JavaScript', 'Node.js', 'Property testing', 'GitHub Actions', 'npm'],
+    links: {
+      demo: 'https://www.npmjs.com/package/ot-core',
+      demoLabel: 'View on npm',
+      code: 'https://github.com/yuvrajinbhakti/ot-core',
+    },
+    // The algorithm this library is, running in the browser. Same demo the
+    // editor's write-up points at, because it is the same code.
+    tryIt: {
+      to: '/playground?example=operational-transform#code-playground',
+      label: 'Run the algorithm',
+    },
+    metrics: [
+      { value: '16.2%', label: 'of concurrent edits diverged, before' },
+      { value: '0', label: 'divergences across 420,000 checks, after' },
+      { value: '0', label: 'runtime dependencies' },
+      { value: '9.5 kB', label: 'published package' },
+    ],
+    sections: [
+      {
+        heading: 'The claim I could not actually support',
+        body: 'The collaborative editor above says that two people can type in the same place and both edits survive, with every client ending at the same result. I had load-tested it to 1,000 concurrent clients at 75ms P95 and it held, so I believed it. What I had never done was check the one thing Operational Transform exists to guarantee — and load testing cannot check it, because a load test measures whether the server keeps up, not whether the answer is right.',
+      },
+      {
+        heading: 'What a property test found',
+        body: 'The guarantee has a name, TP1: for two operations written against the same document, applying yours then theirs must produce exactly what applying theirs then yours produces. That is checkable without knowing the right answer in advance — generate two random concurrent edits, run both orders, compare. Against short documents and a small alphabet, so that edits collide often, 16.2% of 20,000 pairs came back different. Two people editing at once were ending up with different documents, in every category of edit: delete against delete worst at 1,530 failures, then insert against insert, then the mixed cases.',
+      },
+      {
+        heading: 'Three bugs',
+        body: 'There was no tie-breaker. When two people insert at the same index something has to decide who goes first, and my transform returned both operations unchanged — so each client kept its own position and the result depended on which message arrived first. Delete against delete double-counted characters the other delete had already removed, on nested and partially overlapping ranges. And an insert landing inside a concurrently deleted range left the two sides disagreeing about whether the inserted text survived. Each one is a few lines. None of them would ever show up in manual testing, because they only fire when two edits genuinely overlap.',
+      },
+      {
+        heading: 'The trade-off I could not engineer away',
+        body: 'Fixing the third bug forced a choice. If you type into text somebody else is deleting at that exact moment, preserving your character would require splitting their delete into two pieces around it — and an operation in this model is one position and one length, which cannot express that. The alternative is to model operations as sequences of retain, insert and delete components, the way Quill Delta and ShareDB do: strictly more capable, considerably more machinery. I kept the simple model, documented that the character is dropped, and said why. An honest limitation in the README is worth more than a subtle one in the code.',
+      },
+      {
+        heading: 'Making the claim checkable',
+        body: 'The fixed transform runs 420,000 fuzzed pairs with zero divergences — short documents, long ones, and emoji, since positions count code points rather than UTF-16 units. Reviewing my own suite then found a hole in it: the generator only ever inserted a single character, and a one-character insert shifts a position by one whether or not the code consulted its length, so the length arithmetic in three of four branches was barely exercised. CI runs the lot on Node 18, 20 and 22 — and caught a broken test script on the first push that nothing local would have shown.',
+      },
+    ],
+    takeaway:
+      'The gap between "it works" and "I can show you it works" was the entire project. The algorithm was 85% right, which is the most dangerous kind of wrong: good enough that every test I knew how to run came back green.',
+  },
 ];
 
 /**

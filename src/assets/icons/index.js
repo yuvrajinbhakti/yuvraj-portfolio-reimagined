@@ -36,10 +36,12 @@ import moneyzoldIcon from './moneyzoldIcon.jpeg'
 import careCarRentalIcon from './careCarRentalIcon.jpg'
 import dockerNodeAppIcon from './dockerNodeAppIcon.png'
 import codeGenieIcon from './codeGenieIcon.png'
+import otCoreIcon from './otCoreIcon.png'
 
 export {
     careCarRentalIcon,
     codeGenieIcon,
+    otCoreIcon,
     css,
     dockerNodeAppIcon,
     express,

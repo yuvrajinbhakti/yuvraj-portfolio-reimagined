@@ -236,7 +236,11 @@ const CaseStudy = () => {
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium"
                     >
-                      View live demo
+                      {/* Not every project's primary link is a running app.
+                          ot-core's is its npm page, and calling that "live
+                          demo" would be the sort of small inaccuracy these
+                          write-ups are otherwise careful about. */}
+                      {study.links.demoLabel ?? 'View live demo'}
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                       </svg>

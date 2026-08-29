@@ -32,6 +32,9 @@ PROJECTS = [
     ("care-car-rental",      "careCarRentalIcon.jpg",      (29, 78, 216),  (30, 58, 138)),
     ("docker-node",          "dockerNodeAppIcon.png",      (56, 132, 255), (37, 99, 235)),
     ("code-genie",           "codeGenieIcon.png",          (79, 140, 245), (37, 99, 235)),
+    # Drawn rather than sourced: ot-core is a library, so there is no app icon
+    # to composite. See scripts/make-ot-icon.py for the mark.
+    ("ot-core",              "otCoreIcon.png",             (96, 165, 250), (37, 99, 235)),
 ]
 
 

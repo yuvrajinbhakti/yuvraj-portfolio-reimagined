@@ -6,6 +6,7 @@ import {
     careCarRentalIcon,
     dockerNodeAppIcon,
     codeGenieIcon,
+    otCoreIcon,
     contact,
     express,
     github,
@@ -36,6 +37,7 @@ import moneyzoldCover from "../assets/covers/moneyzold.webp";
 import careCarRentalCover from "../assets/covers/care-car-rental.webp";
 import dockerNodeCover from "../assets/covers/docker-node.webp";
 import codeGenieCover from "../assets/covers/code-genie.webp";
+import otCoreCover from "../assets/covers/ot-core.webp";
 // `tone` marks icons that were drawn for a light background.
 //
 // Measured against the card surface: Express is pure black at zero saturation,
@@ -274,5 +276,20 @@ export const projects = [
         tags: ['Python', 'Code Generation', 'AI', 'Automation', 'Machine Learning'],
         status: 'Completed',
         gradient: 'from-purple-500 to-indigo-500'
-    }    
+    },
+    {
+        id: 7,
+        iconUrl: otCoreIcon,
+        image: otCoreCover,
+        theme: 'btn-back-blue',
+        name: 'ot-core',
+        // The only entry here that other people can install, which is the
+        // thing worth saying first.
+        description: 'Published npm library. The Operational Transform engine from the code editor, property-tested until it stopped losing edits — 16% of concurrent pairs used to diverge.',
+        source_code_link: 'https://github.com/yuvrajinbhakti/ot-core',
+        demo_link: null,
+        tags: ['JavaScript', 'Open Source', 'npm', 'Property Testing', 'Algorithms'],
+        status: 'Published',
+        gradient: 'from-blue-500 to-cyan-500'
+    }
 ];
