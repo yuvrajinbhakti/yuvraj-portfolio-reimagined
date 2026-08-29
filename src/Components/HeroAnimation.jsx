@@ -1,9 +1,8 @@
-import { useRef, useMemo, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useReducedMotion } from 'framer-motion';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Float, Sphere, MeshDistortMaterial } from '@react-three/drei';
-import * as THREE from 'three';
 import WebGLBoundary from './WebGLBoundary';
 
 const OrganicShape = ({ mouse }) => {
@@ -84,99 +83,6 @@ OrganicShape.propTypes = {
   mouse: mouseRef.isRequired,
 };
 
-/**
- * A soft round sprite, drawn once and shared by every point.
- *
- * The alternative is what this used to be: 150 octahedron meshes. An
- * octahedron seen from anywhere near head-on is a diamond, so the sky was
- * scattered with crystals rather than stars — and each one was its own draw
- * call. One texture and one geometry replaces all of it.
- */
-const starTexture = () => {
-  const size = 64;
-  const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = size;
-  const ctx = canvas.getContext('2d');
-  const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-  // A bright core falling off fast, then a long faint skirt. Starlight is
-  // mostly the skirt; a hard-edged dot reads as a pixel, not a light.
-  g.addColorStop(0, 'rgba(255,255,255,1)');
-  g.addColorStop(0.25, 'rgba(255,255,255,0.55)');
-  g.addColorStop(0.55, 'rgba(255,255,255,0.12)');
-  g.addColorStop(1, 'rgba(255,255,255,0)');
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, size, size);
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.needsUpdate = true;
-  return texture;
-};
-
-const OrbitingParticles = ({ count = 150, mouse }) => {
-  const groupRef = useRef();
-
-  const { positions, sizes, sprite } = useMemo(() => {
-    const positions = new Float32Array(count * 3);
-    const sizes = new Float32Array(count);
-    for (let i = 0; i < count; i += 1) {
-      positions[i * 3] = (Math.random() - 0.5) * 12;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 12;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 12;
-      // Heavily weighted small. A real field is mostly faint points with a few
-      // bright ones; a uniform distribution gives an evenly-lit sky, which is
-      // the thing that reads as generated.
-      sizes[i] = 0.05 + Math.random() ** 3 * 0.22;
-    }
-    return { positions, sizes, sprite: starTexture() };
-  }, [count]);
-
-  // Textures hold GPU memory until they are told not to.
-  useEffect(() => () => sprite.dispose(), [sprite]);
-
-  useFrame(({ clock }) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y = clock.getElapsedTime() * 0.05;
-      groupRef.current.rotation.z = clock.getElapsedTime() * 0.02;
-      // Subtle push away from cursor
-      groupRef.current.position.x = THREE.MathUtils.lerp(
-        groupRef.current.position.x, -mouse.current.x * 0.5, 0.05
-      );
-      groupRef.current.position.y = THREE.MathUtils.lerp(
-        groupRef.current.position.y, -mouse.current.y * 0.5, 0.05
-      );
-    }
-  });
-
-  return (
-    <group ref={groupRef}>
-      <points>
-        <bufferGeometry>
-          <bufferAttribute attach="attributes-position" args={[positions, 3]} />
-          <bufferAttribute attach="attributes-size" args={[sizes, 1]} />
-        </bufferGeometry>
-        {/* Additive, so overlapping points brighten each other the way real
-            light does rather than compositing into a flat disc — and with
-            depthWrite off, so a near star never punches a hole in the glow of
-            one behind it. sizeAttenuation keeps the far ones small, which is
-            where the depth comes from now the shapes are gone. */}
-        <pointsMaterial
-          map={sprite}
-          size={0.16}
-          sizeAttenuation
-          color="#9ec5ff"
-          transparent
-          opacity={0.85}
-          depthWrite={false}
-          blending={THREE.AdditiveBlending}
-        />
-      </points>
-    </group>
-  );
-};
-
-OrbitingParticles.propTypes = {
-  count: PropTypes.number,
-  mouse: mouseRef.isRequired,
-};
 
 const HeroAnimation = () => {
   const mouse = useRef({ x: 0, y: 0 });
@@ -217,7 +123,15 @@ const HeroAnimation = () => {
           <directionalLight position={[-10, -10, -5]} intensity={1} color="#06b6d4" />
 
           <OrganicShape mouse={mouse} />
-          <OrbitingParticles count={150} mouse={mouse} />
+          {/* The 150-point star cloud that sat here is gone. The page
+              already draws a starfield on the canvas behind this scene, and
+              two of them never agreed: the canvas sky is fixed while this one
+              rotated and drifted with the cursor, at a different scale and
+              density. Reading them together is what stopped either looking
+              like a sky.
+              One sky, and it is the one that covers the whole page rather
+              than just the hero — which also takes a texture, a geometry and
+              a draw call out of the heaviest chunk this site ships. */}
 
           <fog attach="fog" args={['#020617', 5, 15]} />
         </Canvas>
