@@ -31,13 +31,13 @@ What that leaves, gzipped, from the current build:
 
 | | |
 |---|---|
-| Shell — preloaded on every route | `react-vendor` 53.7 + `motion-vendor` 42.0 + `gsap-vendor` 27.7 + entry 35.5 + CSS 14.8 = **173.7 kB** |
-| Shared chunk — star catalogue + route meta, on every page | 49.3 kB |
-| `/` route chunk | 13.9 kB |
+| Shell — preloaded on every route | `react-vendor` 53.7 + `motion-vendor` 42.0 + `gsap-vendor` 27.7 + entry 35.8 + CSS 14.9 = **174.1 kB** |
+| Shared chunk — star catalogue + route meta, on every page | 55.0 kB |
+| `/` route chunk | 14.5 kB |
 
-Known gap: 49.3 kB of that shared chunk is almost entirely the star catalogue, stored as
-decimal text. It gzips well, but a delta-encoded binary form would do better, and it is
-fetched on `/contact` as readily as on `/`.
+Known gap: nearly all of that shared chunk is the star catalogue — 5,044 positions and 519
+names, stored as decimal text. It gzips well, but a delta-encoded binary form would do
+better, and it is fetched on `/contact` as readily as on `/`.
 
 ### No WebGL at all
 
@@ -239,6 +239,68 @@ Which then exposed a second thing: the bottom of that gradient was
 it turned the entire lower half of the page purple the moment it became visible.
 Worst-case text contrast against the lightest 1% of the corrected sky is 6.6:1,
 across all seven text colours the page actually renders.
+
+#### The claim nobody could check
+
+All of the above made a real sky, and a visitor had no way to know it was one —
+it looked exactly like a particle field with a good palette. Every other claim
+on this site has its evidence attached: the case studies carry measured numbers,
+the OT write-up carries a button that runs the algorithm. This was the one
+remarkable claim with no surface at all.
+
+So the sky says what it is. Bottom-left of the hero, quietly:
+
+```
+Chandigarh · 05:22 pm IST
+Arcturus, 70° above the south-west
+```
+
+and pointing at any of the 519 stars brighter than magnitude 4 names it —
+`Vega · Lyra · 53° NE`. Both are either true against any sky app right now or
+they are not.
+
+The names come from the same source as the positions, joined on Hipparcos
+number: `stars.6.json` carries an `id` per star and nothing else useful,
+`starnames.json` is keyed by it. 304 have a proper name; the other 215 carry
+their Bayer or Flamsteed designation, which is what a star chart prints —
+most stars have no proper name and never did. Only to magnitude 4, and that is
+an aiming decision rather than a size one: a magnitude 5 star is drawn under a
+pixel wide, so shipping 5,044 names would be paying for a hover that cannot
+fire. The readout draws from a smaller list still — the 49 proper-named stars
+brighter than magnitude 2, because a Greek letter is a real identity but reads
+as noise in a sentence.
+
+The hit test costs nothing measurable: the nearest named star is found inside
+the loop that is already computing every drawn position, and only for stars
+that carry a name, so it is a property check before it is any arithmetic. With
+the pointer moving every 16 ms: 180 frames, median 16.7 ms, zero over 20 ms.
+
+### The footer met the sky badly
+
+Two things, both measured at 1440×900.
+
+**459 of 1216 px — 38% of the row — was gap.** `grid-cols-[1.4fr_1fr_auto]`
+handed the brand column 595px to hold 310px of text and flung three 20px icons
+into the far corner under a full-size section heading. It did not read as
+whitespace; it read as three blocks that had failed to meet. Sizing the tracks
+to their content does not fix it either — `auto` tracks absorb the leftover
+space, so packing the content just moves the chasms. Two groups pushed to the
+two edges does: one deliberate 503px gutter, zero trailing slack, and the brand
+now sits above the copyright and the links above the email, so the row below is
+anchored to the same two edges.
+
+**The sky stopped dead at the top of it.** `backdrop-blur-lg bg-white/5` under a
+1px border smeared the stars behind it into grey and lifted the black. Against a
+flat background that glass read as a panel; against a real star field it read as
+frosted glass taped over the window. A gradient replaces it — transparent at the
+top, deepening under the type — and the field carries through.
+
+One real defect fell out of looking: on a 390×844 phone scrolled to the very
+end, the email link ran 38→352 at y 784–818 while the audio button (16→52) and
+the cursor pill (343→374) both sat on top of it from 792 down. The primary way
+to contact him was covered at both ends and half its tap target was
+unreachable. The two controls occupy the bottom 52px; the footer now clears
+them.
 
 ### Live cursors that are actually other people
 
