@@ -17,7 +17,15 @@ const InteractiveTerminal = () => {
       role: "Frontend Engineer @ Razorpay",
       location: "Chandigarh, India",
       email: "yuvrajsinghnain03@gmail.com",
-      bio: "Frontend engineer at Razorpay, working on analytics and internal platforms. React, TypeScript, Node.js and Go."
+      // Said nothing the two lines above it had not. It opened by repeating
+      // `role`, closed on a stack listing that `skills` already prints in
+      // full, and described the work as "analytics and internal platforms" —
+      // true of a few thousand engineers.
+      //
+      // A number instead, which is the rule the About page states and follows:
+      // scale is legible on sight, framing makes the reader do the work. And
+      // an ending that is a fact about the person rather than an inventory.
+      bio: "I build the analytics platform 16,000+ merchants use to understand their payments. Outside work, real-time systems — most recently proving my own collaborative editor had been quietly losing edits, and fixing it."
     },
     education: [
       {
