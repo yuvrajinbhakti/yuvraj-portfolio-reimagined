@@ -21,31 +21,44 @@ rendered. Trimming the barrel to the two images actually used took `dist/` from 
 6.9 MB.
 
 Routes are lazy-loaded per file rather than through `src/pages/index.js` — importing from
-the barrel would pull every page, and three.js with them, back into the entry chunk.
-`manualChunks` deliberately does **not** name the three.js chunk: the object form of that
-option wires a chunk into the entry's static graph, which silently undoes the lazy
-boundary you just drew.
+the barrel would pull every page back into the entry chunk. `manualChunks` lists only
+libraries genuinely on the entry path, because the object form of that option wires a named
+chunk into the entry's static graph, which silently undoes the lazy boundary you just drew.
+That mattered most for the three.js chunk, which is gone now; the rule still holds for
+whatever is largest next.
 
 What that leaves, gzipped, from the current build:
 
 | | |
 |---|---|
-| Shell — preloaded on every route | `react-vendor` 53.5 + `motion-vendor` 42.0 + `gsap-vendor` 27.7 + entry 32.0 + CSS 14.3 = **169.5 kB** |
-| `/` route chunk | 14.0 kB |
-| Hero globe (three.js), lazy inside Home | 225.5 kB |
+| Shell — preloaded on every route | `react-vendor` 53.7 + `motion-vendor` 42.0 + `gsap-vendor` 27.7 + entry 35.5 + CSS 14.8 = **173.7 kB** |
+| Shared chunk — star catalogue + route meta, on every page | 49.3 kB |
+| `/` route chunk | 13.9 kB |
 
-Known gap: the globe is above the fold but sits three requests deep — entry, then `Home`,
-then `HeroAnimation` — so the largest thing on the landing page is also the last one asked
-for. Preloading that chunk, or holding it behind an idle callback with a static poster,
-would decouple the two.
+Known gap: 49.3 kB of that shared chunk is almost entirely the star catalogue, stored as
+decimal text. It gzips well, but a delta-encoded binary form would do better, and it is
+fetched on `/contact` as readily as on `/`.
 
-### One WebGL context, not four
+### No WebGL at all
 
-The hero globe is the only `<canvas>` on the site. Service icons were three separate
-react-three-fiber canvases; they are now inline SVG with CSS keyframe idle states, which
-look the same at 64 px and cost nothing. A near-identical decorative canvas behind the
-CTA card was deleted outright — it duplicated the hero and dragged the full 218 kB three.js
-chunk onto `/about` and `/projects`, two pages with no 3D content of their own.
+There is one `<canvas>` on the site and it is 2D. Getting there took three passes.
+
+Service icons were three separate react-three-fiber canvases; they are now inline SVG with
+CSS keyframe idle states, which look the same at 64 px and cost nothing. A near-identical
+decorative canvas behind the CTA card was deleted outright — it duplicated the hero and
+dragged the full three.js chunk onto `/about` and `/projects`, two pages with no 3D content
+of their own.
+
+The hero globe outlasted both, then went the same way. It was the largest thing on the
+landing page by a wide margin — 225.5 kB gzip against a 173.7 kB shell — for a rotating
+sphere sitting behind the headline, and it needed a four-stop dark gradient across the
+whole viewport to keep that headline legible over it. That scrim was also dimming the sky
+behind it. Removing the globe removed `three`, `@react-three/fiber` and `@react-three/drei`
+(65 packages), the WebGL support-detection probe, the error boundary that existed to survive
+a refused context, the `modulepreload` plugin that existed to pull its chunk forward, and
+`assetsInclude: ['**/*.glb']` for a format the repo does not contain.
+
+Two decorative skies were competing above the fold. Only one of them was real.
 
 ### Scroll-driven animation without a scroll listener
 
@@ -57,13 +70,6 @@ stack, and reduced motion or a small viewport falls back to a plain grid.
 The commonly-copied stacking formula (`1.1 - 0.1 × reverse-index`) quietly assumes about
 four cards — at six it scales the first card to 0.5. The scale here is computed
 independently of card count and clamped to 0.88–1.0.
-
-### The globe is `sticky`, not `fixed`
-
-It shrinks and settles into the lower right as the hero exits, then persists for the rest
-of the page. `position: fixed` cannot do this: the page-transition wrapper is a
-`motion.div` carrying a transform, and a transformed ancestor becomes the containing block
-for fixed descendants, so the globe scrolled away with the page. `sticky` is unaffected.
 
 ### Motion has an off switch that actually works
 
@@ -167,6 +173,72 @@ published 280.46°.
 Star and constellation data from [d3-celestial](https://github.com/ofrohn/d3-celestial)
 (BSD-3, Olaf Frohn), trimmed by `scripts/make-star-catalog.py` from 656 kB of
 GeoJSON to a flat integer array.
+
+#### Getting it to look like one
+
+Correct positions are not the same thing as a sky, and the gap between them was
+four measurable mistakes rather than a matter of taste.
+
+The canvas was sized in **CSS pixels while the display had two device pixels per
+one**, so the entire field was rendered at half resolution and bilinearly
+upscaled — and most of a star catalogue is sub-pixel. That is the difference
+between a point and a grey smudge. The floor on star size is now expressed in
+*device* pixels and divided back out, because "the smallest mark the rasteriser
+still draws as a point" is a property of the rasteriser, not of the layout.
+
+**Scale was tied to viewport size**, holding the field of view constant, which
+magnifies the same sky onto a bigger screen: 1,250 stars over 2.9× the area,
+which reads as an empty one. Pinning it instead means a larger window shows more
+sky, which is what a larger window does. Counted, at the same instant:
+
+| | 1920×1080 | 1440×900 | 390×844 |
+|---|---|---|---|
+| field-locked | 1250 | 1379 | 1191 |
+| scale-locked | **1867** | **1495** | 946 |
+
+Stars are **added, not painted** — `globalCompositeOperation = 'lighter'`. Under
+the default, a meteor's own faint trail erased every star it crossed, and dense
+regions looked no denser than sparse ones because each star was replacing its
+neighbour's glow instead of adding to it.
+
+And the **camera tilt is derived, not chosen**. Everything below the horizon is
+culled, correctly, but at a fixed elevation the horizon itself fell inside the
+frame on every common viewport and left a starless band across the bottom fifth
+of the page. Solving the stereographic relation for the frame's own half-height
+gives the angle its bottom edge reaches; pointing six degrees above that keeps
+the horizon out of shot at any aspect ratio. A tall phone sees far more vertical
+sky than a laptop, so this is the one number that cannot be a constant.
+
+What makes a bright star read as a light source rather than a large dot is a
+white core inside a coloured halo, plus diffraction spikes — the core saturates
+whatever is receiving it while the light spread into the wings keeps its hue,
+which is also why Betelgeuse looks orange to the naked eye and a magnitude-5
+star of the same temperature does not. Composed live that is two radial
+gradients and four polygons per star, about a quarter of a million gradient
+objects a second. Each distinct (brightness, colour) pair is instead drawn once
+into its own small canvas and blitted, built on demand because the largest
+sprites are also the rarest: there are four stars in the entire sky brighter
+than magnitude zero. Spikes are rationed to about two dozen stars, which is what
+keeps them meaning something.
+
+Measured at 1440×900: 180 consecutive frames, median 16.7 ms, **zero over 20 ms**.
+
+#### The sky only existed on the first screenful
+
+The canvas is `position: fixed`, and a scroll handler was also writing
+`translateY(scrollY)` onto it — so it slid out of the viewport at exactly the
+rate the page scrolled. At scrollY 1215 its bounding box measured y=1215, fully
+off screen. Everything written to make the descent mean something — the depth
+gradient, the nebula thickening, the per-star parallax — was being computed
+every frame for a surface nobody could see, and it went unnoticed because the
+hero globe used to carry the rest of the page on its own. A fixed canvas needs
+no scroll handling; deleting the one line was the whole fix.
+
+Which then exposed a second thing: the bottom of that gradient was
+`rgb(26, 16, 56)` — red above green, blue clear of both, which is violet — and
+it turned the entire lower half of the page purple the moment it became visible.
+Worst-case text contrast against the lightest 1% of the corrected sky is 6.6:1,
+across all seven text colours the page actually renders.
 
 ### Live cursors that are actually other people
 
@@ -277,7 +349,7 @@ render layer leaves the cover's own background showing as a hard-edged square.
 ## Stack
 
 React 18 · Vite 5 · React Router 6 · Tailwind CSS · framer-motion · GSAP ·
-three.js / react-three-fiber / drei · EmailJS · deployed on Vercel
+Canvas 2D · EmailJS · deployed on Vercel
 
 ## License
 
