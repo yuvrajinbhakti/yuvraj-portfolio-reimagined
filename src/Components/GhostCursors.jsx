@@ -479,10 +479,14 @@ const CursorPill = ({ liveCount, onHide }) => (
   <div className="cursor-pill">
     <span className="cursor-pill__dot" aria-hidden="true" />
     <span className="cursor-pill__body">
+      {/* "you, a moment ago" was a caption for something the reader had not
+          been told was happening. It names a time, not a thing, so it answers
+          a question nobody asked while leaving the actual one — what is that
+          arrow moving on its own? — unanswered. */}
       <span className="cursor-pill__label">
         {liveCount > 0
           ? `${liveCount} other${liveCount === 1 ? '' : 's'} here now`
-          : 'you, a moment ago'}
+          : 'your cursor, replayed'}
       </span>
       <button type="button" onClick={onHide} className="cursor-pill__hide">
         Hide

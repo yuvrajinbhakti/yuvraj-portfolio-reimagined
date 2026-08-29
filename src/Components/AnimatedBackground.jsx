@@ -238,9 +238,16 @@ const AnimatedBackground = ({ children }) => {
         const radius = Math.random() * 1.8 + 0.5;
         const speed = Math.random() * 0.5 + 0.1;
         
-        // Generate a color with a blue/purple hue
-        const hue = Math.random() * 60 + 220; // 220-280 range for blue-purple
-        const saturation = Math.random() * 50 + 50; // 50-100%
+        // The same blue band the cursor layer uses (196-238), not 220-280.
+        // The old range ran past blue into violet, so roughly a third of the
+        // field came out lavender — the exact stray purple that got the ambient
+        // orbs deleted from this component, reintroduced one file over and
+        // scattered across every page.
+        const hue = Math.random() * 42 + 196;
+        // And far less of it. At 50-100% these were saturated dots rather than
+        // stars, which is what made them read as confetti over the globe.
+        // Starlight is near-white with a suggestion of colour in it.
+        const saturation = Math.random() * 30 + 15; // 15-45%
         const lightness = Math.random() * 30 + 70; // 70-100%
         const color = `hsla(${hue}, ${saturation}%, ${lightness}%`;
         
@@ -257,8 +264,10 @@ const AnimatedBackground = ({ children }) => {
         const radius = Math.random() * 1.5 + 1.8;
         const speed = Math.random() * 0.3 + 0.05;
         
-        // Brighter color for larger stars
-        const color = `hsla(${Math.random() * 60 + 220}, 80%, 85%`;
+        // The bright pass. Same band as the field above, and the same reason:
+        // at 80% saturation on hue 220-280 these were the most visible violet
+        // on the page — big, bright, and right over the hero.
+        const color = `hsla(${Math.random() * 42 + 196}, 45%, 88%`;
         
         stars.push(new Star(x, y, radius, color, speed, 0));
       }
@@ -366,8 +375,11 @@ const AnimatedBackground = ({ children }) => {
       
       // Thickens with depth, so the lower page feels denser.
         const k = 1 + depth * 1.6;
-        nebulaGradient.addColorStop(0, `rgba(63, 81, 181, ${(0.02 * k).toFixed(4)})`);
-      nebulaGradient.addColorStop(0.5, `rgba(${Math.round(103 + 40 * depth)}, 58, 183, ${(0.015 * k).toFixed(4)})`);
+      // Both stops sit in the blue band. The middle one used to run red up to
+      // 143 against a green of 58, which is not a blue nebula shading deeper —
+      // it is a purple one, and it tinted the whole lower page.
+      nebulaGradient.addColorStop(0, `rgba(46, 86, 170, ${(0.02 * k).toFixed(4)})`);
+      nebulaGradient.addColorStop(0.5, `rgba(${Math.round(38 + 18 * depth)}, 74, 156, ${(0.015 * k).toFixed(4)})`);
       nebulaGradient.addColorStop(1, 'rgba(33, 33, 33, 0)');
       
       ctx.fillStyle = nebulaGradient;
