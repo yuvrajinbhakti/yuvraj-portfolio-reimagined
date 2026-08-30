@@ -12,7 +12,7 @@ export const caseStudies = [
     slug: 'real-time-code-editor',
     projectId: 1,
     title: 'Real-Time Collaborative Code Editor',
-    tagline: 'It held a thousand concurrent clients, and the merge logic was still wrong.',
+    tagline: 'It held a thousand concurrent clients. When I finally read the sync code, there was no merge logic to be wrong.',
     role: 'Solo project — design, build, deploy',
     stack: ['React', 'Node.js', 'Socket.IO', 'Redis', 'Docker', 'Nginx', 'Bull', 'Prometheus', 'Grafana'],
     links: {
@@ -48,11 +48,16 @@ export const caseStudies = [
     // question "verified how, over what window?" — and it sat directly above a
     // demo link that did not answer. Error rate under load is measured, from
     // the same test as the rest, and defensible in a room.
+    // The load-test numbers moved into the prose below, where the section
+    // explaining why they proved nothing about correctness can sit next to
+    // them. They also measured a sync layer that no longer exists, so leaving
+    // them here as the headline figures for the current code would be the same
+    // kind of overclaim this page is about.
     metrics: [
-      { value: '1000+', label: 'concurrent clients, load-tested' },
-      { value: '75ms', label: 'P95 latency' },
-      { value: '<0.5%', label: 'error rate at peak load' },
-      { value: '10,000/s', label: 'operations processed' },
+      { value: '16.2%', label: 'of concurrent edit pairs diverged' },
+      { value: '0', label: 'imports of the OT library already in package.json' },
+      { value: '2', label: 'bugs found by running it, not by reading it' },
+      { value: '157', label: 'tests behind the merge logic now' },
     ],
     sections: [
       {
@@ -69,19 +74,25 @@ export const caseStudies = [
       },
       {
         heading: 'What the load test proved, and what it could not',
-        body: 'The stack ships with Prometheus and Grafana and was put under sustained load. At 1,000 concurrent clients it processed over 10,000 operations per second at 75ms P95, with an error rate below 0.5%, and instrumentation surfaces an incident in under 30 seconds rather than leaving it for a user to find. Every one of those numbers is real and every one of them is about throughput. A load test asks whether the server keeps up; it cannot ask whether the answer is right, because it has no idea what the right answer is. Two clients ending a session holding different documents is not an error, a timeout or a dropped connection — it is two successful requests. The graphs were green the entire time the merge logic was wrong.',
+        body: 'The stack ships with Prometheus and Grafana and was put under sustained load. At 1,000 concurrent clients it processed over 10,000 operations per second at 75ms P95, with an error rate below 0.5%, and instrumentation surfaces an incident in under 30 seconds rather than leaving it for a user to find. Every one of those numbers is real and every one of them is about throughput. A load test asks whether the server keeps up; it cannot ask whether the answer is right, because it has no idea what the right answer is. Two clients ending a session holding different documents is not an error, a timeout or a dropped connection — it is two successful requests. The graphs were green the entire time the merge logic was wrong. Those numbers also measured the sync layer as it was then, not the one described below.',
       },
       {
         heading: 'How I found out',
         body: 'Operational Transform has exactly one law, called TP1: for two edits written against the same document, applying yours then theirs must give the same text as applying theirs then yours. That is checkable without knowing the right answer in advance — generate two random concurrent edits, run both orders, compare. Against short documents and a small alphabet, so that edits collide often, 16.2% of 20,000 pairs came back different. Delete against delete was worst, then insert against insert, then the mixed cases. Every one of those pairs is two people losing each other\'s work, and none of them would ever appear in manual testing, because they only fire when two edits genuinely overlap.',
       },
       {
-        heading: 'Why the fix is a different repository',
-        body: 'The corrected transform, the convergence tests, a client state machine, a server and a CodeMirror binding all live in ot-core, which is published to npm and has its own write-up next to this one. This codebase still carries the original — the demo above is the thing as it was, bug included, because a case study about discovering a bug is worth more with the evidence still in it than with a quiet patch and no story. Extracting it also forced the part that mattered: an algorithm inside an application can hide behind the application, and one in a library with a test suite cannot.',
+        heading: 'Going back to fix it, and what I found instead',
+        body:
+          'The corrected transform, the convergence tests, a client state machine, a server and editor bindings all live in ot-core, which is published to npm and has its own write-up next to this one. Extracting it forced the part that mattered: an algorithm inside an application can hide behind the application, and one in a library with a test suite cannot. Then I came back to wire the library into the application, which meant reading the sync code properly for the first time in a long while. Every keystroke emitted the entire file. Every arriving message replaced the entire file. The server held no document at all — it rebroadcast whatever it was handed, and a new joiner was brought up to date by asking another client to mail them its text. So the sentence at the top of this page was too generous to itself. I had called the merge logic wrong; there was no merge logic. Two people typing within a round trip of each other did not merge badly, the later message won the whole file and the other person\'s work was gone. And sharedb — a complete Operational Transform implementation — had been sitting in package.json the entire time, imported by exactly zero lines.',
+      },
+      {
+        heading: 'What it took to actually land it',
+        body:
+          'The application now holds an ot-core client per editor and the server holds one authority per room: clients send operations, the server orders them and rebases late ones against everything that landed while they were in flight. Remote cursors move with the text rather than being redrawn from stale offsets, and undo undoes only your own edits — the editor\'s own stack would undo everybody\'s, because from its point of view somebody else\'s operation is just another change to the document. Two bugs turned up that no amount of reading would have found. The server sent the document both on join and in reply to the client\'s request, so every client initialised twice, and the second initialisation replaced the document while the collaborative binding was already attached — which reported replacing the document as an edit and emptied the room for everyone in it. That one also changed the library: a whole-document replacement is never translated into an operation now, because something that can wipe a document when it is used slightly wrong should not depend on the application being careful. Verified with two browsers in one room, typing at the same position: both edits survived, both tabs agreed, and each saw the other\'s caret.',
       },
     ],
     takeaway:
-      'I built the monitoring, ran the load test, read the graphs and concluded it worked. All of that was real and none of it was evidence for the claim I was actually making. The thing I would do differently is not "test more" — it is noticing when a sentence I have written is a description of what I intended rather than a report of something I checked, because that sentence sat at the top of this page for months.',
+      'I built the monitoring, ran the load test, read the graphs and concluded it worked. All of that was real and none of it was evidence for the claim I was actually making. The thing I would do differently is not "test more" — it is noticing when a sentence I have written is a description of what I intended rather than a report of something I checked. Twice, as it turned out: first the claim that edits converged, and then the claim that the merge logic was merely wrong. I wrote the second one on this page while the code did not merge at all, because I was describing the design I remembered instead of the file I could have opened.',
   },
   {
     slug: 'secure-file-sharing',
