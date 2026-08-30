@@ -122,6 +122,50 @@ export const caseStudies = [
       'Security features are easy to list and hard to make usable. The constraint that shaped this build was keeping responses under 100ms while still encrypting, authenticating and logging every single request.',
   },
   {
+    slug: 'moneyzold',
+    projectId: 3,
+    title: 'MoneyZold',
+    tagline: 'A rebuild of CRED\'s interface, down to the curves. Everything behind it is a lie.',
+    role: 'Solo — a study, not a product',
+    stack: ['Flutter', 'Dart', 'GetX', 'flutter_neumorphic'],
+    links: {
+      code: 'https://github.com/yuvrajinbhakti/MoneyZold_Flutter',
+    },
+    // Numbers a reader can check against the repository in under a minute,
+    // including the two that are not flattering. A write-up about a study is
+    // worth reading only if it is clear that it is one.
+    metrics: [
+      { value: '0', label: 'network calls — every screen is fed by a fake' },
+      { value: '4s', label: 'of latency added on purpose' },
+      { value: '4', label: 'clip paths and masks drawn by hand' },
+      { value: '1', label: 'test, and it is the generated one' },
+    ],
+    sections: [
+      {
+        heading: 'What it actually is',
+        body: 'A reimplementation of CRED\'s mobile interface in Flutter. The repository is called MoneyZold and the Dart package inside it is called cred, which is the more honest of the two names — every import in the project reads package:cred/. It is not a finance app and it does not track anything: there is no backend, no account, no persistence, and the two data models are a credit card and a home-screen advertisement. What it is, is an attempt to hit a commercial app\'s visual standard with nothing to hide behind, which is a specific and unglamorous skill that a to-do list does not exercise.',
+      },
+      {
+        heading: 'The interesting part is the shapes',
+        body: 'CRED\'s interface is built out of curves that no standard widget gives you, so four of the seven files in lib/core exist to draw them: WaveClipper, ShapeClipper, BottomBarClipper and RadialGradientMask. The wave is the one worth opening — a loop of ten quadratic Bézier segments, alternating their control points above and below the baseline to produce a scalloped edge that stretches with the widget rather than being a fixed image. That is the whole reason to build something like this. You can copy a layout from a screenshot; you cannot copy a path that has to be correct at every width.',
+      },
+      {
+        heading: 'An API that lies on purpose',
+        body: 'lib/data/api/FakeApisImpl.dart returns its lists through Future.delayed — four seconds for the home advertisements, three for the cards. Reading it as a mistake is the wrong instinct. Loading states are the part of an interface that never gets built when the data is a local array, because there is no moment in which anything is missing: the skeletons, the spinners and the empty states all get skipped, and the app looks finished until it meets a real network. Putting the delay in first makes those screens compulsory. It is the same instinct as the latency slider on the ot-core playground, arrived at three years earlier and for a much smaller reason.',
+      },
+      {
+        heading: 'Layered as though the backend existed',
+        body: 'lib/ splits into core, data, models and ui, the data layer splits again into api, repo and fakedata, and every page carries a GetX binding that constructs its controller — CardsPageBinding, HomePageBinding, MoneyPageBinding and the rest. None of that structure is load-bearing for an app with two models and no server; it is there because swapping FakeApisImpl for something real should be a one-line change, and building the seam before you need it is the only time it is cheap. Whether that patience would have survived contact with an actual API is not something this repository can tell you, because it never got one.',
+      },
+      {
+        heading: 'What it is not',
+        body: 'Four commits, three of which edit the README, between March and July 2023, and nothing since. The Dart is pinned to an SDK older than null safety. The single file in test/ is the counter test Flutter generates when it scaffolds a project — it references a widget this app does not have and would fail if anyone ran it. Set against ot-core two write-ups away, which exists because I could not support a claim I had made, this one is here on different terms: it is an exercise in making something look right, kept because that is a real part of the job and because the clip paths are still the best thing in it.',
+      },
+    ],
+    takeaway:
+      'The habit worth keeping from this is the fake four-second delay. Everything else here is a 2023 study — but building the loading state before the loading exists is the only way it gets built at all, and I have been putting artificial latency in front of myself ever since.',
+  },
+  {
     slug: 'ot-core',
     projectId: 7,
     title: 'ot-core',
