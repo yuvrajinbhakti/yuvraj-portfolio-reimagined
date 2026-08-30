@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import AnimatedBackground from '../Components/AnimatedBackground';
 import GlassCard from '../Components/GlassCard';
 import useDocumentMeta from '../hooks/useDocumentMeta';
+import { CaseStudyMark, CaseStudyDiagram } from '../Components/CaseStudyArt';
 import { getCaseStudy, caseStudies, sectionId } from '../constants/caseStudies';
 
 const Metric = ({ value, label }) => (
@@ -198,12 +199,23 @@ const CaseStudy = () => {
 
               {/* Header */}
               <motion.header {...fade(0.05)} className="mb-10">
-                <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 leading-tight">
-                  {study.title}
-                </h1>
-                <p className="text-lg md:text-xl text-white/70 leading-relaxed mb-6">
-                  {study.tagline}
-                </p>
+                {/* The mark sits beside the title on desktop and above it on a
+                    phone, where a 120px square next to 40px type would leave
+                    the headline three words wide. */}
+                <div className="flex flex-col-reverse sm:flex-row sm:items-start sm:gap-8">
+                  <div className="min-w-0">
+                    <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 leading-tight">
+                      {study.title}
+                    </h1>
+                    <p className="text-lg md:text-xl text-white/70 leading-relaxed mb-6">
+                      {study.tagline}
+                    </p>
+                  </div>
+                  <CaseStudyMark
+                    slug={study.slug}
+                    className="w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 flex-none mb-4 sm:mb-0"
+                  />
+                </div>
 
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-white/50 mb-6">
                   <span>{study.role}</span>
@@ -288,6 +300,14 @@ const CaseStudy = () => {
                   )}
                 </div>
               </motion.header>
+
+              {/* Before the prose rather than inside it: the shape of the thing
+                  first, so the sections have somewhere to land. Drawn from the
+                  project's own content — the real state machine, the real
+                  Bézier loop — so it is worth the space it takes. */}
+              <motion.div {...fade(0.08)} className="mb-12">
+                <CaseStudyDiagram slug={study.slug} />
+              </motion.div>
 
               {/* Metrics */}
               <motion.div {...fade(0.1)} className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
