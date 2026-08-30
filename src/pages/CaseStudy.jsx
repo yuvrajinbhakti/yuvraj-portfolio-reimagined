@@ -261,6 +261,21 @@ const CaseStudy = () => {
                       {study.tryIt.label}
                     </Link>
                   )}
+                  {/* Where to install it from, for the projects that are a
+                      thing you install. Separate from `demo` because a package
+                      page is not a demonstration of anything, and separate from
+                      `code` because reading the source and depending on it are
+                      different intentions. */}
+                  {study.links.package && (
+                    <a
+                      href={study.links.package}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 border border-white/25 hover:bg-white/10 text-white rounded-lg transition-colors text-sm font-medium"
+                    >
+                      View on npm
+                    </a>
+                  )}
                   {study.links.code && (
                     <a
                       href={study.links.code}
