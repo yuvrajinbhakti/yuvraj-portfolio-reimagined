@@ -140,7 +140,7 @@ export const caseStudies = [
       { value: '16.2%', label: 'of concurrent edits diverged, before' },
       { value: '0', label: 'divergences across 920,000 checks, after' },
       { value: '0', label: 'runtime dependencies' },
-      { value: '25,000', label: 'simulated sessions, all converging' },
+      { value: '9', label: 'bugs found above the algebra, none in it' },
     ],
     sections: [
       {
@@ -161,7 +161,7 @@ export const caseStudies = [
       },
       {
         heading: 'Making the claim checkable',
-        body: 'The fixed transform runs 920,000 fuzzed checks with zero divergences — short documents, long ones, and emoji, since positions count code points rather than UTF-16 units. Reviewing my own suite then found a hole in it: the generator only ever inserted a single character, and a one-character insert shifts a position by one whether or not the code consulted its length, so the length arithmetic in three of four branches was barely exercised. CI runs the lot on Node 18, 20 and 22 — and caught a broken test script on the first push that nothing local would have shown.',
+        body: 'The fixed transform runs 920,000 fuzzed checks with zero divergences — short documents, long ones, and emoji, since positions count code points rather than UTF-16 units. Reviewing my own suite then found a hole in it: the generator only ever inserted a single character, and a one-character insert shifts a position by one whether or not the code consulted its length, so the length arithmetic in three of four branches was barely exercised. CI runs the lot on Node 18, 20 and 22 — and caught a broken test script on the first push that nothing local would have shown. It also refuses to let a test skip: the six that need a real WebSocket skip themselves when the one devDependency is absent, which is right for a fresh clone and wrong on CI, where a suite quietly ceasing to test what it was written for is worse than one that is simply missing.',
       },
       {
         heading: 'The line in the README that was wrong',
@@ -172,12 +172,20 @@ export const caseStudies = [
         body: 'The playground is three real clients and a real server over a wire whose latency, jitter, duplicate rate and connection failures are all sliders. It exists to make the argument in one click — the same three concurrent edits converge with a server and land on two different documents without one — and it paid for itself twice before that. The room was acknowledging the author before broadcasting to everyone else, and because the author releases its next buffered edit the instant it is acknowledged, that edit reached the server and went out first: every other client saw revision N+1 arrive before N and discarded N as a duplicate. One operation lost per collision, silently, in code that had passed 55,000 simulated sessions. The other was that the room dropped history the moment somebody left, so a client whose socket died came back to be told it was too far behind and was resynced from a snapshot that quietly threw away everything it had typed offline. Both are the kind of thing you only find by running the thing rather than testing it.',
       },
       {
+        heading: 'And then a real socket found three more',
+        body: 'Every test to that point drove a socket I had written, and mine were synchronous. A real one delivers on a later turn of the event loop, hands the server a Buffer where a browser hands a string, and can close between a write and its delivery — none of which anything had exercised. Six tests against an actual WebSocket server found three bugs in code that had already survived 55,000 simulated sessions. The room forgot a client when its socket closed, discarding the sequence number used to recognise a resend at the exact moment it was about to matter, so the client came back, resent, and the text was inserted twice. A client applied its own operation when it arrived as history on a rejoin, because the path that handled that correctly was the one taking an explicit array, not the one where the same operations arrive as messages. And an acknowledgement could advance a client past operations it had never seen, after which its next buffered edit was sent claiming a baseline it never had and the server rebased it from the wrong place — one character, one position early, and nothing complained.',
+      },
+      {
+        heading: 'What that pattern is actually telling me',
+        body: 'Nine bugs now, and not one of them in the transform function. Every single one lived in the layer above it: the state machine, the fan-out, the reconnect. The algebra was the part I was afraid of and the part that turned out to be provable, because a property test can generate a million cases and check each one against a law. The protocol around it has no such law — its correctness is a story about timing, and the only way to check a story about timing is to build the thing that has the timing. Each layer needed a harness the layer below could not provide: property tests for the pair, simulated sessions for the protocol, a playground for the fan-out, a real socket for everything asynchronous. I keep expecting to be finished and keep finding the next harness.',
+      },
+      {
         heading: 'What a server is actually for',
         body: 'The README used to say peer-to-peer "needs a side per originating peer", which implies a careful tie-break is enough. It is not. Convergence over a pair is TP1; convergence when different participants transform in different orders is TP2, which this model does not have and almost no operational transform does. An exhaustive search found the smallest counterexample there is — a two-character document, three edits — where six peers receiving the same three edits in the six possible orders land on two different documents, at a rate of about 3.6% across random triples. Impose one order and it is zero across 200,000. That is now asserted as a test rather than described as a caveat: a limitation somebody can trip over in production should fail the build if it ever changes.',
       },
     ],
     takeaway:
-      'The gap between "it works" and "I can show you it works" was the entire project. The algorithm was 85% right, which is the most dangerous kind of wrong: good enough that every test I knew how to run came back green. The documentation turned out to have the same problem — the sentence about peer-to-peer sounded careful and was false, and only a test could tell me that.',
+      'The gap between "it works" and "I can show you it works" was the entire project. The algorithm was 85% right, which is the most dangerous kind of wrong: good enough that every test I knew how to run came back green. Then the documentation turned out to have the same problem — the sentence about peer-to-peer sounded careful and was false — and then the protocol above the algorithm turned out to have it too, nine times. The lesson was not that I write buggy code. It was that every layer needs a harness the layer below cannot provide, and that I stop building harnesses the moment one of them goes quiet.',
   },
 ];
 
