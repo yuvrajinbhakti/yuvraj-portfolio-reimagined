@@ -121,12 +121,13 @@ export const caseStudies = [
     role: 'Solo — published to npm',
     stack: ['JavaScript', 'Node.js', 'Property testing', 'GitHub Actions', 'npm'],
     links: {
-      demo: 'https://www.npmjs.com/package/ot-core',
-      // Names the destination, not the format. The case study composes
-      // "View on npm" from it and the project cards just say "npm" — because a
-      // card button reading "Demo" that lands on a package page is the same
-      // small dishonesty these write-ups avoid everywhere else.
-      demoLabel: 'npm',
+      // This used to be the npm page, carrying a `demoLabel` of "npm" so that
+      // no button would say "Demo" and land somewhere you cannot demo
+      // anything. There is a real one now: three clients, a server, and a
+      // network you can break — so the label goes back to the truth and npm
+      // moves to a slot of its own.
+      demo: 'https://yuvrajinbhakti.github.io/ot-core/demo/',
+      package: 'https://www.npmjs.com/package/ot-core',
       code: 'https://github.com/yuvrajinbhakti/ot-core',
     },
     // The algorithm this library is, running in the browser. Same demo the
@@ -165,6 +166,10 @@ export const caseStudies = [
       {
         heading: 'The line in the README that was wrong',
         body: 'Every test above checks a pair of operations. Nobody runs a pair — they run several people against a server, and it is not obvious that a property about two edits survives five clients, twenty rounds and acknowledgements arriving late. So I built the session as a simulation: 20,000 of them, all converging, and at every acknowledgement the client\'s own rebase of its pending edit has to equal the server\'s. That last assertion is the invariant the whole protocol rests on, and nothing had ever checked it. Writing the simulation wrong twice first is what made it worth having — both times it looked like the library was broken, and both times the bug was in my model of the protocol.',
+      },
+      {
+        heading: 'Building the demo found two more bugs',
+        body: 'The playground is three real clients and a real server over a wire whose latency, jitter, duplicate rate and connection failures are all sliders. It exists to make the argument in one click — the same three concurrent edits converge with a server and land on two different documents without one — and it paid for itself twice before that. The room was acknowledging the author before broadcasting to everyone else, and because the author releases its next buffered edit the instant it is acknowledged, that edit reached the server and went out first: every other client saw revision N+1 arrive before N and discarded N as a duplicate. One operation lost per collision, silently, in code that had passed 55,000 simulated sessions. The other was that the room dropped history the moment somebody left, so a client whose socket died came back to be told it was too far behind and was resynced from a snapshot that quietly threw away everything it had typed offline. Both are the kind of thing you only find by running the thing rather than testing it.',
       },
       {
         heading: 'What a server is actually for',
