@@ -137,9 +137,9 @@ export const caseStudies = [
     },
     metrics: [
       { value: '16.2%', label: 'of concurrent edits diverged, before' },
-      { value: '0', label: 'divergences across 420,000 checks, after' },
+      { value: '0', label: 'divergences across 920,000 checks, after' },
       { value: '0', label: 'runtime dependencies' },
-      { value: '9.5 kB', label: 'published package' },
+      { value: '25,000', label: 'simulated sessions, all converging' },
     ],
     sections: [
       {
@@ -160,11 +160,19 @@ export const caseStudies = [
       },
       {
         heading: 'Making the claim checkable',
-        body: 'The fixed transform runs 420,000 fuzzed pairs with zero divergences — short documents, long ones, and emoji, since positions count code points rather than UTF-16 units. Reviewing my own suite then found a hole in it: the generator only ever inserted a single character, and a one-character insert shifts a position by one whether or not the code consulted its length, so the length arithmetic in three of four branches was barely exercised. CI runs the lot on Node 18, 20 and 22 — and caught a broken test script on the first push that nothing local would have shown.',
+        body: 'The fixed transform runs 920,000 fuzzed checks with zero divergences — short documents, long ones, and emoji, since positions count code points rather than UTF-16 units. Reviewing my own suite then found a hole in it: the generator only ever inserted a single character, and a one-character insert shifts a position by one whether or not the code consulted its length, so the length arithmetic in three of four branches was barely exercised. CI runs the lot on Node 18, 20 and 22 — and caught a broken test script on the first push that nothing local would have shown.',
+      },
+      {
+        heading: 'The line in the README that was wrong',
+        body: 'Every test above checks a pair of operations. Nobody runs a pair — they run several people against a server, and it is not obvious that a property about two edits survives five clients, twenty rounds and acknowledgements arriving late. So I built the session as a simulation: 20,000 of them, all converging, and at every acknowledgement the client\'s own rebase of its pending edit has to equal the server\'s. That last assertion is the invariant the whole protocol rests on, and nothing had ever checked it. Writing the simulation wrong twice first is what made it worth having — both times it looked like the library was broken, and both times the bug was in my model of the protocol.',
+      },
+      {
+        heading: 'What a server is actually for',
+        body: 'The README used to say peer-to-peer "needs a side per originating peer", which implies a careful tie-break is enough. It is not. Convergence over a pair is TP1; convergence when different participants transform in different orders is TP2, which this model does not have and almost no operational transform does. An exhaustive search found the smallest counterexample there is — a two-character document, three edits — where six peers receiving the same three edits in the six possible orders land on two different documents, at a rate of about 3.6% across random triples. Impose one order and it is zero across 200,000. That is now asserted as a test rather than described as a caveat: a limitation somebody can trip over in production should fail the build if it ever changes.',
       },
     ],
     takeaway:
-      'The gap between "it works" and "I can show you it works" was the entire project. The algorithm was 85% right, which is the most dangerous kind of wrong: good enough that every test I knew how to run came back green.',
+      'The gap between "it works" and "I can show you it works" was the entire project. The algorithm was 85% right, which is the most dangerous kind of wrong: good enough that every test I knew how to run came back green. The documentation turned out to have the same problem — the sentence about peer-to-peer sounded careful and was false, and only a test could tell me that.',
   },
 ];
 
