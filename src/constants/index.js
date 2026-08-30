@@ -194,7 +194,7 @@ export const projects = [
         image: realtimeCodeEditorCover,
         theme: 'btn-back-blue',
         name: 'Realtime Code Editor',
-        description: 'Collaborative code editor on Socket.io and React. Several people edit the same file at once, with live cursors.',
+        description: 'Collaborative code editor on Socket.io and React, load-tested to 1,000 concurrent clients — and the merge logic was still wrong. The write-up is about how I found out.',
         source_code_link: 'https://github.com/yuvrajinbhakti/Real-Time-Code-Editor-With-Database',
         demo_link: null, // Add demo link if available
         tags: ['React', 'Socket.io', 'Node.js', 'MongoDB', 'Real-time'],

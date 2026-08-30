@@ -12,7 +12,7 @@ export const caseStudies = [
     slug: 'real-time-code-editor',
     projectId: 1,
     title: 'Real-Time Collaborative Code Editor',
-    tagline: 'Several people typing in the same file, without overwriting each other.',
+    tagline: 'It held a thousand concurrent clients, and the merge logic was still wrong.',
     role: 'Solo project — design, build, deploy',
     stack: ['React', 'Node.js', 'Socket.IO', 'Redis', 'Docker', 'Nginx', 'Bull', 'Prometheus', 'Grafana'],
     links: {
@@ -60,20 +60,28 @@ export const caseStudies = [
         body: 'Two people editing the same line at the same time is the hard part of collaborative editing. Naive approaches lose keystrokes: the last write wins and the other person\'s work quietly disappears. Getting this right means every client has to converge on the same document, no matter what order the edits arrive in.',
       },
       {
-        heading: 'Operational Transform',
-        body: 'Edits are sent as operations rather than as whole-document snapshots, and each operation is transformed against any concurrent operations it did not see before being applied. That means two people can type in the same place and both edits survive, with every client ending up at the same result. Redis clustering keeps that shared state consistent across server instances rather than trapping a session on one box.',
+        heading: 'Operational Transform, and the sentence I should not have written',
+        body: 'Edits are sent as operations rather than whole-document snapshots, and each operation is transformed against any concurrent operations it did not see before being applied. Redis clustering keeps that shared state consistent across server instances rather than trapping a session on one box. This section used to end by saying that two people can type in the same place and both edits survive, with every client ending up at the same result. That is what Operational Transform is for and it is what I believed I had built — but it was a description of the intention, not a report of a measurement, and when I finally measured it the answer was no. The paragraph stayed here, wrong, for as long as it took me to think of testing it.',
       },
       {
         heading: 'Scaling past one server',
         body: 'WebSocket connections are stateful, which makes horizontal scaling awkward — a client is pinned to whichever server it connected to. The deployment runs multiple containers behind Nginx load balancing, with Bull message queues carrying work between them, so servers can communicate and the system scales out instead of up.',
       },
       {
-        heading: 'Proving it actually holds',
-        body: 'The claims above are only worth something if they are measured, so the stack ships with Prometheus and Grafana and was put under sustained load testing. At 1,000 concurrent clients it processed over 10,000 operations per second at 75ms P95, with an error rate below 0.5%, and instrumentation surfaces an incident in under 30 seconds rather than leaving it to be discovered by users.',
+        heading: 'What the load test proved, and what it could not',
+        body: 'The stack ships with Prometheus and Grafana and was put under sustained load. At 1,000 concurrent clients it processed over 10,000 operations per second at 75ms P95, with an error rate below 0.5%, and instrumentation surfaces an incident in under 30 seconds rather than leaving it for a user to find. Every one of those numbers is real and every one of them is about throughput. A load test asks whether the server keeps up; it cannot ask whether the answer is right, because it has no idea what the right answer is. Two clients ending a session holding different documents is not an error, a timeout or a dropped connection — it is two successful requests. The graphs were green the entire time the merge logic was wrong.',
+      },
+      {
+        heading: 'How I found out',
+        body: 'Operational Transform has exactly one law, called TP1: for two edits written against the same document, applying yours then theirs must give the same text as applying theirs then yours. That is checkable without knowing the right answer in advance — generate two random concurrent edits, run both orders, compare. Against short documents and a small alphabet, so that edits collide often, 16.2% of 20,000 pairs came back different. Delete against delete was worst, then insert against insert, then the mixed cases. Every one of those pairs is two people losing each other\'s work, and none of them would ever appear in manual testing, because they only fire when two edits genuinely overlap.',
+      },
+      {
+        heading: 'Why the fix is a different repository',
+        body: 'The corrected transform, the convergence tests, a client state machine, a server and a CodeMirror binding all live in ot-core, which is published to npm and has its own write-up next to this one. This codebase still carries the original — the demo above is the thing as it was, bug included, because a case study about discovering a bug is worth more with the evidence still in it than with a quiet patch and no story. Extracting it also forced the part that mattered: an algorithm inside an application can hide behind the application, and one in a library with a test suite cannot.',
       },
     ],
     takeaway:
-      'The interesting work was not the editor UI — it was accepting that concurrent edits are a distributed-systems problem and building the conflict resolution, shared state and monitoring to match.',
+      'I built the monitoring, ran the load test, read the graphs and concluded it worked. All of that was real and none of it was evidence for the claim I was actually making. The thing I would do differently is not "test more" — it is noticing when a sentence I have written is a description of what I intended rather than a report of something I checked, because that sentence sat at the top of this page for months.',
   },
   {
     slug: 'secure-file-sharing',
@@ -145,7 +153,7 @@ export const caseStudies = [
     sections: [
       {
         heading: 'The claim I could not actually support',
-        body: 'The collaborative editor above says that two people can type in the same place and both edits survive, with every client ending at the same result. I had load-tested it to 1,000 concurrent clients at 75ms P95 and it held, so I believed it. What I had never done was check the one thing Operational Transform exists to guarantee — and load testing cannot check it, because a load test measures whether the server keeps up, not whether the answer is right.',
+        body: 'The write-up for the collaborative editor used to say, as a plain statement of fact, that two people can type in the same place and both edits survive with every client ending at the same result. It says something rather different now. I had load-tested it to 1,000 concurrent clients at 75ms P95 and it held, so I believed it. What I had never done was check the one thing Operational Transform exists to guarantee — and load testing cannot check it, because a load test measures whether the server keeps up, not whether the answer is right.',
       },
       {
         heading: 'What a property test found',
