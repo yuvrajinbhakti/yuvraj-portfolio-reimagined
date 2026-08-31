@@ -166,8 +166,8 @@ export const caseStudies = [
     // worth reading only if it is clear that it is one.
     metrics: [
       { value: '0', label: 'network calls — every screen is fed by a fake' },
-      { value: '4s', label: 'of latency added on purpose' },
-      { value: '4', label: 'clip paths and masks drawn by hand' },
+      { value: '4s', label: 'the longest delay the fake API adds on purpose' },
+      { value: '6', label: 'clippers and painters drawn by hand, in 4 files' },
       { value: '1', label: 'test, and it is the generated one' },
     ],
     sections: [
