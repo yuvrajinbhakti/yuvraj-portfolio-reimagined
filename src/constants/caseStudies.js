@@ -125,7 +125,7 @@ export const caseStudies = [
       {
         heading: 'What it was supposed to do',
         body:
-          'Encrypt every file at rest with AES-256-GCM, which authenticates the ciphertext as well as hiding it, so tampering is detected rather than silently decrypted. Put access behind JWT authentication with TOTP two-factor and role-based control. Write every access to an audit log in MongoDB, so the system can say exactly who touched a document and when. Give share links an expiry, so access ends on a schedule instead of lasting forever. All of that is implemented, and all of it was true except the first clause.',
+          'Encrypt every file at rest with AES-256-GCM, which authenticates the ciphertext as well as hiding it, so tampering is detected rather than silently decrypted. Put access behind JWT authentication with per-user roles. Write every access to an audit log in MongoDB, so the system can say exactly who touched a document and when. Expire files on a schedule rather than leaving them forever. That is the product, and every part of it now runs — which is a sentence I could not have written this morning.',
       },
       {
         heading: 'It stored everything in plaintext',
@@ -141,6 +141,11 @@ export const caseStudies = [
         heading: 'What it is checked against now',
         body:
           'Five properties, because the round trip alone would have passed on plaintext. The file and text round trips match. The bytes on disk are not the plaintext. A single flipped byte in the ciphertext is rejected. Decryption with the wrong key is rejected. Those last two are the entire point of GCM over plain AES, and neither could have passed before. The fallback is gone as well: an upload that cannot be encrypted is now refused and the temporary file deleted, because a tool whose whole premise is secure sharing must not silently downgrade the one guarantee it makes. Failing loudly costs an upload. Succeeding quietly costs the guarantee, and the user cannot tell which they got.',
+      },
+      {
+        heading: 'Two features this page used to claim, and a published secret',
+        body:
+          'Having found the encryption never ran, I audited the rest of the server the same way rather than assuming the first stone was the only loose one. Two features this page advertised are not wired to anything. Share links with an expiry: the logic exists in utils/fileSharing.js and looks complete, but its controller file is empty, no route registers it, and the function that enforces expiry, passwords, download limits and email allowlists is called by nothing. TOTP two-factor: the user model has the fields and the methods, utils/twoFactor.js has the implementation, and no route ever reaches it. Both are gone from the description above rather than described in the future tense. Two other things were worth fixing rather than describing. The JWT secret had a fallback — process.env.JWT_SECRET or a hard-coded string, written three times — which means any deployment missing that variable signs its tokens with a key published in a public repository, and forging an administrator token becomes copy and paste. There is no default now; a missing, short or placeholder secret stops the process at startup. And the access check called userId.toString() before testing whether a file was public, while the download route allows unauthenticated requests, so public files threw instead of downloading. That one failed closed, so nothing was exposed. It simply did not work, and nothing said so.',
       },
       {
         heading: 'The numbers that used to be here',
