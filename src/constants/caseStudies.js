@@ -103,7 +103,7 @@ export const caseStudies = [
     slug: 'secure-file-sharing',
     projectId: 2,
     title: 'Enterprise File Sharing Platform',
-    tagline: 'Sharing sensitive documents without handing over permanent access.',
+    tagline: 'Every file it stored was in plaintext, and the dashboard said otherwise.',
     role: 'Solo project — design, build, deploy',
     stack: ['React', 'Node.js', 'Express', 'MongoDB', 'Redis', 'JWT', 'AES-256-GCM', 'Docker'],
     links: {
@@ -111,31 +111,45 @@ export const caseStudies = [
       code: 'https://github.com/yuvrajinbhakti/FileSharing',
     },
     metrics: [
-      { value: 'AES-256', label: 'GCM encryption at rest' },
-      { value: '<100ms', label: 'API response time' },
-      { value: '99.5%', label: 'uptime' },
-      { value: '80%', label: 'less manual security review' },
+      { value: '0', label: 'files that were actually encrypted, before' },
+      { value: '4', label: 'calls to a Node function that does not exist' },
+      { value: '1', label: 'fallback that turned the failure into success' },
+      { value: '5', label: 'properties the encryption is now checked against' },
     ],
     sections: [
       {
         heading: 'The problem',
-        body: 'Most quick file-sharing tools trade security for convenience: links never expire, files sit unencrypted, and nobody can tell you afterwards who opened what. That is fine for a holiday photo and unacceptable for a signed contract.',
+        body:
+          'Most quick file-sharing tools trade security for convenience: links never expire, files sit unencrypted, and nobody can tell you afterwards who opened what. That is fine for a holiday photo and unacceptable for a signed contract.',
       },
       {
-        heading: 'Encryption and access',
-        body: 'Files are encrypted with AES-256-GCM, which authenticates the ciphertext as well as hiding it — tampering is detected rather than silently decrypted. Access sits behind JWT authentication with TOTP two-factor, and role-based access control decides who can see what. Share links are encrypted and carry an expiry, so access ends on a schedule instead of lasting forever.',
+        heading: 'What it was supposed to do',
+        body:
+          'Encrypt every file at rest with AES-256-GCM, which authenticates the ciphertext as well as hiding it, so tampering is detected rather than silently decrypted. Put access behind JWT authentication with TOTP two-factor and role-based control. Write every access to an audit log in MongoDB, so the system can say exactly who touched a document and when. Give share links an expiry, so access ends on a schedule instead of lasting forever. All of that is implemented, and all of it was true except the first clause.',
       },
       {
-        heading: 'Making it auditable',
-        body: 'Every access is written to an audit log in MongoDB automatically, and rate limiting middleware blunts brute-force and scraping attempts. The point was to make the system answerable: being able to say exactly who touched a document and when is the difference between a file host and something you would send a signed contract through, and it cut manual security monitoring by about 80%.',
+        heading: 'It stored everything in plaintext',
+        body:
+          'I went looking for numbers on this page I could not defend, and found something worse than a soft metric. The encryption module calls crypto.createCipherGCM. There is no such function in Node — the API is createCipheriv, and the GCM part comes from the algorithm string. Every call threw. All four sites had it, both directions. That alone would have been loud, an upload failing visibly. What made it quiet was the next fifteen lines: the upload controller caught the error and fell back to storing the file unencrypted, assembling what the code itself called a \u201cfake encryption result\u201d so the rest of the pipeline would accept it. So the failure was not merely silent, it was converted into apparent success. Meanwhile the dashboard told every user \u201cyour files will be encrypted with AES-256 before storage\u201d. Every file this application ever stored was written to disk in the clear.',
       },
       {
-        heading: 'Keeping it fast',
-        body: 'Encryption and auditing both add work on the critical path, so Redis caching keeps API responses under 100ms. Bulk file operations and real-time upload tracking round out the day-to-day usage, and the whole thing is containerised with Docker, running at 99.5% uptime.',
+        heading: 'Why nothing caught it',
+        body:
+          'Everything around the mistake was right, which is exactly why it survived. A fresh IV per file, getAuthTag on the way out, setAuthTag on the way back in, the algorithm string correct at the top of the file — the whole shape of a careful GCM implementation, with one function name in the middle that does not exist. It reads correctly. It passes review. Uploads succeeded, downloads returned the right bytes, and the audit log filled up, because a plaintext file round-trips perfectly. Nothing in the product could tell the difference between working encryption and none at all, and nothing was checking. The fix is four characters, four times.',
+      },
+      {
+        heading: 'What it is checked against now',
+        body:
+          'Five properties, because the round trip alone would have passed on plaintext. The file and text round trips match. The bytes on disk are not the plaintext. A single flipped byte in the ciphertext is rejected. Decryption with the wrong key is rejected. Those last two are the entire point of GCM over plain AES, and neither could have passed before. The fallback is gone as well: an upload that cannot be encrypted is now refused and the temporary file deleted, because a tool whose whole premise is secure sharing must not silently downgrade the one guarantee it makes. Failing loudly costs an upload. Succeeding quietly costs the guarantee, and the user cannot tell which they got.',
+      },
+      {
+        heading: 'The numbers that used to be here',
+        body:
+          'This page claimed responses under 100ms, 99.5% uptime, and an 80% reduction in manual security review. The repository contains no load test, no timing instrumentation, and nothing that measures uptime or review effort, so none of the three had a source. They are gone rather than softened. Redis caching, database indexes and connection pooling are real and worth doing; what they achieve under load is unknown until somebody measures it. Uptime is observed over months, not built, and an 80% reduction needs a baseline that never existed.',
       },
     ],
     takeaway:
-      'Security features are easy to list and hard to make usable. The constraint that shaped this build was keeping responses under 100ms while still encrypting, authenticating and logging every single request.',
+      'I audited this page expecting to delete a few soft percentages, and found that its flagship claim was not soft but false. The lesson is not that I should have tested the encryption, though I should have. It is that the code looked exactly like working encryption, the product behaved exactly like working encryption, and the only way to tell the difference was to encrypt a file and check that the bytes on disk were not the ones I put in. Every security feature has a version of that check, and it is never the one the feature makes convenient to run.',
   },
   {
     slug: 'moneyzold',
