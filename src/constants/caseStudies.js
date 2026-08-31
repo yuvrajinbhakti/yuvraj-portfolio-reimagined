@@ -56,7 +56,7 @@ export const caseStudies = [
     metrics: [
       { value: '16.2%', label: 'of concurrent edit pairs diverged' },
       { value: '0', label: 'imports of the OT library already in package.json' },
-      { value: '2', label: 'bugs found by running it, not by reading it' },
+      { value: '6', label: 'bugs found by running it, not by reading it' },
       { value: '157', label: 'tests behind the merge logic now' },
     ],
     sections: [
@@ -74,7 +74,7 @@ export const caseStudies = [
       },
       {
         heading: 'What the load test proved, and what it could not',
-        body: 'The stack ships with Prometheus and Grafana and was put under sustained load. At 1,000 concurrent clients it processed over 10,000 operations per second at 75ms P95, with an error rate below 0.5%, and instrumentation surfaces an incident in under 30 seconds rather than leaving it for a user to find. Every one of those numbers is real and every one of them is about throughput. A load test asks whether the server keeps up; it cannot ask whether the answer is right, because it has no idea what the right answer is. Two clients ending a session holding different documents is not an error, a timeout or a dropped connection — it is two successful requests. The graphs were green the entire time the merge logic was wrong. Those numbers also measured the sync layer as it was then, not the one described below.',
+        body: 'The stack ships with Prometheus and Grafana and was put under sustained load. At 1,000 concurrent clients it processed over 10,000 operations per second at 75ms P95, with an error rate below 0.5%, and instrumentation surfaces an incident in under 30 seconds rather than leaving it for a user to find. Every one of those numbers is real and every one of them is about throughput. A load test asks whether the server keeps up; it cannot ask whether the answer is right, because it has no idea what the right answer is. Two clients ending a session holding different documents is not an error, a timeout or a dropped connection — it is two successful requests. The graphs were green the entire time the merge logic was wrong. Those numbers also measured the sync layer as it was then, not the one described below. And the monitoring was less real than this section implied: prometheus.yml had been scraping /metrics every fifteen seconds since it was written, the load test hit the same path, prom-client was installed — and no route ever served it. The scrape target did not exist. It does now, reporting operations by outcome, how long each takes to order, and how much history each room is holding.',
       },
       {
         heading: 'How I found out',
@@ -89,6 +89,11 @@ export const caseStudies = [
         heading: 'What it took to actually land it',
         body:
           'The application now holds an ot-core client per editor and the server holds one authority per room: clients send operations, the server orders them and rebases late ones against everything that landed while they were in flight. Remote cursors move with the text rather than being redrawn from stale offsets, and undo undoes only your own edits — the editor\'s own stack would undo everybody\'s, because from its point of view somebody else\'s operation is just another change to the document. Two bugs turned up that no amount of reading would have found. The server sent the document both on join and in reply to the client\'s request, so every client initialised twice, and the second initialisation replaced the document while the collaborative binding was already attached — which reported replacing the document as an edit and emptied the room for everyone in it. That one also changed the library: a whole-document replacement is never translated into an operation now, because something that can wipe a document when it is used slightly wrong should not depend on the application being careful. Verified with two browsers in one room, typing at the same position: both edits survived, both tabs agreed, and each saw the other\'s caret.',
+      },
+      {
+        heading: 'Right code is not a working demo',
+        body:
+          'The editing was correct and the site was still broken, which took four more failures to sort out — and every one of them was found by running the thing rather than reading it. Two people joining a room saw a phantom third with no name, because the server cleared a departing socket\'s username before it had left the room and the client only ever removes people on an explicit goodbye. A metrics gauge counting connected sockets climbed and never came down, because Engine.IO has not decremented its count yet at the moment the disconnect event fires. The Docker image built cleanly and died on startup, because the Dockerfile listed the files to copy by hand and nobody had added the two new modules to that list — then the next build failed outright on a directory in that same list that does not exist, so the list is gone and the image copies the repository. And the deployed page told every visitor\'s browser to open a socket to their own machine, because the bundle fell back to localhost when a build-time variable was unset, which under a Docker build it always is. The server had been correct and unreachable for hours. It connects to the origin serving the page now, which needs no configuration to be right.',
       },
     ],
     takeaway:
