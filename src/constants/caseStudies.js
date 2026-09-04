@@ -214,6 +214,12 @@ export const caseStudies = [
       // network you can break — so the label goes back to the truth and npm
       // moves to a slot of its own.
       demo: 'https://yuvrajinbhakti.github.io/ot-core/demo/',
+      // The convergence property, running rather than described: two operations
+      // transforming against each other, and a button that fuzzes a hundred
+      // thousand random pairs live. It imports the library rather than
+      // reimplementing it, which is the only reason its numbers are worth
+      // anything.
+      visualizer: 'https://yuvrajinbhakti.github.io/ot-core/visualizer/',
       package: 'https://www.npmjs.com/package/ot-core',
       code: 'https://github.com/yuvrajinbhakti/ot-core',
     },
@@ -253,7 +259,17 @@ export const caseStudies = [
       {
         heading: '785 downloads, and what that number is not',
         body:
-          'ot-core was downloaded 785 times in its first two days from npm. That is the sentence I wanted to write, so it is the one I checked. Both spikes land on the days I published — 148 when 1.0.0 went up, 637 when four more versions followed — and every other day is zero. A number that moves only when I move it is not measuring demand; it is measuring me. What it measures is the mirrors, registry proxies and security scanners that fetch every new tarball within minutes of publication, which is why four releases in a day produced four times the traffic. I cannot prove that from outside, and I want to be exact about the limit: npm publishes totals, not user agents, so nobody outside npm can separate a person from a scanner. What I can say is that the shape is wrong for adoption and exactly right for automation. The figure stays on this page because deleting it would be its own kind of dishonesty, and because the first real signal is easy to state — a download on a day I did not publish.',
+          'ot-core was downloaded 785 times in its first two days from npm. That is the sentence I wanted to write, so it is the one I checked. Both spikes land on the days I published — 148 when 1.0.0 went up, 637 when four more versions followed. A number that moves only when I move it is not measuring demand; it is measuring me. What it measures is the mirrors, registry proxies and security scanners that fetch every new tarball within minutes of publication, which is why four releases in a day produced four times the traffic. I cannot prove that from outside, and I want to be exact about the limit: npm publishes totals, not user agents, so nobody outside npm can separate a person from a scanner.',
+      },
+      {
+        heading: 'The test I set, and what it returned',
+        body:
+          'This page used to end that section by naming the thing that would count as evidence: a download on a day I did not publish. Three of them have happened since — 26, then 24, then 11 — so the honest thing is to report the answer rather than leave the question standing. It is not the answer I was hoping for. Three consecutive days of traffic with no release behind it is a real baseline and not nothing, but the shape is a decay curve: each day smaller than the last, trailing off from a publish burst the way a cache tail does. Adoption does not decay from day one. I had written the test as though it had a yes or a no in it. It came back with neither, which is its own lesson about picking a threshold before you know what the data looks like. The number now stands at 846 and I still cannot tell you that any of them was a person.',
+      },
+      {
+        heading: 'A zero that can be checked',
+        body:
+          'Zero divergences across a fuzz run is a weak thing to put on a page, because a broken harness reports zero too and the two are indistinguishable from outside. Anyone reading it has to take my word that the check could have failed. So the fuzzer moved out of the test suite into the published package as ot-core/fuzz, and it takes the transform under test as an argument — which means it can be pointed at a transform that is definitely wrong. Same pairs, same seed, same runner: this library returns 0 divergences in 100,000 pairs, and a transform that simply returns each operation unchanged returns 46,990. Forty-seven per cent. That second number is what makes the first one worth reading, and it is the one I would want to see on somebody else\'s page. There is a visualiser too, linked above: two operations transforming against each other with the inserted and deleted spans marked, and a button that runs either fuzzer in your browser. It imports the library rather than carrying its own copy, so nothing on it is a figure I typed. Building it found one more bug, in my own code and in the usual place — the run handler yielded through requestAnimationFrame before starting, and requestAnimationFrame does not fire at all in a hidden tab, so a run started in one would sit on "Running…" forever. I found it because the preview pane happened to be hidden.',
       },
       {
         heading: 'The line in the README that was wrong',
