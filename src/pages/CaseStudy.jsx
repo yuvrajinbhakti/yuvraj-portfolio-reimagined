@@ -273,6 +273,23 @@ const CaseStudy = () => {
                       {study.tryIt.label}
                     </Link>
                   )}
+                  {/* A page that runs the claim rather than stating it.
+                      Separate from `demo`, which shows the project working —
+                      this shows the property the project rests on being
+                      checked, live, against the published library. */}
+                  {study.links.visualizer && (
+                    <a
+                      href={study.links.visualizer}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 border border-white/25 hover:bg-white/10 text-white rounded-lg transition-colors text-sm font-medium"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+                      </svg>
+                      Check convergence
+                    </a>
+                  )}
                   {/* Where to install it from, for the projects that are a
                       thing you install. Separate from `demo` because a package
                       page is not a demonstration of anything, and separate from
