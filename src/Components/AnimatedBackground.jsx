@@ -16,7 +16,7 @@ import {
   alphaForT,
 } from '../utils/sky';
 import { OBSERVER } from '../constants/observer';
-import { sunPosition, nextSunrise, nightfallBefore } from '../utils/sun';
+import { sunPosition, nextSunrise, solarTimeline } from '../utils/sun';
 import { moonHorizontal, moonPhase } from '../utils/moon';
 import { setSkyTime, resetSkyTime } from '../utils/skyClock';
 import PropTypes from 'prop-types';
@@ -128,129 +128,88 @@ const AnimatedBackground = ({ children }) => {
        * the moon is where it really is, which near new moon is low in the west
        * at the top of the page and gone by the time you have scrolled past it.
        */
-      const dark = found ? nightfallBefore(found, OBSERVER, 0) : null;
-      nightAt = dark ? dark.getTime() : sunriseAt - 11 * 3600 * 1000;
+      timeline = found ? solarTimeline(found, OBSERVER) : null;
+      nightAt = timeline ? timeline[STORY[0][1]].getTime() : sunriseAt - 11 * 3600 * 1000;
     };
+    /*
+     * Scroll depth to time — a storyboard, not a formula.
+     *
+     * This was derived for a long time and it was the wrong approach. First
+     * linearly from the clock, which spent half the page on a sky that does not
+     * change; then weighted by how fast the sky was moving, with a floor
+     * constant to stop the dark hours collapsing, and an exponent on the
+     * twilight curve to drag the middle of the range up. Each knob fixed the
+     * symptom the last one caused, and at no point had anybody decided what the
+     * page actually does and where. The physics decided, and the physics has no
+     * opinion about pacing: a real night is about eighty-five per cent
+     * nothing-happening, so the answer kept coming back "dark for most of it,
+     * then everything at once".
+     *
+     * So the pacing is declared. Each row below pins a scroll position to a
+     * named moment of the night, and the time in between is interpolated. To
+     * hold the hero dark for longer, move the first rows down. To spend more of
+     * the page on the sunrise, give the last rows more room. That is the whole
+     * control surface, and it is readable as a storyboard because it is one.
+     *
+     * The sky itself stays real. Every frame is a true projection of a true
+     * moment — stars, sun and moon all where they actually are at the time this
+     * returns — and the readout names that time. Only the *rate* is authored,
+     * and a scrollbar was never a clock.
+     */
+    const STORY = [
+      // Depth 0 is the end of civil twilight rather than sunset. Two reasons:
+      // the hero has to read as the star field it was designed as, which it
+      // cannot do against a lit sky; and the sun must be far enough down that
+      // it is not drawn through the headline. It is still dusk, so there is
+      // colour low in the frame and a young moon is still up.
+      [0.00, 'civilDusk'],
+      [0.12, 'nauticalDusk'],
+      [0.22, 'astroDusk'],
+      // The dark hours, compressed. Nothing observable happens between these
+      // two beyond the stars turning, and the stars turning is the one thing
+      // that reads well without any help.
+      [0.38, 'deepest'],
+      [0.52, 'astroDawn'],
+      // And then the whole back half of the page is the sunrise arriving,
+      // which is the part worth scrolling for.
+      [0.68, 'nauticalDawn'],
+      [0.85, 'civilDawn'],
+      [1.00, 'sunrise'],
+    ];
+
+    let timeline = null;
+
+    // Called here rather than at its definition: it reads STORY and writes
+    // `timeline`, both of which are declared above this line and not above that
+    // one. The whole night is resolved once, at mount.
     refreshSunrise();
-
-    /**
-     * Scroll depth to time — weighted, not linear.
-     *
-     * Linear was the obvious mapping and it wasted the page. A night is mostly
-     * nothing happening: measured over a typical span, the sun spends about half
-     * of it below eighteen degrees, where the sky is as dark as it is going to
-     * get and one hour is indistinguishable from the next. Mapping that straight
-     * onto scroll spent half the page on a sky that never changed, and then had
-     * to fit the whole of dawn into the last three per cent — the part somebody
-     * actually scrolled down to see went past in a flick of the wheel.
-     *
-     * So the pixels follow the change rather than the clock. Each slice of the
-     * span is weighted by how much the sky actually moves across it, plus a floor
-     * so the dead middle of the night still costs some scrolling instead of
-     * snapping through. Inverting that gives a depth that is uniform in *change*:
-     * twilight at both ends opens out, the flat stretches compress.
-     *
-     * Nothing false comes of it, which is the reason it is allowed. The readout
-     * reads the clock this returns, so it still names the true hour at every
-     * depth — it is the scrollbar that stops being a linear clock, and the
-     * scrollbar never claimed to be one.
-     */
-    const SAMPLES = 240;
-    /*
-     * How much there is to look at, at a given moment. The weighting above
-     * spends scroll in proportion to how fast this moves.
-     *
-     * Two terms, because two different things change. The sky's own brightness
-     * is the big one, and it is finished either side of a band: below about -18°
-     * the night is as dark as it gets, above about +6° the day is as bright as
-     * it gets. That term alone was the first version, and it gave the daytime
-     * ten per cent of the page — correct by its own logic, since the sky really
-     * does stop changing once the sun is up, and wrong in effect, because the
-     * sun is now drawn and it crossed the whole frame and set inside half a
-     * screen of scrolling.
-     *
-     * So the second term is the sun's own height. While it is up it is an object
-     * in the picture and its movement is worth pixels even though the background
-     * behind it has stopped changing.
-     */
-    const lightness = (t) => {
-      const altitude = sunPosition(new Date(t), OBSERVER).altitude;
-      const sky = Math.min(1, Math.max(0, (altitude + 18) / 24));
-      const sunInFrame = Math.max(0, altitude) / 90;
-      return sky + sunInFrame * 0.6;
-    };
-    /*
-     * What an hour of nothing-happening is worth, in scroll.
-     *
-     * At zero the dark hours would collapse to a seam and the sky would jump
-     * across it; at the old 0.003 they took nearly half the page. Half the page
-     * of a sky that does not change is how the sunrise ended up feeling like
-     * something bolted onto the end — there was no build, just a long hold and
-     * then an event.
-     *
-     * At 0.0015 the two twilights take about eighty per cent of the scroll
-     * between them and the dark hours take the rest, which is the right way
-     * round: the page spends its length on the part that moves.
-     */
-    const FLAT_FLOOR = 0.0015;
-
-    let depthTable = null;
-    let tableBuiltAt = 0;
-
-    const buildDepthTable = () => {
-      const start = nightAt;
-      const span = Math.max(0, sunriseAt - start);
-
-      const weights = new Float64Array(SAMPLES);
-      let total = 0;
-      let prev = lightness(start);
-      for (let i = 0; i < SAMPLES; i++) {
-        const here = lightness(start + ((i + 1) / SAMPLES) * span);
-        const w = Math.abs(here - prev) + FLAT_FLOOR;
-        weights[i] = w;
-        total += w;
-        prev = here;
-      }
-
-      // Invert the cumulative distribution: walk it in equal steps of weight and
-      // record the time each step lands on.
-      const table = new Float64Array(SAMPLES + 1);
-      table[0] = start;
-      let acc = 0;
-      let j = 0;
-      for (let k = 1; k <= SAMPLES; k++) {
-        const target = (k / SAMPLES) * total;
-        while (j < SAMPLES - 1 && acc + weights[j] < target) {
-          acc += weights[j];
-          j++;
-        }
-        const within = weights[j] > 0 ? Math.min(1, (target - acc) / weights[j]) : 0;
-        table[k] = start + ((j + within) / SAMPLES) * span;
-      }
-
-      depthTable = table;
-      tableBuiltAt = start;
-    };
 
     /** The moment this scroll depth corresponds to. */
     const timeAtDepth = (depth) => {
       // Somebody who has asked their system for less motion has not asked for a
       // sky that runs at a thousand times real speed under their thumb. They get
-      // the top of the page, held still: the same dark sky everyone else opens
-      // on, and no sun swinging through the headline at two in the afternoon.
+      // the top of the page, held still: the same dusk everyone else opens on.
       if (reduce) return nightAt;
 
-      // Rebuilt rather than built once, because depth 0 has to stay the real
-      // present on a page somebody leaves open. A minute of drift is invisible
-      // at this scale, and 240 solar positions is well under a millisecond.
-      if (!depthTable || Date.now() - tableBuiltAt > 60_000) {
-        refreshSunrise();
-        buildDepthTable();
-      }
+      if (!timeline) return nightAt;
 
-      const x = Math.min(1, Math.max(0, depth)) * SAMPLES;
-      const i = Math.min(SAMPLES - 1, Math.floor(x));
-      return depthTable[i] + (depthTable[i + 1] - depthTable[i]) * (x - i);
+      // The night this page is showing has finished; pick up the next one. One
+      // comparison a frame, and it rebuilds once a day at sunrise rather than on
+      // a timer that spends the other twenty-three hours finding nothing.
+      if (Date.now() > sunriseAt) refreshSunrise();
+
+      const d = Math.min(1, Math.max(0, depth));
+      for (let i = 0; i < STORY.length - 1; i++) {
+        const [d0, k0] = STORY[i];
+        const [d1, k1] = STORY[i + 1];
+        if (d <= d1 || i === STORY.length - 2) {
+          const t0 = timeline[k0].getTime();
+          const t1 = timeline[k1].getTime();
+          const across = d1 === d0 ? 0 : (d - d0) / (d1 - d0);
+          return t0 + (t1 - t0) * Math.min(1, Math.max(0, across));
+        }
+      }
+      return timeline.sunrise.getTime();
     };
 
     const SKY_TOP = [[2, 6, 23], [15, 23, 42]];   // cold near-black blue
@@ -1008,20 +967,24 @@ const AnimatedBackground = ({ children }) => {
      *
      * Size is the one thing here that is not true. Both are about half a degree
      * across, which at this projection is four pixels — a dot indistinguishable
-     * from a mediocre star, and at four or five times that still only a bright
-     * speck. Nine times is where they stop being specks and start being objects:
-     * the moon is wide enough to read a phase off, and the sun is wide enough to
-     * sit on the horizon rather than hover above it.
+     * from a mediocre star. Every sky app exaggerates for the same reason: a
+     * true half-degree moon on a phone screen is a pixel and a half, and nobody
+     * would call that a moon.
      *
-     * Which is a real exaggeration and worth being plain about. Every sky app
-     * does the same thing for the same reason — a true half-degree moon on a
-     * phone screen is a pixel and a half, and nobody would call that a moon. The
-     * licence is taken in the radius and nowhere else: where they sit, when they
-     * rise and set, how far away the moon is on the night you look, and which of
-     * its limbs is lit are all computed, and those are the parts somebody could
-     * check by stepping outside.
+     * But there is a limit, and nine times was past it. A big soft ball is the
+     * cartoon sun; the real one is a *small hard disc inside an enormous glow*.
+     * In a photograph of a sunrise the disc is something you could cover with a
+     * fingernail and the bloom takes half the frame, and getting that ratio
+     * backwards is most of what makes a drawn sun look drawn. Five times keeps
+     * the moon wide enough to read a phase off while leaving the sun small
+     * enough that the glow does the work.
+     *
+     * The licence is taken in the radius and nowhere else: where they sit, when
+     * they rise and set, how far away the moon is on the night you look, and
+     * which of its limbs is lit are all computed, and those are the parts
+     * somebody could check by stepping outside.
      */
-    const BODY_EXAGGERATION = 9;
+    const BODY_EXAGGERATION = 5;
 
     /** Screen position of an alt/az direction, or null if it is behind the view. */
     const projectBody = (altitude, azimuth, cam) => {
@@ -1130,12 +1093,16 @@ const AnimatedBackground = ({ children }) => {
       // The bloom widens as it reddens. A sun on the horizon is not a brighter
       // disc than a sun overhead — it is a dimmer one inside a much larger glow,
       // because that is where all the light it lost has gone.
-      // Multipliers of the radius, so they had to come down when the disc went
-      // up — otherwise enlarging the sun also doubled a glow that was already
-      // a quarter of the screen across.
+      // Three, spanning two orders of size: a wide wash that lifts the whole
+      // quarter of the sky the sun is in, a middle bloom, and a tight core that
+      // makes the disc look like it is emitting rather than painted. Multipliers
+      // of the radius, so shrinking the disc widened them in proportion — which
+      // is the right way round, and the reason the sun reads as brighter now
+      // while actually putting less light into the pixels behind the type.
       context.globalCompositeOperation = 'lighter';
-      haloAt(spot.x, spot.y, r * (8 + low * 8), body, 0.17 + low * 0.07);
-      haloAt(spot.x, spot.y, r * 2.4, body, 0.30 * strength);
+      haloAt(spot.x, spot.y, r * (18 + low * 14), body, 0.10 + low * 0.05);
+      haloAt(spot.x, spot.y, r * 6, body, 0.13 + low * 0.05);
+      haloAt(spot.x, spot.y, r * 2.2, body, 0.30 * strength);
 
       /*
        * The disc is painted, not added, and that is the difference between a
@@ -1151,10 +1118,20 @@ const AnimatedBackground = ({ children }) => {
        * Drawn opaque, the disc is exactly the colour the atmosphere calculation
        * says it should be, and the halos bloom around it instead of through it.
        */
+      /*
+       * Flattened as it nears the horizon, which is the detail that sells it.
+       *
+       * Refraction lifts the lower limb more than the upper one — the light from
+       * the bottom edge takes a longer, lower path through denser air and gets
+       * bent further — so a sun on the horizon is measurably wider than it is
+       * tall, by something like a fifth. Everyone has seen it and almost nobody
+       * has noticed why, which makes it exactly the kind of thing whose absence
+       * reads as wrong without being nameable.
+       */
       context.globalCompositeOperation = 'source-over';
       context.fillStyle = `rgb(${body})`;
       context.beginPath();
-      context.arc(spot.x, spot.y, r, 0, TAU);
+      context.ellipse(spot.x, spot.y, r, r * (1 - low * 0.2), 0, 0, TAU);
       context.fill();
     };
 

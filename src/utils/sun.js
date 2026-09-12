@@ -104,6 +104,93 @@ export function twilightBand(altitude) {
  * @returns {Date | null}
  */
 /**
+ * The eight moments a night is made of, working back from a sunrise.
+ *
+ * These are the named boundaries — sunset, the ends of civil, nautical and
+ * astronomical twilight, the deepest point, and the same three coming back up —
+ * and they exist so that the page can be *choreographed* against them instead of
+ * against raw time.
+ *
+ * That distinction is the whole reason this function exists. Mapping clock time
+ * onto scroll, however it was weighted, meant nobody had decided what the page
+ * does and where: a real night is about eighty-five per cent nothing-happening,
+ * so the physics chose the pacing and the answer was always "dark for most of
+ * it, then everything at once". Keying the scroll to these instead means the
+ * pacing is a decision — this much page for dusk, this much for the dark, this
+ * much for dawn — while every frame in between still renders a true sky for a
+ * true moment. Only the rate is authored.
+ *
+ * Phases that do not happen collapse rather than vanish. Above the Arctic circle
+ * in June there is no astronomical night; those stops land on the darkest moment
+ * there is, the segment between them has zero duration, and the caller
+ * interpolates across it without noticing.
+ *
+ * @param {Date} sunrise the sunrise the night runs up to
+ * @param {{ latitude: number, longitude: number }} observer
+ * @returns {{ sunset: Date, civilDusk: Date, nauticalDusk: Date, astroDusk: Date,
+ *   deepest: Date, astroDawn: Date, nauticalDawn: Date, civilDawn: Date,
+ *   sunrise: Date }}
+ */
+export function solarTimeline(sunrise, observer) {
+  const STEP_MS = 5 * 60 * 1000;
+  const end = sunrise.getTime();
+  const begin = end - 18 * 3600 * 1000;
+
+  // Sample the whole night once; every boundary below is read off this.
+  const times = [];
+  const alts = [];
+  for (let t = begin; t <= end; t += STEP_MS) {
+    times.push(t);
+    alts.push(sunPosition(new Date(t), observer).altitude);
+  }
+
+  // The darkest moment — solar midnight. Everything else is found either side.
+  let deepestIndex = 0;
+  for (let i = 1; i < alts.length; i++) if (alts[i] < alts[deepestIndex]) deepestIndex = i;
+
+  /** Bisect the crossing of `target` between two samples, to the second. */
+  const refine = (i, j, target) => {
+    let lo = times[i];
+    let hi = times[j];
+    const loAbove = alts[i] > target;
+    while (hi - lo > 1000) {
+      const mid = (lo + hi) / 2;
+      if (sunPosition(new Date(mid), observer).altitude > target === loAbove) lo = mid;
+      else hi = mid;
+    }
+    return new Date(Math.round(hi));
+  };
+
+  /** Last time before the darkest point that the sun was above `target`. */
+  const falling = (target) => {
+    for (let i = deepestIndex; i > 0; i--) {
+      if (alts[i] <= target && alts[i - 1] > target) return refine(i - 1, i, target);
+    }
+    return new Date(times[deepestIndex]);
+  };
+
+  /** First time after the darkest point that the sun climbs past `target`. */
+  const rising = (target) => {
+    for (let i = deepestIndex; i < alts.length - 1; i++) {
+      if (alts[i] <= target && alts[i + 1] > target) return refine(i, i + 1, target);
+    }
+    return new Date(times[deepestIndex]);
+  };
+
+  return {
+    sunset: falling(0),
+    civilDusk: falling(-6),
+    nauticalDusk: falling(-12),
+    astroDusk: falling(-18),
+    deepest: new Date(times[deepestIndex]),
+    astroDawn: rising(-18),
+    nauticalDawn: rising(-12),
+    civilDawn: rising(-6),
+    sunrise,
+  };
+}
+
+/**
  * The evening before a sunrise, at whichever depth of dusk you ask for.
  *
  * The page shows one night, and a night has to start somewhere. `altitudeDeg`
