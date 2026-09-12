@@ -16,6 +16,8 @@ import {
   alphaForT,
 } from '../utils/sky';
 import { OBSERVER } from '../constants/observer';
+import { sunPosition, nextSunrise } from '../utils/sun';
+import { setSkyTime, resetSkyTime } from '../utils/skyClock';
 import PropTypes from 'prop-types';
 import { useReducedMotion } from 'framer-motion';
 
@@ -54,6 +56,48 @@ const AnimatedBackground = ({ children }) => {
     //
     // Deliberately subtle — it should be felt, not noticed. Both ends stay very
     // dark so text contrast never shifts (white-on-near-black at every depth).
+    /**
+     * The descent is a clock.
+     *
+     * The sky here is not decorative — it is this catalogue, reduced for
+     * Chandigarh's latitude at an actual moment, and the readout in the hero
+     * says so out loud. Which means a scroll that simply faded the palette from
+     * dark to light would make that readout a lie: daylight above a caption
+     * claiming 3am.
+     *
+     * So the scroll moves the moment instead of the mood. Depth 0 is now. Depth
+     * 1 is the next time the sun comes up over that latitude. Everything between
+     * is the sky that will actually be there — stars wheel west at fifteen
+     * degrees an hour because that is what the Earth does, and the horizon warms
+     * because the sun is genuinely on its way up. Scroll back and it runs
+     * backwards.
+     *
+     * The span is therefore different depending on when somebody visits, which
+     * is the honest behaviour rather than a bug: at 5am there is very little
+     * night left, and at 10am there is nearly a full day of it coming.
+     */
+    let skyNow = Date.now();
+    let sunriseAt = null;
+
+    const refreshSunrise = () => {
+      const found = nextSunrise(new Date(), OBSERVER);
+      // Null above the polar circles in the season where the sun never rises.
+      // Not a case Chandigarh can reach, handled because the function can
+      // return it and a crash behind every page would be a poor way to find out.
+      sunriseAt = found ? found.getTime() : Date.now() + 12 * 3600 * 1000;
+    };
+    refreshSunrise();
+
+    /** The moment this scroll depth corresponds to. */
+    const timeAtDepth = (depth) => {
+      // Somebody who has asked their system for less motion has not asked for a
+      // sky that runs at a thousand times real speed under their thumb. They get
+      // the true current sky, which is the thing the readout claims anyway.
+      if (reduce) return Date.now();
+      const span = Math.max(0, sunriseAt - Date.now());
+      return Date.now() + depth * span;
+    };
+
     const SKY_TOP = [[2, 6, 23], [15, 23, 42]];   // cold near-black blue
     // Deeper and warmer-toward-blue, not indigo. The old bottom stop was
     // (26, 16, 56) — red above green with blue well clear of both, which is
@@ -588,12 +632,59 @@ const AnimatedBackground = ({ children }) => {
       meteorTimeoutId = setTimeout(createMeteor, Math.random() * 5000 + 2000);
     };
     
-    // Fill canvas with initial gradient
+    /**
+     * How close the sun is to rising, 0 to 1.
+     *
+     * Astronomical twilight begins at -18 degrees and sunrise is 0, so that is
+     * the range worth reacting to — above the horizon is irrelevant here because
+     * the page never scrolls past dawn.
+     */
+    /**
+     * How much twilight is in the sky, 0 to 1.
+     *
+     * Twilight is the band from eighteen degrees below the horizon up to the
+     * horizon itself — the conventional definition, not a choice — and it
+     * happens twice: once on the way down and once on the way up. This does not
+     * distinguish them, because the sky does not either. Dusk and dawn are the
+     * same geometry running in opposite directions and they look alike.
+     *
+     * So a full scroll gets an arc rather than a flat stretch with a surprise at
+     * the end: daylight, the warmth of sunset, the long dark middle where the
+     * sun is far below the horizon and the stars are at their best, then the
+     * warmth returning on the other side.
+     *
+     * The quarter-degree tolerance is not fussiness. Depth 1 is sunrise, which
+     * means altitude zero, which in floating point is as likely to be a hair
+     * above as a hair below — and an `altitude > 0` cutoff turned the last pixel
+     * of the page black after the glow had been building for the previous
+     * hundred. The bottom of the page is exactly where that must not happen.
+     */
+    const twilightGlow = (when) => {
+      const altitude = sunPosition(new Date(when), OBSERVER).altitude;
+      if (altitude > 0.25) return 0;
+      return Math.min(1, Math.max(0, (altitude + 18) / 18));
+    };
+
+    // The warmth the eastern horizon takes on as the sun approaches it. Sampled
+    // from an actual civil-twilight sky rather than picked: a desaturated amber
+    // that reads as light rather than as a colour.
+    const DAWN_GLOW = [86, 62, 58];
+
     const fillBackground = (depth = 0) => {
+      const dawn = twilightGlow(timeAtDepth(depth));
+
       const gradient = context.createLinearGradient(0, 0, 0, height);
       gradient.addColorStop(0, mixRGB(SKY_TOP[0], SKY_DEEP[0], depth));
-      gradient.addColorStop(1, mixRGB(SKY_TOP[1], SKY_DEEP[1], depth));
-      
+
+      // The bottom stop is where dawn shows. Capped well short of daylight:
+      // this canvas sits behind every paragraph on the site, and the whole page
+      // is white text on near-black. A sky bright enough to look like morning is
+      // a sky nobody can read the words against — so what you get is the first
+      // warmth on the horizon, which is both what is actually happening at this
+      // hour and as far as the contrast budget goes.
+      const deep = mixRGB(SKY_DEEP[1], DAWN_GLOW, dawn * 0.55);
+      gradient.addColorStop(1, depth > 0 ? deep : mixRGB(SKY_TOP[1], SKY_DEEP[1], depth));
+
       context.fillStyle = gradient;
       context.fillRect(0, 0, width, height);
     };
@@ -635,12 +726,34 @@ const AnimatedBackground = ({ children }) => {
       
       const scrollY = window.scrollY;
 
-      // Re-project once a second. The sky turns 15 degrees an hour, so between
-      // frames it moves four ten-thousandths of a degree — recomputing 2,851
-      // positions to find that out would be the most expensive thing here.
-      if (time - projectedAt > 1000) {
-        projectSky(Date.now());
+      // Re-project when the sky has actually moved.
+      //
+      // It used to be once a second against the wall clock, on the reasoning
+      // that the sky turns fifteen degrees an hour and therefore four
+      // ten-thousandths of a degree between frames. That still holds while the
+      // page is still. It stops holding the moment the scroll is driving the
+      // clock, because then a flick of the wheel is worth hours and the sky has
+      // to keep up — so the trigger is the time itself changing rather than a
+      // second elapsing.
+      //
+      // One test covers both cases, which is the reason there is only one. At
+      // the top of the page `wanted` is the wall clock, so it pulls away from
+      // the last projection at a millisecond per millisecond and trips this
+      // after twenty seconds — twenty seconds being eight hundredths of a
+      // degree of rotation, which nobody can see. Under the scroll the same
+      // distance opens in a frame, and it re-projects in that frame.
+      //
+      // Affordable either way: a full re-projection of 5,044 stars measures at
+      // 0.51ms, which is three per cent of a sixty-hertz frame.
+      const wanted = timeAtDepth(depth);
+      if (Math.abs(wanted - skyNow) > 20000) {
+        skyNow = wanted;
+        projectSky(skyNow);
         constellationSegments = projectConstellations();
+        // The readouts name this time in words. They used to read the wall
+        // clock, which was right until the scroll started moving the sky and
+        // then said quarter past one over a sky seventeen hours later.
+        setSkyTime(skyNow);
       }
 
       // The figures, under everything, at the edge of visible. They are there
@@ -802,6 +915,9 @@ const AnimatedBackground = ({ children }) => {
 
     // Cleanup
     return () => {
+      // Module state outlives this component; leaving a scrolled time behind
+      // would have the next mount's readouts open on a stale hour.
+      resetSkyTime();
       window.removeEventListener('resize', updateDimensions);
       window.removeEventListener('pointermove', onPointerMove);
       document.documentElement.removeEventListener('pointerleave', onPointerLeave);

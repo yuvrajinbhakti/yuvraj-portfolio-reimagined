@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { STARS, STAR_STRIDE, STAR_LABELS, NOTABLE } from '../constants/starCatalog';
 import { localSiderealTime, horizontal } from '../utils/sky';
 import { OBSERVER, formatLocalTime, compassPoint } from '../constants/observer';
+import { subscribeSkyTime } from '../utils/skyClock';
 
 /**
  * The caption the sky did not have.
@@ -40,20 +41,36 @@ const currentSubject = (date) => {
   return null;
 };
 
-const read = () => ({ time: formatLocalTime(), star: currentSubject(new Date()) });
+const read = (when = Date.now(), shifted = false) => ({
+  time: formatLocalTime(new Date(when)),
+  star: currentSubject(new Date(when)),
+  shifted,
+});
 
 const SkyReadout = () => {
-  const [state, setState] = useState(read);
+  const [state, setState] = useState(() => read());
 
-  // Once a minute is plenty: the clock only shows minutes, and the sky turns a
-  // quarter of a degree in that time.
+  /*
+   * This line names the place and the hour the sky above it is showing, and the
+   * sky is no longer always now — scrolling runs it forward to the next sunrise.
+   * So the words follow the canvas rather than the wall clock, and say when they
+   * have left it.
+   *
+   * Two sources, deliberately. The subscription covers scrolling; the interval
+   * covers standing still, because a reader who stops at the top of the page
+   * should still watch the minute tick over. The store ignores changes under a
+   * minute, so the subscription cannot outpace what this renders.
+   */
+  useEffect(() => subscribeSkyTime((time, shifted) => setState(read(time, shifted))), []);
+
   useEffect(() => {
     const now = new Date();
     const msToNextMinute = (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
     let interval;
+    const tick = () => setState((prev) => (prev.shifted ? prev : read()));
     const timeout = setTimeout(() => {
-      setState(read());
-      interval = setInterval(() => setState(read()), 60_000);
+      tick();
+      interval = setInterval(tick, 60_000);
     }, msToNextMinute);
     return () => { clearTimeout(timeout); clearInterval(interval); };
   }, []);
@@ -65,13 +82,21 @@ const SkyReadout = () => {
         <span className="text-white/25"> · </span>
         <span className="tabular-nums">{state.time}</span>
         <span className="text-white/25"> IST</span>
+        {/* The one word that keeps this honest. Without it the line reads as a
+            report of the time, and while you are scrolling it is not one. */}
+        {state.shifted && <span className="text-white/25"> · scrolled</span>}
       </p>
       {/* Nothing bright enough is up — which happens, and saying so is better
-          than promoting a star nobody has heard of to keep the line full. */}
+          than promoting a star nobody has heard of to keep the line full. The
+          two wordings exist because "right now" stops being true the moment the
+          scroll has moved the sky, and this is the sentence whose whole job is
+          to be true. */}
       <p className="text-white/30">
         {state.star
           ? `${state.star.name}, ${state.star.altitude}° above the ${state.star.direction}`
-          : 'the sky above, as it is right now'}
+          : state.shifted
+            ? 'the sky above, at that hour'
+            : 'the sky above, as it is right now'}
       </p>
       {/* Only where there is a pointer to hover with, and hidden from screen
           readers everywhere: an instruction to point at something is not an
