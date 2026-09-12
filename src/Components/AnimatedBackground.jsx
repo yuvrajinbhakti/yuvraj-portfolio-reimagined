@@ -1940,9 +1940,25 @@ const AnimatedBackground = ({ children }) => {
       // Both stops sit in the blue band. The middle one used to run red up to
       // 143 against a green of 58, which is not a blue nebula shading deeper —
       // it is a purple one, and it tinted the whole lower page.
+      /*
+       * Five stops on an eased falloff, where there were three on a linear one.
+       *
+       * Three stops with alpha stepping 0.02 -> 0.015 -> 0 is smooth in value
+       * and kinked in slope, at the half stop and again at the rim. The eye is
+       * far more sensitive to a discontinuity in the *rate* of change than to
+       * one in brightness — that is what a Mach band is — so a gradient whose
+       * alpha arrives at zero with a corner shows a visible ring even when the
+       * step either side of it measures one or two levels out of 255 and no
+       * amount of staring at the numbers finds it.
+       *
+       * These approach zero tangentially instead, so there is no corner to see.
+       */
+      const mid = `${Math.round(38 + 18 * depth)}, 74, 156`;
       nebulaGradient.addColorStop(0, `rgba(46, 86, 170, ${(0.02 * k).toFixed(4)})`);
-      nebulaGradient.addColorStop(0.5, `rgba(${Math.round(38 + 18 * depth)}, 74, 156, ${(0.015 * k).toFixed(4)})`);
-      nebulaGradient.addColorStop(1, 'rgba(33, 33, 33, 0)');
+      nebulaGradient.addColorStop(0.35, `rgba(${mid}, ${(0.0168 * k).toFixed(4)})`);
+      nebulaGradient.addColorStop(0.6, `rgba(${mid}, ${(0.0104 * k).toFixed(4)})`);
+      nebulaGradient.addColorStop(0.82, `rgba(${mid}, ${(0.0036 * k).toFixed(4)})`);
+      nebulaGradient.addColorStop(1, `rgba(${mid}, 0)`);
       
       ctx.fillStyle = nebulaGradient;
       ctx.fillRect(0, 0, width, height);
