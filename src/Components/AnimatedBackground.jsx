@@ -404,7 +404,20 @@ const AnimatedBackground = ({ children }) => {
      * retreat to eleven is no longer the binding constraint — footer body type
      * went to 65% white and is sitting at 6.3:1, so there is room to spend.
      */
-    const HORIZON_DROP = 16;
+    /*
+     * Twenty-six, up from sixteen, and now it is the water setting this rather
+     * than the sun.
+     *
+     * At sixteen the horizon landed at 88.7% of the frame, so the sea was an
+     * eleven per cent strip along the bottom — a dark hem, not a foreground.
+     * Twenty-six brings it to about three-quarters, which gives the water the
+     * bottom quarter of the frame: enough to be the thing the light lands on.
+     *
+     * It also puts the sun *on* the horizon rather than above it, so the water
+     * takes its lower half. A sun half out of the sea is the picture; a sun
+     * hovering clear of it is a sticker on a backdrop.
+     */
+    const HORIZON_DROP = 26;
     const horizonTilt = (depth) => {
       if (reduce) return 0;
       const t = Math.max(0, Math.min(1, (depth - 0.6) / 0.4));
@@ -1450,6 +1463,124 @@ const AnimatedBackground = ({ children }) => {
       }
     };
 
+    /*
+     * Water, under the sunrise.
+     *
+     * The sun had nothing beneath it. It sat on the bottom edge of the frame
+     * with a plain wash under it and plain gradient over it, and no amount of
+     * colour was going to fix that, because what the picture was missing was not
+     * light — it was a foreground. A sunrise is a composition: sky, the sun at
+     * the join, and something underneath for the light to land on. Take away the
+     * third and the other two are a swatch.
+     *
+     * I argued against this and was wrong about which objection mattered.
+     * Chandigarh is landlocked, and I took that to mean water would be the first
+     * invented thing on a page whose whole manner is that its claims check out.
+     * But the claims this page makes are about the sky — where those stars are,
+     * what the moon is doing, when the sun comes up — and they go on being true
+     * with water under them. Nothing here says you are looking at Chandigarh's
+     * ground. Scenery under a true sky is a stage, not a lie.
+     *
+     * The horizon is found rather than chosen: it is altitude zero through the
+     * same projection as everything else, so it sits where the view is actually
+     * pointing and moves correctly as the camera drops over the last stretch.
+     * Above it, sky. Below it, the same light lying on water.
+     */
+    let horizonColour = [16, 30, 72];
+
+    const drawWater = (when, cam, exposure, seconds) => {
+      if (exposure < 0.02) return;
+
+      const horizon = projectBody(0, cam.azimuth, cam);
+      if (!horizon) return;
+      const horizonY = horizon.y;
+      // The horizon is below the bottom of the frame for most of the page —
+      // the view only drops far enough to see it over the last stretch — and
+      // there is no water to draw until it is.
+      if (horizonY >= height - 2) return;
+
+      const sun = sunPosition(new Date(when), OBSERVER);
+      const depthBelow = height - horizonY;
+
+      /*
+       * Water is the sky, dimmer and colder. It is a mirror, so its colour is
+       * the colour above it — which is why it is taken from the gradient's own
+       * bottom stop rather than picked. Roughly forty per cent of the light
+       * comes back at a shallow angle, and what does not is the sea's own
+       * near-black.
+       */
+      const deep = [10, 12, 24];
+      const surface = mixArr(deep, horizonColour, 0.62);
+      const far = mixArr(deep, horizonColour, 0.38);
+      const near = mixArr(deep, horizonColour, 0.14);
+
+      // Four stops rather than three, and the falloff is gentler than the first
+      // attempt, which reached its own near-black a third of the way down and
+      // left a black hem under a lit sky. Water away from you is nearly all
+      // reflected sky; it only goes dark close in, where you are looking into
+      // it rather than across it.
+      const sea = context.createLinearGradient(0, horizonY, 0, height);
+      sea.addColorStop(0, rgbStr(surface));
+      sea.addColorStop(0.42, rgbStr(far));
+      sea.addColorStop(0.78, rgbStr(near));
+      sea.addColorStop(1, rgbStr(deep));
+      context.globalCompositeOperation = 'source-over';
+      context.fillStyle = sea;
+      context.fillRect(0, horizonY, width, depthBelow);
+
+      /*
+       * The glitter path — the broken column of light under the sun.
+       *
+       * This is the part that reads as water rather than as a dark band, and it
+       * is not a reflection in the mirror sense: each wavelet is a tilted facet,
+       * so what you get is thousands of separate images of the sun, widening as
+       * they recede because the facets nearer you are seen at a steeper angle.
+       * Hence the taper — narrow at the horizon, spreading toward the viewer —
+       * which is the opposite of a flat mirror and the reason a painted
+       * reflection that does not taper looks wrong.
+       */
+      const glitterX = sunGlowX(when, cam.azimuth);
+      const lit = Math.max(0, 1 - Math.abs(sun.altitude) / 16) * exposure;
+      if (lit > 0.02 && glitterX > -width && glitterX < width * 2) {
+        const [r, g, b] = [255, 176, 104];
+        const ROWS = 26;
+        for (let i = 0; i < ROWS; i++) {
+          const t = i / (ROWS - 1);
+          const y = horizonY + t * depthBelow;
+          // Widens toward the viewer, and each band breaks up on its own
+          // rhythm so the column shivers instead of pulsing as one piece.
+          const spread = (0.04 + t * 1.0) * depthBelow * 1.5;
+          const shimmer = 0.55 + 0.45 * Math.sin(seconds * 1.7 + i * 1.31);
+          const halfWidth = spread * shimmer;
+          const alpha = lit * (1 - t) * (1 - t) * 0.5;
+          if (alpha < 0.004 || halfWidth < 1) continue;
+
+          const band = context.createLinearGradient(
+            glitterX - halfWidth, 0, glitterX + halfWidth, 0
+          );
+          band.addColorStop(0, `rgba(${r},${g},${b},0)`);
+          band.addColorStop(0.5, `rgba(${r},${g},${b},${alpha})`);
+          band.addColorStop(1, `rgba(${r},${g},${b},0)`);
+          context.fillStyle = band;
+          context.fillRect(
+            glitterX - halfWidth, y, halfWidth * 2,
+            Math.max(1.5, depthBelow / ROWS * 0.85)
+          );
+        }
+      }
+
+      // The join itself, a shade brighter than either side. Water meets sky at
+      // a hard line — it is the one edge in a landscape that has no softness —
+      // and without it the two gradients blend and the whole thing turns to haze.
+      const rim = context.createLinearGradient(0, horizonY - 1.5, 0, horizonY + 1.5);
+      const rimColour = mixArr(horizonColour, [255, 210, 170], 0.35 * exposure);
+      rim.addColorStop(0, `rgba(${rimColour.map(Math.round).join(',')},0)`);
+      rim.addColorStop(0.5, `rgba(${rimColour.map(Math.round).join(',')},${0.5 * exposure})`);
+      rim.addColorStop(1, `rgba(${rimColour.map(Math.round).join(',')},0)`);
+      context.fillStyle = rim;
+      context.fillRect(0, horizonY - 1.5, width, 3);
+    };
+
     const fillBackground = (depth = 0, dawn = null, when = null, cam = null) => {
       const view = cam || cameraBasis(horizonTilt(depth), viewAzimuth(depth));
       const facing = view.azimuth;
@@ -1506,7 +1637,10 @@ const AnimatedBackground = ({ children }) => {
         0.8,
         rgbStr(mixArr(mixArr(nightTop, nightBottom, 0.8), DAWN_MID, glow * 0.28 * (0.55 + reach * 0.45)))
       );
-      gradient.addColorStop(1, rgbStr(mixArr(nightBottom, DAWN_HORIZON, glow * reach)));
+      // Kept for the water, which is a mirror and therefore has to take its
+      // colour from whatever the sky above it happens to be doing.
+      horizonColour = mixArr(nightBottom, DAWN_HORIZON, glow * reach);
+      gradient.addColorStop(1, rgbStr(horizonColour));
 
       context.fillStyle = gradient;
       context.fillRect(0, 0, width, height);
@@ -1719,6 +1853,9 @@ const AnimatedBackground = ({ children }) => {
       // underside means. They sit above it in the sky rather than across it, so
       // the disc stays clear and the banks take the light off it.
       drawClouds(when, cam, dawn);
+      // Last, because water is in front of all of it — it has to cover the
+      // stars below the horizon and the lower half of the sun sitting on it.
+      drawWater(when, cam, dawn, seconds);
 
       context.globalCompositeOperation = 'source-over';
 
