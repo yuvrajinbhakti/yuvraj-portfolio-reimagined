@@ -110,12 +110,26 @@ const AnimatedBackground = ({ children }) => {
       sunriseAt = found ? found.getTime() : Date.now() + 12 * 3600 * 1000;
       if (found) sunriseAzimuth = sunPosition(found, OBSERVER).azimuth;
 
-      // And where that night started. Falls back to six hours before sunrise in
-      // the summer months at high latitudes where it never gets fully dark —
-      // not a case Chandigarh reaches, but the function can return null and a
-      // NaN span behind every page would be a poor way to discover it.
-      const dark = found ? nightfallBefore(found, OBSERVER) : null;
-      nightAt = dark ? dark.getTime() : sunriseAt - 6 * 3600 * 1000;
+      /*
+       * And where that night started: the sunset before it, not the nightfall.
+       *
+       * It began at the end of astronomical twilight, on the reasoning that the
+       * darkest possible sky was the right thing to open on. Two things were
+       * wrong with it. The sky then had nowhere to go but down for the first
+       * half of the page — the sun was already as far below the horizon as it
+       * was going to get, so nothing changed until the dawn, and the sunrise
+       * arrived as an event tacked onto the last stretch rather than the end of
+       * anything. And it cut the moon out: a young crescent is a dusk object,
+       * it follows the sun down, and tonight it set at 19:13 against a night
+       * that began at 19:54. Near new moon there is no moon in the night at all.
+       *
+       * From sunset the page has an actual shape — dusk burning down through
+       * the hero, the dark hours in the middle, dawn coming up to meet it — and
+       * the moon is where it really is, which near new moon is low in the west
+       * at the top of the page and gone by the time you have scrolled past it.
+       */
+      const dark = found ? nightfallBefore(found, OBSERVER, 0) : null;
+      nightAt = dark ? dark.getTime() : sunriseAt - 11 * 3600 * 1000;
     };
     refreshSunrise();
 
@@ -165,10 +179,20 @@ const AnimatedBackground = ({ children }) => {
       const sunInFrame = Math.max(0, altitude) / 90;
       return sky + sunInFrame * 0.6;
     };
-    // Tuned so the two twilights take roughly seventy per cent of the scroll
-    // between them. At zero the flat stretches would collapse to nothing and the
-    // sky would jump; much higher and it degenerates back into linear.
-    const FLAT_FLOOR = 0.003;
+    /*
+     * What an hour of nothing-happening is worth, in scroll.
+     *
+     * At zero the dark hours would collapse to a seam and the sky would jump
+     * across it; at the old 0.003 they took nearly half the page. Half the page
+     * of a sky that does not change is how the sunrise ended up feeling like
+     * something bolted onto the end — there was no build, just a long hold and
+     * then an event.
+     *
+     * At 0.0015 the two twilights take about eighty per cent of the scroll
+     * between them and the dark hours take the rest, which is the right way
+     * round: the page spends its length on the part that moves.
+     */
+    const FLAT_FLOOR = 0.0015;
 
     let depthTable = null;
     let tableBuiltAt = 0;
@@ -501,6 +525,12 @@ const AnimatedBackground = ({ children }) => {
       const ry = -fx / horiz;
       return {
         scale,
+        // Where it is pointing, kept on the object so the background can ask.
+        // The gradient needs the altitude to know how far the bottom of the
+        // frame is from the horizon, and the glow needs the azimuth to know
+        // which side the sun is on.
+        altitude, azimuth,
+        edge,
         fx, fy, fz,
         rx, ry,
         ux: ry * fz,
@@ -882,7 +912,24 @@ const AnimatedBackground = ({ children }) => {
     const twilightGlow = (when) => {
       const altitude = sunPosition(new Date(when), OBSERVER).altitude;
       if (altitude > 0.25) return 0;
-      return Math.min(1, Math.max(0, (altitude + 18) / 18));
+      const t = Math.min(1, Math.max(0, (altitude + 18) / 18));
+      /*
+       * Curved, not linear, and the curve is the difference between a sky that
+       * is changing and a sky that appears to change only at the end.
+       *
+       * Linearly, the sun at -12° — a sky a person would describe as visibly
+       * blue, an hour of real dusk — scored 0.33 and rendered as almost nothing.
+       * Everything worth seeing was crammed into the last few degrees above the
+       * horizon, so however the scroll was distributed the colour still arrived
+       * all at once. The exponent pulls the middle of the range up: -12° now
+       * reads 0.44, -9° reads 0.60, and the arc has a middle instead of a wall.
+       *
+       * It also roughly matches how the sky actually behaves. Twilight
+       * brightness against solar altitude is not a straight line — it falls off
+       * steeply just under the horizon and then flattens, which is why the light
+       * seems to go out of an evening much faster than the last degrees suggest.
+       */
+      return Math.pow(t, 0.72);
     };
 
     /*
@@ -1111,7 +1158,28 @@ const AnimatedBackground = ({ children }) => {
       context.fill();
     };
 
-    const fillBackground = (depth = 0, dawn = null, when = null, facing = VIEW_AZIMUTH) => {
+    /*
+     * How much of the horizon's own glow actually reaches the bottom of the frame.
+     *
+     * The gradient's last stop is the bottom edge of the viewport, and the view
+     * is aimed above the horizon for most of the page — at the top it is six
+     * degrees clear of it. The brightest part of a twilight sky is the two or
+     * three degrees immediately over the horizon, and at the top of the page
+     * that band is simply not in shot. Painting it there anyway was both wrong
+     * and the brightest thing behind the hero's dimmest line of type.
+     *
+     * So the warmth arrives as the view comes down to meet it: about a third of
+     * it while the frame is still well up, all of it once the horizon is inside
+     * the frame, which is the same last stretch where the sun appears.
+     */
+    const horizonReach = (cam) => {
+      const bottomAltitude = cam.altitude - cam.edge;
+      return Math.min(1, Math.max(0.34, 1 - bottomAltitude / 9));
+    };
+
+    const fillBackground = (depth = 0, dawn = null, when = null, cam = null) => {
+      const view = cam || cameraBasis(horizonTilt(depth), viewAzimuth(depth));
+      const facing = view.azimuth;
       const moment = when === null ? timeAtDepth(depth) : when;
       const glow = dawn === null ? twilightGlow(moment) : dawn;
 
@@ -1130,12 +1198,13 @@ const AnimatedBackground = ({ children }) => {
       // viewport rather than a sunrise — a sky that had been tinted, not lit.
       // Keeping the top nearly as dark as it was at midnight is what gives the
       // horizon something to be brighter *than*.
+      const reach = horizonReach(view);
       gradient.addColorStop(0, rgbStr(mixArr(nightTop, DAWN_TOP, glow * 0.5)));
       gradient.addColorStop(
         0.74,
-        rgbStr(mixArr(mixArr(nightTop, nightBottom, 0.74), DAWN_MID, glow * 0.62))
+        rgbStr(mixArr(mixArr(nightTop, nightBottom, 0.74), DAWN_MID, glow * 0.62 * (0.55 + reach * 0.45)))
       );
-      gradient.addColorStop(1, rgbStr(mixArr(nightBottom, DAWN_HORIZON, glow)));
+      gradient.addColorStop(1, rgbStr(mixArr(nightBottom, DAWN_HORIZON, glow * reach)));
 
       context.fillStyle = gradient;
       context.fillRect(0, 0, width, height);
@@ -1190,7 +1259,7 @@ const AnimatedBackground = ({ children }) => {
       // sunrise, as Venus and Sirius genuinely are.
       const starVisibility = Math.max(0.05, 1 - Math.pow(dawn, 2.2) * 0.98);
 
-      fillBackground(depth, dawn, when, facing);
+      fillBackground(depth, dawn, when, cam);
       
       const scrollYForSky = window.scrollY;
       

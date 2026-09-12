@@ -104,29 +104,29 @@ export function twilightBand(altitude) {
  * @returns {Date | null}
  */
 /**
- * The moment night properly began, working backwards from a sunrise.
+ * The evening before a sunrise, at whichever depth of dusk you ask for.
  *
- * The page shows one night, and a night has to start somewhere. This is the end
- * of evening astronomical twilight — the sun eighteen degrees down, the point
- * where the last of the sun's light is out of the sky and the faintest stars
- * come up. It is the darkest the sky gets on the way in, which is exactly the
- * sky the top of the page wants.
+ * The page shows one night, and a night has to start somewhere. `altitudeDeg`
+ * picks where: 0 is sunset itself, -6 the end of civil twilight, -18 the end of
+ * astronomical twilight, when the last of the sun is out of the sky.
  *
  * Scanning backwards from the sunrise rather than forwards from now, because
- * "the night that ends at that sunrise" is well defined at any hour of the day,
- * and "the next nightfall" is not — ask at one in the morning and the honest
+ * "the evening that leads to that sunrise" is well defined at any hour of the
+ * day and "the next sunset" is not — ask at one in the morning and the honest
  * answer is tonight, which is the wrong night.
  *
  * Going back from sunrise the sun sinks, bottoms out around midnight and climbs
- * again toward dusk, so the first crossing back above -18° is the one wanted.
+ * again toward dusk, so the first crossing back above the threshold is the one
+ * wanted.
  *
  * @param {Date} sunrise
  * @param {{ latitude: number, longitude: number }} observer
+ * @param {number} [altitudeDeg=-18] the sun's altitude that marks the start
  * @param {number} [withinHours=18] how far back to give up
- * @returns {Date | null} null through the summer months where it never gets
- *   fully dark, which at high latitudes is most of them.
+ * @returns {Date | null} null when the sun never gets that low — a real case in
+ *   summer at high latitudes, where astronomical night simply does not happen.
  */
-export function nightfallBefore(sunrise, observer, withinHours = 18) {
+export function nightfallBefore(sunrise, observer, altitudeDeg = -18, withinHours = 18) {
   const STEP_MS = 10 * 60 * 1000;
   const limit = sunrise.getTime() - withinHours * 3600 * 1000;
 
@@ -136,12 +136,12 @@ export function nightfallBefore(sunrise, observer, withinHours = 18) {
   for (let t = prevTime - STEP_MS; t >= limit; t -= STEP_MS) {
     const alt = sunPosition(new Date(t), observer).altitude;
 
-    if (prevAlt <= -18 && alt > -18) {
-      let lo = t;          // earlier, brighter than -18
-      let hi = prevTime;   // later, darker than -18
+    if (prevAlt <= altitudeDeg && alt > altitudeDeg) {
+      let lo = t;          // earlier, brighter than the threshold
+      let hi = prevTime;   // later, darker than it
       while (hi - lo > 1000) {
         const mid = (lo + hi) / 2;
-        if (sunPosition(new Date(mid), observer).altitude > -18) lo = mid;
+        if (sunPosition(new Date(mid), observer).altitude > altitudeDeg) lo = mid;
         else hi = mid;
       }
       return new Date(Math.round(hi));
