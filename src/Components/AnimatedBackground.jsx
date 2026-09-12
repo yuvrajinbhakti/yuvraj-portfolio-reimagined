@@ -16,7 +16,7 @@ import {
   alphaForT,
 } from '../utils/sky';
 import { OBSERVER } from '../constants/observer';
-import { sunPosition, nextSunrise } from '../utils/sun';
+import { sunPosition, nextSunrise, nightfallBefore } from '../utils/sun';
 import { moonHorizontal, moonPhase } from '../utils/moon';
 import { setSkyTime, resetSkyTime } from '../utils/skyClock';
 import PropTypes from 'prop-types';
@@ -73,12 +73,30 @@ const AnimatedBackground = ({ children }) => {
      * because the sun is genuinely on its way up. Scroll back and it runs
      * backwards.
      *
-     * The span is therefore different depending on when somebody visits, which
-     * is the honest behaviour rather than a bug: at 5am there is very little
-     * night left, and at 10am there is nearly a full day of it coming.
+     * ## One night, not "from here"
+     *
+     * The span used to start at the visitor's own clock and run to the next
+     * sunrise, on the reasoning that the top of the page should be the sky
+     * actually overhead. It read well at two in the morning and badly at two in
+     * the afternoon, which is when most people look at it: the page opened in
+     * broad daylight with the sun drawn straight through the headline, and the
+     * dark star field this whole background exists for did not appear until you
+     * had already scrolled past the hero.
+     *
+     * So the page shows a night — the one that ends at the next sunrise. Depth 0
+     * is the end of evening twilight, which is the darkest the sky gets, and
+     * depth 1 is the sun on the horizon. Everyone arrives at the same opening
+     * and everyone ends at the same sunrise, whatever the hour they turned up.
+     *
+     * What that costs is the claim that the sky is the one currently overhead,
+     * and the readout is changed to match rather than left saying something that
+     * stopped being true. It still names a real hour of a real night at a real
+     * place; it no longer implies that hour is this one.
      */
     let skyNow = Date.now();
     let sunriseAt = null;
+    /** Where the night begins. See refreshSunrise. */
+    let nightAt = null;
     // Where on the horizon it will come up. Not a constant: due east only at the
     // equinoxes, and swinging about 28 degrees either side of it across the year
     // at this latitude. The view turns to face this, so it has to be the real one.
@@ -91,6 +109,13 @@ const AnimatedBackground = ({ children }) => {
       // return it and a crash behind every page would be a poor way to find out.
       sunriseAt = found ? found.getTime() : Date.now() + 12 * 3600 * 1000;
       if (found) sunriseAzimuth = sunPosition(found, OBSERVER).azimuth;
+
+      // And where that night started. Falls back to six hours before sunrise in
+      // the summer months at high latitudes where it never gets fully dark —
+      // not a case Chandigarh reaches, but the function can return null and a
+      // NaN span behind every page would be a poor way to discover it.
+      const dark = found ? nightfallBefore(found, OBSERVER) : null;
+      nightAt = dark ? dark.getTime() : sunriseAt - 6 * 3600 * 1000;
     };
     refreshSunrise();
 
@@ -149,7 +174,7 @@ const AnimatedBackground = ({ children }) => {
     let tableBuiltAt = 0;
 
     const buildDepthTable = () => {
-      const start = Date.now();
+      const start = nightAt;
       const span = Math.max(0, sunriseAt - start);
 
       const weights = new Float64Array(SAMPLES);
@@ -187,8 +212,9 @@ const AnimatedBackground = ({ children }) => {
     const timeAtDepth = (depth) => {
       // Somebody who has asked their system for less motion has not asked for a
       // sky that runs at a thousand times real speed under their thumb. They get
-      // the true current sky, which is the thing the readout claims anyway.
-      if (reduce) return Date.now();
+      // the top of the page, held still: the same dark sky everyone else opens
+      // on, and no sun swinging through the headline at two in the afternoon.
+      if (reduce) return nightAt;
 
       // Rebuilt rather than built once, because depth 0 has to stay the real
       // present on a page somebody leaves open. A minute of drift is invisible
@@ -1099,10 +1125,15 @@ const AnimatedBackground = ({ children }) => {
       // Overhead barely moves; the horizon carries the change. That difference
       // is the whole effect — a sky that brightened uniformly would read as
       // someone turning up a dimmer, not as the sun arriving.
-      gradient.addColorStop(0, rgbStr(mixArr(nightTop, DAWN_TOP, glow * 0.85)));
+      // Weighted hard toward the bottom. Spread evenly the warmth had nowhere to
+      // be the brightest thing, and the result was a brown wash over the whole
+      // viewport rather than a sunrise — a sky that had been tinted, not lit.
+      // Keeping the top nearly as dark as it was at midnight is what gives the
+      // horizon something to be brighter *than*.
+      gradient.addColorStop(0, rgbStr(mixArr(nightTop, DAWN_TOP, glow * 0.5)));
       gradient.addColorStop(
-        0.62,
-        rgbStr(mixArr(mixArr(nightTop, nightBottom, 0.62), DAWN_MID, glow * 0.8))
+        0.74,
+        rgbStr(mixArr(mixArr(nightTop, nightBottom, 0.74), DAWN_MID, glow * 0.62))
       );
       gradient.addColorStop(1, rgbStr(mixArr(nightBottom, DAWN_HORIZON, glow)));
 

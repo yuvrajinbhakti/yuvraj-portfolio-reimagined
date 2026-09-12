@@ -83,8 +83,14 @@ const SkyReadout = () => {
         <span className="tabular-nums">{state.time}</span>
         <span className="text-white/25"> IST</span>
         {/* The one word that keeps this honest. Without it the line reads as a
-            report of the time, and while you are scrolling it is not one. */}
-        {state.shifted && <span className="text-white/25"> · scrolled</span>}
+            report of the current time, and it is not one: the page shows the
+            night that ends at the next sunrise, so the hour named here is an
+            hour of that night rather than this one. It said "scrolled" while
+            depth 0 meant now and scrolling was the only thing that could move
+            it — that stopped being true when the top of the page became
+            nightfall, and a label that survives the thing it described is just
+            a wrong label. */}
+        {state.shifted && <span className="text-white/25"> · tonight</span>}
       </p>
       {/* Nothing bright enough is up — which happens, and saying so is better
           than promoting a star nobody has heard of to keep the line full. The
@@ -94,9 +100,7 @@ const SkyReadout = () => {
       <p className="text-white/30">
         {state.star
           ? `${state.star.name}, ${state.star.altitude}° above the ${state.star.direction}`
-          : state.shifted
-            ? 'the sky above, at that hour'
-            : 'the sky above, as it is right now'}
+          : 'the sky above, at that hour'}
       </p>
       {/* Only where there is a pointer to hover with, and hidden from screen
           readers everywhere: an instruction to point at something is not an
