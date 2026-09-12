@@ -142,9 +142,39 @@ const Footer = () => {
           flat background that glass read as a panel; against a real star field
           it read as frosted glass taped over the window.
           A gradient instead — transparent at the top, deepening downward —
-          which lets the field carry through and simply thickens under the type. */}
+          which lets the field carry through and simply thickens under the type.
+
+          Both the colour and the strength changed, because the thing behind it
+          changed. The footer is at the bottom of the page, so it is only ever on
+          screen at full scroll depth — and full scroll depth is sunrise. This
+          scrim is therefore always sitting on a dawn sky, and it used to be a
+          cold navy at 90%, which composited the dawn to rgb(19,20,32): still
+          blue-dominant, thirteen points of red *below* its own blue. The sunrise
+          was being painted and then covered over at exactly the point it lands.
+
+          A warm near-black instead, at 70%. Darkening the type's background is
+          the job; doing it in navy also cancelled the colour, and there was no
+          reason the two had to come together. Measured against the sunrise sky,
+          the composite goes from thirteen points cool to twenty-six warm.
+
+          70% is where the contrast budget puts it, not taste. The white/50 body
+          copy holds about 4.8:1 against a 4.5:1 AA floor; dropping to 60% buys
+          four more points of warmth and leaves 4.52:1, which is a margin of
+          nothing. Full-white type sits at 14:1. The fainter decorative type is
+          under AA either way and moves by a third of a point.
+
+          It also stops thickening and thins out again over the last stretch,
+          which is the part that stops looking like a scrim and starts looking
+          like a horizon. The sun is drawn where the sun actually is at the
+          moment the bottom of the page represents, and at full depth that is
+          sitting on the horizon — below the last line of type, which measures
+          out at 88% of this element's height. A scrim that went on deepening to
+          the bottom edge was covering only the sunrise by then, and covering it
+          at seventy per cent: the disc composited to rgb(95,75,45), a khaki
+          smudge. Everything above 86% still gets the full weight, because that
+          is where the words are. */}
       <div
-        className="pointer-events-none absolute inset-0 -top-24 bg-gradient-to-b from-transparent via-[#070c1c]/60 to-[#070c1c]/90"
+        className="pointer-events-none absolute inset-0 -top-24 bg-[linear-gradient(to_bottom,transparent_0%,rgba(26,14,12,0.45)_55%,rgba(26,14,12,0.7)_89%,rgba(26,14,12,0.18)_94%,rgba(26,14,12,0.15)_100%)]"
         aria-hidden="true"
       />
       <div className="relative">

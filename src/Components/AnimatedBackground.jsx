@@ -17,6 +17,7 @@ import {
 } from '../utils/sky';
 import { OBSERVER } from '../constants/observer';
 import { sunPosition, nextSunrise } from '../utils/sun';
+import { moonHorizontal, moonPhase } from '../utils/moon';
 import { setSkyTime, resetSkyTime } from '../utils/skyClock';
 import PropTypes from 'prop-types';
 import { useReducedMotion } from 'framer-motion';
@@ -78,6 +79,10 @@ const AnimatedBackground = ({ children }) => {
      */
     let skyNow = Date.now();
     let sunriseAt = null;
+    // Where on the horizon it will come up. Not a constant: due east only at the
+    // equinoxes, and swinging about 28 degrees either side of it across the year
+    // at this latitude. The view turns to face this, so it has to be the real one.
+    let sunriseAzimuth = 90;
 
     const refreshSunrise = () => {
       const found = nextSunrise(new Date(), OBSERVER);
@@ -85,8 +90,98 @@ const AnimatedBackground = ({ children }) => {
       // Not a case Chandigarh can reach, handled because the function can
       // return it and a crash behind every page would be a poor way to find out.
       sunriseAt = found ? found.getTime() : Date.now() + 12 * 3600 * 1000;
+      if (found) sunriseAzimuth = sunPosition(found, OBSERVER).azimuth;
     };
     refreshSunrise();
+
+    /**
+     * Scroll depth to time — weighted, not linear.
+     *
+     * Linear was the obvious mapping and it wasted the page. A night is mostly
+     * nothing happening: measured over a typical span, the sun spends about half
+     * of it below eighteen degrees, where the sky is as dark as it is going to
+     * get and one hour is indistinguishable from the next. Mapping that straight
+     * onto scroll spent half the page on a sky that never changed, and then had
+     * to fit the whole of dawn into the last three per cent — the part somebody
+     * actually scrolled down to see went past in a flick of the wheel.
+     *
+     * So the pixels follow the change rather than the clock. Each slice of the
+     * span is weighted by how much the sky actually moves across it, plus a floor
+     * so the dead middle of the night still costs some scrolling instead of
+     * snapping through. Inverting that gives a depth that is uniform in *change*:
+     * twilight at both ends opens out, the flat stretches compress.
+     *
+     * Nothing false comes of it, which is the reason it is allowed. The readout
+     * reads the clock this returns, so it still names the true hour at every
+     * depth — it is the scrollbar that stops being a linear clock, and the
+     * scrollbar never claimed to be one.
+     */
+    const SAMPLES = 240;
+    /*
+     * How much there is to look at, at a given moment. The weighting above
+     * spends scroll in proportion to how fast this moves.
+     *
+     * Two terms, because two different things change. The sky's own brightness
+     * is the big one, and it is finished either side of a band: below about -18°
+     * the night is as dark as it gets, above about +6° the day is as bright as
+     * it gets. That term alone was the first version, and it gave the daytime
+     * ten per cent of the page — correct by its own logic, since the sky really
+     * does stop changing once the sun is up, and wrong in effect, because the
+     * sun is now drawn and it crossed the whole frame and set inside half a
+     * screen of scrolling.
+     *
+     * So the second term is the sun's own height. While it is up it is an object
+     * in the picture and its movement is worth pixels even though the background
+     * behind it has stopped changing.
+     */
+    const lightness = (t) => {
+      const altitude = sunPosition(new Date(t), OBSERVER).altitude;
+      const sky = Math.min(1, Math.max(0, (altitude + 18) / 24));
+      const sunInFrame = Math.max(0, altitude) / 90;
+      return sky + sunInFrame * 0.6;
+    };
+    // Tuned so the two twilights take roughly seventy per cent of the scroll
+    // between them. At zero the flat stretches would collapse to nothing and the
+    // sky would jump; much higher and it degenerates back into linear.
+    const FLAT_FLOOR = 0.003;
+
+    let depthTable = null;
+    let tableBuiltAt = 0;
+
+    const buildDepthTable = () => {
+      const start = Date.now();
+      const span = Math.max(0, sunriseAt - start);
+
+      const weights = new Float64Array(SAMPLES);
+      let total = 0;
+      let prev = lightness(start);
+      for (let i = 0; i < SAMPLES; i++) {
+        const here = lightness(start + ((i + 1) / SAMPLES) * span);
+        const w = Math.abs(here - prev) + FLAT_FLOOR;
+        weights[i] = w;
+        total += w;
+        prev = here;
+      }
+
+      // Invert the cumulative distribution: walk it in equal steps of weight and
+      // record the time each step lands on.
+      const table = new Float64Array(SAMPLES + 1);
+      table[0] = start;
+      let acc = 0;
+      let j = 0;
+      for (let k = 1; k <= SAMPLES; k++) {
+        const target = (k / SAMPLES) * total;
+        while (j < SAMPLES - 1 && acc + weights[j] < target) {
+          acc += weights[j];
+          j++;
+        }
+        const within = weights[j] > 0 ? Math.min(1, (target - acc) / weights[j]) : 0;
+        table[k] = start + ((j + within) / SAMPLES) * span;
+      }
+
+      depthTable = table;
+      tableBuiltAt = start;
+    };
 
     /** The moment this scroll depth corresponds to. */
     const timeAtDepth = (depth) => {
@@ -94,8 +189,18 @@ const AnimatedBackground = ({ children }) => {
       // sky that runs at a thousand times real speed under their thumb. They get
       // the true current sky, which is the thing the readout claims anyway.
       if (reduce) return Date.now();
-      const span = Math.max(0, sunriseAt - Date.now());
-      return Date.now() + depth * span;
+
+      // Rebuilt rather than built once, because depth 0 has to stay the real
+      // present on a page somebody leaves open. A minute of drift is invisible
+      // at this scale, and 240 solar positions is well under a millisecond.
+      if (!depthTable || Date.now() - tableBuiltAt > 60_000) {
+        refreshSunrise();
+        buildDepthTable();
+      }
+
+      const x = Math.min(1, Math.max(0, depth)) * SAMPLES;
+      const i = Math.min(SAMPLES - 1, Math.floor(x));
+      return depthTable[i] + (depthTable[i + 1] - depthTable[i]) * (x - i);
     };
 
     const SKY_TOP = [[2, 6, 23], [15, 23, 42]];   // cold near-black blue
@@ -107,8 +212,13 @@ const AnimatedBackground = ({ children }) => {
     const SKY_DEEP = [[3, 7, 28], [16, 30, 72]];
 
     const lerp = (a, b, t) => a + (b - a) * t;
-    const mixRGB = (c1, c2, t) =>
-      `rgb(${Math.round(lerp(c1[0], c2[0], t))}, ${Math.round(lerp(c1[1], c2[1], t))}, ${Math.round(lerp(c1[2], c2[2], t))})`;
+    // Two forms because the twilight sky is mixed twice — night toward dawn, and
+    // then the result toward the gradient stop above it — and rounding to a CSS
+    // string in between loses the second mix's precision at these low values.
+    const mixArr = (c1, c2, t) => [
+      lerp(c1[0], c2[0], t), lerp(c1[1], c2[1], t), lerp(c1[2], c2[2], t),
+    ];
+    const rgbStr = (c) => `rgb(${Math.round(c[0])}, ${Math.round(c[1])}, ${Math.round(c[2])})`;
 
     const getDepth = () => {
       const max = document.documentElement.scrollHeight - window.innerHeight;
@@ -248,7 +358,72 @@ const AnimatedBackground = ({ children }) => {
      * sky than a laptop does, so this is the one number that cannot be a
      * constant.
      */
-    const cameraBasis = () => {
+    /*
+     * How far the view has dropped toward the horizon, in degrees.
+     *
+     * The camera is aimed to keep the horizon just under the bottom edge, which
+     * is right for a page about stars and wrong for the end of this one. The sun
+     * comes up at depth 1 by construction — that is what the span is — but "up"
+     * means an altitude of zero, and zero was six degrees below the frame. The
+     * sunrise the whole scroll is built toward was happening just off-screen.
+     *
+     * So the last stretch looks down. Nothing before 0.6 moves at all, which
+     * keeps the hero and the whole night exactly as they were; from there it
+     * eases in, and by the bottom of the page the horizon is inside the frame
+     * with the sun sitting on it.
+     *
+     * Squared rather than linear so the movement starts imperceptibly. A camera
+     * that begins tilting the instant you cross a threshold reads as a camera;
+     * one that drifts reads as looking down.
+     *
+     * Eleven degrees rather than fifteen, and the four degrees are a legibility
+     * decision rather than a compositional one. Tilting further does not push
+     * the sun down the frame, it pulls it *up* — a view aimed lower puts the
+     * horizon nearer the middle. At fifteen the disc came to rest across the
+     * last line of type, and the email address underneath it measured 3.5:1
+     * against a 4.5:1 floor. At eleven the sun sits below the text with the
+     * horizon still comfortably inside the frame.
+     */
+    const HORIZON_DROP = 11;
+    const horizonTilt = (depth) => {
+      if (reduce) return 0;
+      const t = Math.max(0, Math.min(1, (depth - 0.6) / 0.4));
+      return t * t * HORIZON_DROP;
+    };
+
+    /*
+     * Which way the view faces, in degrees of azimuth.
+     *
+     * Due south for the whole of the page that is about stars, because from
+     * thirty degrees north that is where the sky is worth looking at. Then it
+     * turns, because the sun does not come up in the south.
+     *
+     * Dropping the view to the horizon was half the problem and the smaller
+     * half. The sun rises in the east, the frame is about seventy-five degrees
+     * wide, and south to east is ninety — so the sunrise the entire scroll is
+     * built toward was not merely below the frame, it was a quarter turn outside
+     * it. No amount of tilting was going to find it.
+     *
+     * So the last stretch turns to face where the sun will actually come up.
+     * That bearing is computed from the sunrise this page is counting down to,
+     * not assumed to be east: it is only due east at the equinoxes, and wanders
+     * about twenty-eight degrees either side across the year.
+     *
+     * Smoothstep rather than the squared curve the tilt uses — this one has to
+     * arrive as well as leave, and a pan that stops abruptly at the bottom of
+     * the page reads as a scroll that ran out rather than a view that settled.
+     */
+    const viewAzimuth = (depth) => {
+      if (reduce) return VIEW_AZIMUTH;
+      const t = Math.max(0, Math.min(1, (depth - 0.55) / 0.45));
+      const eased = t * t * (3 - 2 * t);
+      // Signed shortest way round, so it turns east through south-east rather
+      // than the long way round through west.
+      const delta = ((sunriseAzimuth - VIEW_AZIMUTH + 540) % 360) - 180;
+      return VIEW_AZIMUTH + delta * eased;
+    };
+
+    const cameraBasis = (tiltDown = 0, azimuth = VIEW_AZIMUTH) => {
       // Scale is degrees-to-pixels, and it is deliberately *not* proportional
       // to the viewport. It used to be `max(width, height) * 0.34`, which holds
       // the field of view constant and therefore magnifies the same sky onto a
@@ -268,24 +443,43 @@ const AnimatedBackground = ({ children }) => {
       // In a stereographic projection a star theta from centre lands
       // 2*tan(theta/2) away, so this inverts to the angle at the frame edge.
       const edge = (2 * Math.atan(height / 2 / (2 * scale))) / DEG;
-      const altitude = Math.min(74, edge + 6);
+      const altitude = Math.min(74, edge + 6) - tiltDown;
 
       const fAlt = altitude * DEG;
-      const fAz = VIEW_AZIMUTH * DEG;
+      const fAz = azimuth * DEG;
       const fx = Math.cos(fAlt) * Math.sin(fAz);
       const fy = Math.cos(fAlt) * Math.cos(fAz);
       const fz = Math.sin(fAlt);
-      // right = forward x world-up, normalised; up = forward x right.
+      /*
+       * right = forward x world-up, normalised; up = right x forward.
+       *
+       * The signs matter and were wrong. World +x is east and +y is north, so
+       * the cross product of a southward forward with world-up is (fy, -fx, 0),
+       * which points west — and west is indeed what is on your right when you
+       * are facing south. The old pair negated both this and the up vector, so
+       * the two cancelled and the view stayed upright while being flipped
+       * east-for-west.
+       *
+       * Nothing about that looks broken until you check it. A mirrored sky is
+       * still a plausible sky: the stars are in plausible places, they wheel at
+       * the right rate, they rise and set on schedule. What it costs is the two
+       * things this background exists for. The constellations were drawn as
+       * mirror images of themselves, so the one moment the whole feature is
+       * built around — somebody recognising Orion — was the moment it would look
+       * subtly wrong. And the readout names a compass direction, so "Arcturus,
+       * 63 degrees above the east" sat over an Arcturus drawn on the western
+       * side of the frame. The caption and the picture disagreed.
+       */
       const horiz = Math.hypot(fx, fy) || 1;
-      const rx = -fy / horiz;
-      const ry = fx / horiz;
+      const rx = fy / horiz;
+      const ry = -fx / horiz;
       return {
         scale,
         fx, fy, fz,
         rx, ry,
-        ux: -fz * ry,
-        uy: fz * rx,
-        uz: fx * ry - fy * rx,
+        ux: ry * fz,
+        uy: -rx * fz,
+        uz: rx * fy - ry * fx,
       };
     };
 
@@ -416,10 +610,11 @@ const AnimatedBackground = ({ children }) => {
      */
     let projected = [];
     let projectedAt = 0;
+    /** The bearing the cached projection was built for. See the re-projection test. */
+    let projectedFacing = VIEW_AZIMUTH;
 
-    const projectSky = (now) => {
+    const projectSky = (now, cam = cameraBasis()) => {
       const lst = localSiderealTime(new Date(now), OBSERVER.longitude);
-      const cam = cameraBasis();
       const out = [];
 
       for (let i = 0; i < STARS.length; i += STAR_STRIDE) {
@@ -473,9 +668,8 @@ const AnimatedBackground = ({ children }) => {
       projectedAt = now;
     };
 
-    const projectConstellations = () => {
+    const projectConstellations = (cam = cameraBasis()) => {
       const lst = localSiderealTime(new Date(projectedAt), OBSERVER.longitude);
-      const cam = cameraBasis();
 
       const segments = [];
       for (const line of CONSTELLATION_LINES) {
@@ -665,28 +859,273 @@ const AnimatedBackground = ({ children }) => {
       return Math.min(1, Math.max(0, (altitude + 18) / 18));
     };
 
-    // The warmth the eastern horizon takes on as the sun approaches it. Sampled
-    // from an actual civil-twilight sky rather than picked: a desaturated amber
-    // that reads as light rather than as a colour.
-    const DAWN_GLOW = [86, 62, 58];
+    /*
+     * Twilight, in three bands rather than one.
+     *
+     * A single warm stop at the bottom was the first attempt and it did not read
+     * as morning, for the reason a photograph of a sunrise is not one colour:
+     * the warmth is a band sitting *on* the horizon, there is a rose-violet above
+     * it, and the sky over your head is still deep blue and full of stars. Mixing
+     * the horizon amber into the bottom of a two-stop gradient produced a flat
+     * mauve wash — the amber and the indigo averaged into each other across the
+     * whole viewport and cancelled out.
+     *
+     * These three are sampled toward the sun through civil twilight, and the
+     * gradient keeps them apart: warm only where the sun is, cold overhead.
+     */
+    const DAWN_HORIZON = [132, 88, 70];  // the amber band on the horizon itself
+    const DAWN_MID = [72, 58, 88];       // rose-violet, the transition above it
+    const DAWN_TOP = [14, 24, 52];       // still night overhead, no longer black
 
-    const fillBackground = (depth = 0) => {
-      const dawn = twilightGlow(timeAtDepth(depth));
+    /*
+     * How bright the horizon is allowed to get.
+     *
+     * The canvas sits behind every paragraph on the site and the page is light
+     * text on near-black, so this is a contrast budget, not a taste decision.
+     * DAWN_HORIZON puts white text at about 6.9:1 — just inside WCAG AAA for
+     * body text, with AA at 4.5:1 well clear. The previous value was 12.7:1,
+     * which sounds like a virtue and was actually the bug: it left most of the
+     * budget unspent and bought a sunrise nobody could see.
+     */
+    /**
+     * Where the light is coming from, as a screen x.
+     *
+     * Twilight is not a uniform wash and the vertical gradient alone could never
+     * say so: dusk and dawn came out pixel-identical, because a gradient from
+     * dark to warm has no opinion about *which way* the sun is. It is the one
+     * cue that tells them apart without reading the clock — the sun sets in the
+     * west and rises in the east, and this camera faces due south, which puts
+     * west on the right of the frame and east on the left.
+     *
+     * The sun itself is never in shot. The view is tilted to keep the horizon
+     * just below the bottom edge, and through twilight the sun is below that
+     * again, so there is nothing to draw and no sun is drawn. What is drawn is
+     * where its light enters the frame from, which is a real direction.
+     *
+     * Past about 110 degrees off-axis the stereographic projection runs away
+     * toward infinity, so the angle is clamped before it is projected rather
+     * than the result afterwards — the glow then sits off the frame edge on the
+     * correct side instead of at an undefined coordinate.
+     */
+    const sunGlowX = (when, facing) => {
+      const { azimuth } = sunPosition(new Date(when), OBSERVER);
+
+      // Measured against where the view is actually pointing, not due south.
+      // Once the pan exists, a glow anchored to a fixed bearing slides the wrong
+      // way across the frame as the camera turns under it.
+      const off = ((azimuth - facing + 540) % 360) - 180;
+      const clamped = Math.max(-110, Math.min(110, off));
+      return width / 2 + 2 * Math.tan((clamped * DEG) / 2) * cameraBasis().scale;
+    };
+
+    /*
+     * The sun and the moon.
+     *
+     * Everything else in this sky is a fixed catalogue turned by the Earth. These
+     * two move against it, which is the entire reason they were worth adding:
+     * the star field says "a real sky", and a moon in the right phase climbing
+     * the right part of it says "and a real night", which is the thing scrolling
+     * was supposed to be about.
+     *
+     * They are in frame for the same reason the Milky Way is — the camera looks
+     * due south, and from thirty degrees north everything on the ecliptic crosses
+     * the southern sky. The sun rides through the upper half of the view around
+     * noon, sets off to the right, and is gone; the moon does its own version on
+     * its own schedule, which on most days is not the sun's.
+     *
+     * Size is the one thing here that is not true. Both are about half a degree
+     * across, which at this projection is four pixels — a dot indistinguishable
+     * from a mediocre star, and at four or five times that still only a bright
+     * speck. Nine times is where they stop being specks and start being objects:
+     * the moon is wide enough to read a phase off, and the sun is wide enough to
+     * sit on the horizon rather than hover above it.
+     *
+     * Which is a real exaggeration and worth being plain about. Every sky app
+     * does the same thing for the same reason — a true half-degree moon on a
+     * phone screen is a pixel and a half, and nobody would call that a moon. The
+     * licence is taken in the radius and nowhere else: where they sit, when they
+     * rise and set, how far away the moon is on the night you look, and which of
+     * its limbs is lit are all computed, and those are the parts somebody could
+     * check by stepping outside.
+     */
+    const BODY_EXAGGERATION = 9;
+
+    /** Screen position of an alt/az direction, or null if it is behind the view. */
+    const projectBody = (altitude, azimuth, cam) => {
+      const a = altitude * DEG;
+      const z = azimuth * DEG;
+      const sx = Math.cos(a) * Math.sin(z);
+      const sy = Math.cos(a) * Math.cos(z);
+      const sz = Math.sin(a);
+
+      const dot = sx * cam.fx + sy * cam.fy + sz * cam.fz;
+      if (dot < -0.2) return null;
+
+      const k = 2 / (1 + dot);
+      return {
+        x: width / 2 + k * (sx * cam.rx + sy * cam.ry) * cam.scale,
+        y: height / 2 - k * (sx * cam.ux + sy * cam.uy + sz * cam.uz) * cam.scale,
+      };
+    };
+
+    /** A soft halo. Both bodies have one; the sun's is enormous and the moon's isn't. */
+    const haloAt = (x, y, radius, color, strength) => {
+      const halo = context.createRadialGradient(x, y, 0, x, y, radius);
+      halo.addColorStop(0, `rgba(${color}, ${strength})`);
+      halo.addColorStop(0.35, `rgba(${color}, ${strength * 0.28})`);
+      halo.addColorStop(1, `rgba(${color}, 0)`);
+      context.fillStyle = halo;
+      context.beginPath();
+      context.arc(x, y, radius, 0, TAU);
+      context.fill();
+    };
+
+    /**
+     * The moon, lit the way it is actually lit.
+     *
+     * The terminator is an ellipse, not an arc — the shadow boundary is a circle
+     * on the sphere seen at an angle, so it projects to an ellipse whose width
+     * runs from the full radius at new and full down through zero at the
+     * quarters. Drawing it as a circular bite is the usual shortcut and it makes
+     * every phase except the quarters visibly wrong.
+     *
+     * Which limb is lit is the other half. In the northern hemisphere a waxing
+     * moon is lit on the right and a waning one on the left; a crescent facing
+     * the wrong way is the kind of mistake everyone notices and nobody can name.
+     */
+    const drawMoon = (when, cam, fade) => {
+      const date = new Date(when);
+      const { altitude, azimuth, distance } = moonHorizontal(date, OBSERVER);
+      if (altitude < -1) return;                       // under the horizon
+
+      const spot = projectBody(altitude, azimuth, cam);
+      if (!spot) return;
+
+      const { illuminated, waxing } = moonPhase(date);
+      // Angular radius from the actual distance, so perigee really is bigger.
+      const angular = Math.atan(1737.4 / distance);
+      const r = angular * cam.scale * BODY_EXAGGERATION;
+
+      // A thin crescent carries very little light and a full moon washes out the
+      // sky around it; the halo follows the lit fraction rather than being fixed.
+      const lit = 0.25 + illuminated * 0.75;
+      context.globalCompositeOperation = 'lighter';
+      haloAt(spot.x, spot.y, r * 3.5, '206, 214, 235', 0.11 * lit * fade);
+
+      // The disc occludes: a star behind the moon is behind the moon.
+      context.globalCompositeOperation = 'source-over';
+      context.globalAlpha = fade;
+      context.fillStyle = 'rgb(228, 231, 224)';
+      context.beginPath();
+      const waist = Math.abs(2 * illuminated - 1) * r;
+      const inward = illuminated < 0.5;   // crescent: terminator cuts into the lit side
+      if (waxing) {
+        context.arc(spot.x, spot.y, r, -Math.PI / 2, Math.PI / 2, false);
+        context.ellipse(spot.x, spot.y, waist, r, 0, Math.PI / 2, -Math.PI / 2, inward);
+      } else {
+        context.arc(spot.x, spot.y, r, Math.PI / 2, -Math.PI / 2, false);
+        context.ellipse(spot.x, spot.y, waist, r, 0, -Math.PI / 2, Math.PI / 2, inward);
+      }
+      context.fill();
+      context.globalAlpha = 1;
+    };
+
+    /**
+     * The sun.
+     *
+     * Drawn a little below the horizon as well as above it, because the last
+     * minutes before it sets are the ones worth seeing and cutting it off at
+     * exactly zero makes it vanish mid-descent.
+     */
+    const drawSun = (when, cam) => {
+      const { altitude, azimuth } = sunPosition(new Date(when), OBSERVER);
+      if (altitude < -3) return;
+
+      const spot = projectBody(altitude, azimuth, cam);
+      if (!spot) return;
+
+      // Reddened as it goes down. Blue scatters out of the beam first and green
+      // second, over a path length that grows fast near the horizon — which is
+      // the same fact as the sky being blue, seen from the other end, and why a
+      // setting sun is one you can look at.
+      const low = Math.max(0, Math.min(1, (10 - altitude) / 13));
+      const body = `255, ${Math.round(244 - low * 95)}, ${Math.round(214 - low * 190)}`;
+      const strength = 1 - low * 0.3;
+
+      const r = Math.atan(696340 / 149597870) * cam.scale * BODY_EXAGGERATION;
+
+      // The bloom widens as it reddens. A sun on the horizon is not a brighter
+      // disc than a sun overhead — it is a dimmer one inside a much larger glow,
+      // because that is where all the light it lost has gone.
+      // Multipliers of the radius, so they had to come down when the disc went
+      // up — otherwise enlarging the sun also doubled a glow that was already
+      // a quarter of the screen across.
+      context.globalCompositeOperation = 'lighter';
+      haloAt(spot.x, spot.y, r * (8 + low * 8), body, 0.17 + low * 0.07);
+      haloAt(spot.x, spot.y, r * 2.4, body, 0.30 * strength);
+
+      /*
+       * The disc is painted, not added, and that is the difference between a
+       * sunrise and a smudge.
+       *
+       * Additively it was three layers deep — two halos and the body — over a
+       * sky that was already warm, and the channels went to (501, 337, 171)
+       * before clamping. Red and green both pinned at 255, which does not make
+       * a brighter orange, it makes a pale yellow: clipping two of three
+       * channels throws the hue away and leaves only the blue deficit behind.
+       * On screen it read as khaki.
+       *
+       * Drawn opaque, the disc is exactly the colour the atmosphere calculation
+       * says it should be, and the halos bloom around it instead of through it.
+       */
+      context.globalCompositeOperation = 'source-over';
+      context.fillStyle = `rgb(${body})`;
+      context.beginPath();
+      context.arc(spot.x, spot.y, r, 0, TAU);
+      context.fill();
+    };
+
+    const fillBackground = (depth = 0, dawn = null, when = null, facing = VIEW_AZIMUTH) => {
+      const moment = when === null ? timeAtDepth(depth) : when;
+      const glow = dawn === null ? twilightGlow(moment) : dawn;
+
+      // The night sky, unchanged — what the page looks like with the sun well
+      // down, and at depth 0 the only thing that paints.
+      const nightTop = mixArr(SKY_TOP[0], SKY_DEEP[0], depth);
+      const nightBottom = mixArr(SKY_TOP[1], SKY_DEEP[1], depth);
 
       const gradient = context.createLinearGradient(0, 0, 0, height);
-      gradient.addColorStop(0, mixRGB(SKY_TOP[0], SKY_DEEP[0], depth));
 
-      // The bottom stop is where dawn shows. Capped well short of daylight:
-      // this canvas sits behind every paragraph on the site, and the whole page
-      // is white text on near-black. A sky bright enough to look like morning is
-      // a sky nobody can read the words against — so what you get is the first
-      // warmth on the horizon, which is both what is actually happening at this
-      // hour and as far as the contrast budget goes.
-      const deep = mixRGB(SKY_DEEP[1], DAWN_GLOW, dawn * 0.55);
-      gradient.addColorStop(1, depth > 0 ? deep : mixRGB(SKY_TOP[1], SKY_DEEP[1], depth));
+      // Overhead barely moves; the horizon carries the change. That difference
+      // is the whole effect — a sky that brightened uniformly would read as
+      // someone turning up a dimmer, not as the sun arriving.
+      gradient.addColorStop(0, rgbStr(mixArr(nightTop, DAWN_TOP, glow * 0.85)));
+      gradient.addColorStop(
+        0.62,
+        rgbStr(mixArr(mixArr(nightTop, nightBottom, 0.62), DAWN_MID, glow * 0.8))
+      );
+      gradient.addColorStop(1, rgbStr(mixArr(nightBottom, DAWN_HORIZON, glow)));
 
       context.fillStyle = gradient;
       context.fillRect(0, 0, width, height);
+
+      // The directional half, over the top of the vertical one. Anchored just
+      // below the bottom edge because that is where the horizon is — the glow
+      // enters the frame rather than sitting in it.
+      if (glow > 0.01) {
+        const gx = Math.max(-width * 0.4, Math.min(width * 1.4, sunGlowX(moment, facing)));
+        const gy = height * 1.04;
+        const reach = Math.max(width, height) * 0.9;
+
+        const radial = context.createRadialGradient(gx, gy, 0, gx, gy, reach);
+        const [r, g, b] = DAWN_HORIZON;
+        radial.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${0.42 * glow})`);
+        radial.addColorStop(0.5, `rgba(${r}, ${g}, ${b}, ${0.16 * glow})`);
+        radial.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
+
+        context.fillStyle = radial;
+        context.fillRect(0, 0, width, height);
+      }
     };
     
     // Animation loop
@@ -697,10 +1136,30 @@ const AnimatedBackground = ({ children }) => {
       
       const depth = getDepth();
 
-      
-      // Fill with gradient background
-      
-      fillBackground(depth);
+      /*
+       * How far into twilight this depth is, computed once and spent three times.
+       *
+       * The sky brightening was only ever half of a sunrise. The other half is
+       * that the stars go out — and they did not, so the last frame of the scroll
+       * was a full night's star field sitting on top of an orange horizon, which
+       * is the one thing a morning sky never looks like. Whatever this number
+       * does to the background it has to do, inverted, to everything drawn on it.
+       */
+      const when = timeAtDepth(depth);
+      const dawn = twilightGlow(when);
+      // One camera for the whole frame. The stars are projected through it only
+      // when the clock moves on, and the sun and moon every frame, so handing
+      // both the same object is what stops them drifting apart from each other.
+      const facing = viewAzimuth(depth);
+      const cam = cameraBasis(horizonTilt(depth), facing);
+
+      // Stars hold through nautical twilight and then go quickly, which is what
+      // they do: the sky brightens on a curve and the faint ones are lost long
+      // before the bright ones. The floor keeps the brightest few just visible at
+      // sunrise, as Venus and Sirius genuinely are.
+      const starVisibility = Math.max(0.05, 1 - Math.pow(dawn, 2.2) * 0.98);
+
+      fillBackground(depth, dawn, when, facing);
       
       const scrollYForSky = window.scrollY;
       
@@ -745,11 +1204,21 @@ const AnimatedBackground = ({ children }) => {
       //
       // Affordable either way: a full re-projection of 5,044 stars measures at
       // 0.51ms, which is three per cent of a sixty-hertz frame.
+      //
+      // The camera is the second trigger, and it is not redundant. Time and
+      // camera are both driven by depth, so it is tempting to let one stand for
+      // the other — but they move at wildly different rates. Over the last
+      // stretch the view swings ninety degrees while the clock advances about
+      // forty minutes, so the pan covers in a frame what the clock needs
+      // hundreds of times longer to match. Keyed on time alone, the stars would
+      // lag behind a sun and moon that are re-projected every frame, and the
+      // sky would visibly shear.
       const wanted = timeAtDepth(depth);
-      if (Math.abs(wanted - skyNow) > 20000) {
+      if (Math.abs(wanted - skyNow) > 20000 || Math.abs(facing - projectedFacing) > 0.25) {
         skyNow = wanted;
-        projectSky(skyNow);
-        constellationSegments = projectConstellations();
+        projectSky(skyNow, cam);
+        constellationSegments = projectConstellations(cam);
+        projectedFacing = facing;
         // The readouts name this time in words. They used to read the wall
         // clock, which was right until the scroll started moving the sky and
         // then said quarter past one over a sky seventeen hours later.
@@ -763,7 +1232,9 @@ const AnimatedBackground = ({ children }) => {
       // hero reads as a network diagram rather than a sky — the lines are
       // regular and the stars are not, so the eye finds them first at equal
       // weight.
-      context.strokeStyle = 'rgba(120, 165, 235, 0.075)';
+      // Faded with the stars they connect. A figure outlining stars that twilight
+      // has already washed out is a diagram, not a constellation.
+      context.strokeStyle = `rgba(120, 165, 235, ${0.075 * starVisibility})`;
       context.lineWidth = 1;
       context.translate(0, -scrollY * 0.06);
       for (const segment of constellationSegments) {
@@ -810,9 +1281,9 @@ const AnimatedBackground = ({ children }) => {
           }
         }
 
-        context.globalAlpha = star.twinkle
+        context.globalAlpha = starVisibility * (star.twinkle
           ? 1 - star.twinkle * 0.5 * (0.5 + 0.5 * Math.sin(seconds * 2.1 + star.phase))
-          : 1;
+          : 1);
         context.drawImage(
           sprite.canvas,
           star.x - sprite.half,
@@ -821,13 +1292,22 @@ const AnimatedBackground = ({ children }) => {
           sprite.side
         );
       }
-      context.globalAlpha = 1;
-
-      // Update and draw meteors
+      // Meteors fade with everything else. A shooting star is a faint thing —
+      // the ones bright enough to survive a brightening sky are rare enough that
+      // drawing them at full strength over a dawn horizon would look like a
+      // scratch on the screen rather than a meteor.
+      context.globalAlpha = starVisibility;
       meteors.forEach(meteor => {
         meteor.update();
         meteor.draw(context);
       });
+      context.globalAlpha = 1;
+
+      // The moon dims as the sky brightens, but nothing like as fast as a star:
+      // it is routinely visible in a blue afternoon, which is the whole reason
+      // people are surprised to see it there. The sun does not dim at all.
+      drawMoon(when, cam, 0.35 + starVisibility * 0.65);
+      drawSun(when, cam);
 
       context.globalCompositeOperation = 'source-over';
 
