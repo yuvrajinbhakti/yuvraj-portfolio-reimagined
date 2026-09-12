@@ -953,7 +953,12 @@ const AnimatedBackground = ({ children }) => {
      * colour itself.
      */
     const DAWN_HORIZON = [158, 86, 48];  // the band on the horizon itself
-    const DAWN_MID = [78, 54, 82];       // rose-violet, the transition above it
+    // Warmed from (78,54,82). The old one was a cool rose sitting directly on a
+    // hot orange, and the join between them read as a line rather than a sky —
+    // there was no orange-to-rose transit, the colour just stopped. Carrying
+    // some of the horizon's red up into this stop is what turns the band into a
+    // gradient you can look into.
+    const DAWN_MID = [104, 62, 76];      // rose, the transition above the band
     const DAWN_TOP = [14, 24, 52];       // still night overhead, no longer black
 
     /*
@@ -1101,14 +1106,27 @@ const AnimatedBackground = ({ children }) => {
 
       // A thin crescent carries very little light and a full moon washes out the
       // sky around it; the halo follows the lit fraction rather than being fixed.
+      // The halo was a tenth of an alpha over three and a half radii, tuned
+      // when the moon was a dot. At a size where the phase is legible that is
+      // no glow at all — a full moon came out as a flat disc pasted on the sky,
+      // when the thing everyone recognises about a full moon is the soft round
+      // wash it puts around itself. Two of them now: a wide one for the wash and
+      // a tight one so the limb does not end on a hard edge.
+      //
+      // Warm rather than blue, which is the other half of it. Moonlight is
+      // sunlight, and it looks silver only because the eye gives up its colour
+      // vision at that brightness — photographed, or drawn, it is a faintly
+      // warm white. The old 206,214,235 was a deliberate blue and read as
+      // metallic.
       const lit = 0.25 + illuminated * 0.75;
       context.globalCompositeOperation = 'lighter';
-      haloAt(spot.x, spot.y, r * 3.5, '206, 214, 235', 0.11 * lit * fade);
+      haloAt(spot.x, spot.y, r * 6.5, '226, 224, 208', 0.15 * lit * fade);
+      haloAt(spot.x, spot.y, r * 2.2, '236, 232, 216', 0.18 * lit * fade);
 
       // The disc occludes: a star behind the moon is behind the moon.
       context.globalCompositeOperation = 'source-over';
       context.globalAlpha = fade;
-      context.fillStyle = 'rgb(228, 231, 224)';
+      context.fillStyle = 'rgb(244, 240, 224)';
       context.beginPath();
       const waist = Math.abs(2 * illuminated - 1) * r;
       const inward = illuminated < 0.5;   // crescent: terminator cuts into the lit side
@@ -1252,11 +1270,17 @@ const AnimatedBackground = ({ children }) => {
        * can afford it — the footer scrim is there, and the type above the
        * horizon band is the sparse kind.
        */
+      // The middle stop moved up from 0.74 to 0.64 and its weight from 0.32 to
+      // 0.44. Held at 0.74 the dawn was a band along the bottom twelve per cent
+      // of the frame — a horizon rather than a sunrise, correct and thin.
+      // Raising it lets the light climb into the lower third, which is where a
+      // sunrise actually lives. The footer type was brightened to 65% white to
+      // pay for it; that is what the headroom was spent on.
       const reach = horizonReach(view);
       gradient.addColorStop(0, rgbStr(mixArr(nightTop, DAWN_TOP, glow * 0.22)));
       gradient.addColorStop(
-        0.74,
-        rgbStr(mixArr(mixArr(nightTop, nightBottom, 0.74), DAWN_MID, glow * 0.32 * (0.55 + reach * 0.45)))
+        0.64,
+        rgbStr(mixArr(mixArr(nightTop, nightBottom, 0.64), DAWN_MID, glow * 0.44 * (0.55 + reach * 0.45)))
       );
       gradient.addColorStop(1, rgbStr(mixArr(nightBottom, DAWN_HORIZON, glow * reach)));
 

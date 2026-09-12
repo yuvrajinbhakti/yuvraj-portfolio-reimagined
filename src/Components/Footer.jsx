@@ -207,7 +207,7 @@ const Footer = () => {
               {/* A footer line is the last thing read, so it should leave
                   something rather than restate the header. The old one was a
                   business card — title, then stack, no turn in it. */}
-              <p className="text-white/50 mt-2 text-sm leading-relaxed max-w-xs">
+              <p className="text-white/65 mt-2 text-sm leading-relaxed max-w-xs">
                 Interfaces, the systems behind them, and an ML detour I never came back from.
               </p>
               {/* Real, and true right now — which is the whole reason it earns a
@@ -232,12 +232,12 @@ const Footer = () => {
                   <Link
                     key={study.slug}
                     to={`/work/${study.slug}`}
-                    className="group relative inline-block w-fit py-1 -my-1 text-white/50 hover:text-white transition-colors text-sm after:absolute after:left-0 after:right-0 after:bottom-[2px] after:h-px after:bg-blue-400 after:origin-left after:scale-x-0 after:transition-transform after:duration-300 hover:after:scale-x-100"
+                    className="group relative inline-block w-fit py-1 -my-1 text-white/65 hover:text-white transition-colors text-sm after:absolute after:left-0 after:right-0 after:bottom-[2px] after:h-px after:bg-blue-400 after:origin-left after:scale-x-0 after:transition-transform after:duration-300 hover:after:scale-x-100"
                   >
                     {study.title}
                   </Link>
                 ))}
-                <Link to="/projects" className="group relative inline-block w-fit py-1 -my-1 text-white/50 hover:text-white transition-colors text-sm after:absolute after:left-0 after:right-0 after:bottom-[2px] after:h-px after:bg-blue-400 after:origin-left after:scale-x-0 after:transition-transform after:duration-300 hover:after:scale-x-100">
+                <Link to="/projects" className="group relative inline-block w-fit py-1 -my-1 text-white/65 hover:text-white transition-colors text-sm after:absolute after:left-0 after:right-0 after:bottom-[2px] after:h-px after:bg-blue-400 after:origin-left after:scale-x-0 after:transition-transform after:duration-300 hover:after:scale-x-100">
                   All projects
                 </Link>
               </nav>
@@ -258,7 +258,7 @@ const Footer = () => {
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group inline-flex w-fit items-center gap-2.5 py-1 -my-1 text-white/50 hover:text-white transition-colors duration-200 text-sm"
+                    className="group inline-flex w-fit items-center gap-2.5 py-1 -my-1 text-white/65 hover:text-white transition-colors duration-200 text-sm"
                   >
                     <span className="text-white/35 transition-colors group-hover:text-blue-300" aria-hidden="true">
                       {social.icon}
@@ -272,7 +272,7 @@ const Footer = () => {
           </div>
 
           {/* Copyright */}
-          <div className="mt-8 pt-6 border-t border-white/10 flex flex-col sm:flex-row gap-2 sm:gap-4 items-center justify-between text-white/50 text-sm">
+          <div className="mt-8 pt-6 border-t border-white/10 flex flex-col sm:flex-row gap-2 sm:gap-4 items-center justify-between text-white/65 text-sm">
             <div className="flex items-center gap-4">
               <span>&copy; {currentYear} Yuvraj Singh Nain</span>
               <CursorSetting />
