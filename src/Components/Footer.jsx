@@ -174,7 +174,7 @@ const Footer = () => {
           smudge. Everything above 86% still gets the full weight, because that
           is where the words are. */}
       <div
-        className="pointer-events-none absolute inset-0 -top-24 bg-[linear-gradient(to_bottom,transparent_0%,rgba(26,14,12,0.45)_55%,rgba(26,14,12,0.7)_89%,rgba(26,14,12,0.18)_94%,rgba(26,14,12,0.15)_100%)]"
+        className="pointer-events-none absolute inset-0 -top-24 bg-[linear-gradient(to_bottom,transparent_0%,rgba(26,14,12,0.5)_55%,rgba(26,14,12,0.8)_90%,rgba(26,14,12,0.2)_95%,rgba(26,14,12,0.16)_100%)]"
         aria-hidden="true"
       />
       <div className="relative">

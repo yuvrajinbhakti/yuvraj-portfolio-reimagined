@@ -392,15 +392,19 @@ const AnimatedBackground = ({ children }) => {
      * that begins tilting the instant you cross a threshold reads as a camera;
      * one that drifts reads as looking down.
      *
-     * Eleven degrees rather than fifteen, and the four degrees are a legibility
-     * decision rather than a compositional one. Tilting further does not push
-     * the sun down the frame, it pulls it *up* — a view aimed lower puts the
-     * horizon nearer the middle. At fifteen the disc came to rest across the
-     * last line of type, and the email address underneath it measured 3.5:1
-     * against a 4.5:1 floor. At eleven the sun sits below the text with the
-     * horizon still comfortably inside the frame.
+     * Sixteen degrees. It was fifteen, then eleven when the sun at fifteen came
+     * to rest across the last line of type and left the email address at 3.5:1
+     * against a 4.5:1 floor — and eleven then parked the sun on the very bottom
+     * edge, half out of frame, with nothing but plain gradient above it.
+     *
+     * Note the direction, which is the opposite of what it looks like: tilting
+     * further does not push the sun *down* the frame, it lifts it, because a
+     * view aimed lower puts the horizon nearer the middle. Sixteen brings the
+     * sun up off the edge into the frame proper. The contrast that forced the
+     * retreat to eleven is no longer the binding constraint — footer body type
+     * went to 65% white and is sitting at 6.3:1, so there is room to spend.
      */
-    const HORIZON_DROP = 11;
+    const HORIZON_DROP = 16;
     const horizonTilt = (depth) => {
       if (reduce) return 0;
       const t = Math.max(0, Math.min(1, (depth - 0.6) / 0.4));
@@ -1045,7 +1049,13 @@ const AnimatedBackground = ({ children }) => {
      * which of its limbs is lit are all computed, and those are the parts
      * somebody could check by stepping outside.
      */
-    const SUN_EXAGGERATION = 9;
+    // The sun is larger than the moon here, which is worth a word since in the
+    // sky they are famously the same size — half a degree each, the coincidence
+    // that makes total eclipses possible. The difference is what each one needs
+    // to read: the moon needs enough disc to show a phase and no more, while the
+    // sun is the thing the whole scroll arrives at and has to carry the bottom
+    // of the page on its own.
+    const SUN_EXAGGERATION = 14;
     const MOON_EXAGGERATION = 9;
 
     /** Screen position of an alt/az direction, or null if it is behind the view. */
