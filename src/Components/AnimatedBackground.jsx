@@ -1529,6 +1529,47 @@ const AnimatedBackground = ({ children }) => {
       context.fillRect(0, horizonY, width, depthBelow);
 
       /*
+       * Swell, coming in.
+       *
+       * The sea was a static gradient with a shivering column on it, which reads
+       * as a photograph rather than water. What moves in real water, seen from a
+       * shore, is not the surface texture — it is the rows of swell arriving,
+       * and the thing that makes them read as distance is that they *accelerate*
+       * as they come. Equal distances on the water are unequal on the screen:
+       * near the horizon a hundred metres is a couple of pixels, at your feet it
+       * is half the frame.
+       *
+       * So the rows are spaced by u squared rather than by u. That bunches them
+       * against the horizon and spreads them toward the viewer, and because the
+       * animation advances u rather than y, each row speeds up as it travels —
+       * which is the whole illusion, and it comes out of the geometry rather
+       * than being eased by hand.
+       */
+      const WAVES = 26;
+      const crest = mixArr(surface, [255, 226, 198], 0.3);
+      const crestRGB = crest.map(Math.round).join(',');
+      // A row takes about seventeen seconds to come in. Measured rather than
+      // eyeballed, because the pane I check in was throttled and could not show
+      // me: at this rate a row moves 4px/s near the horizon and 23px/s by the
+      // time it reaches the viewer. The first version ran a third slower and the
+      // far half of the sea read as a still.
+      const travel = seconds * 0.06;
+      for (let i = 0; i < WAVES; i++) {
+        const u = ((i / WAVES) + travel) % 1;
+        const t = u * u;
+        const y = horizonY + t * depthBelow;
+        const thickness = Math.max(1, (0.35 + t * 2.4) * (depthBelow / WAVES));
+        // Each row breathes on its own phase, so the set never pulses together.
+        const breathe = 0.5 + 0.5 * Math.sin(seconds * 0.9 + i * 2.13);
+        // Fading toward the viewer: close water is dark and you are looking
+        // into it, so the crests stop catching the sky.
+        const alpha = (0.05 + 0.055 * breathe) * (1 - t * 0.8) * exposure;
+        if (alpha < 0.004) continue;
+        context.fillStyle = `rgba(${crestRGB},${alpha})`;
+        context.fillRect(0, y, width, thickness);
+      }
+
+      /*
        * The glitter path — the broken column of light under the sun.
        *
        * This is the part that reads as water rather than as a dark band, and it
@@ -1550,7 +1591,10 @@ const AnimatedBackground = ({ children }) => {
           // Widens toward the viewer, and each band breaks up on its own
           // rhythm so the column shivers instead of pulsing as one piece.
           const spread = (0.04 + t * 1.0) * depthBelow * 1.5;
-          const shimmer = 0.55 + 0.45 * Math.sin(seconds * 1.7 + i * 1.31);
+          // Phase-locked to the swell above, so the column breaks up along the
+          // same water rather than flickering to a rhythm of its own. Two
+          // rhythms on one surface is the tell that it was drawn.
+          const shimmer = 0.55 + 0.45 * Math.sin(seconds * 1.7 + i * 1.31 - travel * 26);
           const halfWidth = spread * shimmer;
           const alpha = lit * (1 - t) * (1 - t) * 0.5;
           if (alpha < 0.004 || halfWidth < 1) continue;
