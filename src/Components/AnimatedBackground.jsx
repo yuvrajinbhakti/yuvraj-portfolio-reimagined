@@ -157,14 +157,21 @@ const AnimatedBackground = ({ children }) => {
      * and a scrollbar was never a clock.
      */
     const STORY = [
-      // Depth 0 is the end of civil twilight rather than sunset. Two reasons:
-      // the hero has to read as the star field it was designed as, which it
-      // cannot do against a lit sky; and the sun must be far enough down that
-      // it is not drawn through the headline. It is still dusk, so there is
-      // colour low in the frame and a young moon is still up.
-      [0.00, 'civilDusk'],
-      [0.12, 'nauticalDusk'],
-      [0.22, 'astroDusk'],
+      // Sunset, not civil dusk, and the reason is the frame rather than the
+      // light. The view is tilted up until the page is well down, so its lower
+      // edge sits about six degrees above the horizon: anything below that is
+      // out of shot. A young moon follows the sun down, and at civil dusk it
+      // was already at three degrees — up, real, and underneath the picture.
+      // Half an hour earlier it clears the edge, which is the difference
+      // between a moon in the hero and an empty sky.
+      //
+      // Starting in a brighter part of the evening does not mean a brighter
+      // hero. The sky is kept dark by the gradient (see the glow multipliers);
+      // what the timeline decides is where things *are*, not how lit it is.
+      [0.00, 'sunset'],
+      [0.10, 'civilDusk'],
+      [0.17, 'nauticalDusk'],
+      [0.24, 'astroDusk'],
       // The dark hours, compressed. Nothing observable happens between these
       // two beyond the stars turning, and the stars turning is the one thing
       // that reads well without any help.
@@ -892,6 +899,34 @@ const AnimatedBackground = ({ children }) => {
     };
 
     /*
+     * How much of that twilight the page actually shows, by depth.
+     *
+     * This is the one place the sky is deliberately not literal, and it is worth
+     * saying why rather than pretending otherwise.
+     *
+     * Rendered honestly, the brightness of the sky follows the sun, and that
+     * costs the thing this background is for. At sunset the real sky is bright
+     * enough to hide every star — so an honest hero at sunset is an empty one,
+     * no constellations, nothing to point at, which is precisely what the star
+     * field exists to show. The version of this site people liked has a dark sky
+     * full of stars at half past three in the afternoon; the sky here was always
+     * a stylised one, and the honest brightness curve quietly broke that without
+     * anyone deciding to.
+     *
+     * So the *positions* stay real — where the sun and moon are, which stars are
+     * up, which way the light comes from — and the *exposure* is authored. The
+     * page holds a night-adapted sky for its whole length and opens up over the
+     * last stretch, where the sunrise is the thing being looked at and there is
+     * a scrim under the type to afford it.
+     *
+     * The readout is unaffected: it names the hour, and the hour is true.
+     */
+    const twilightEnvelope = (depth) => {
+      const t = Math.min(1, Math.max(0, (depth - 0.45) / 0.55));
+      return 0.1 + 0.9 * t * t * (3 - 2 * t);
+    };
+
+    /*
      * Twilight, in three bands rather than one.
      *
      * A single warm stop at the bottom was the first attempt and it did not read
@@ -905,8 +940,20 @@ const AnimatedBackground = ({ children }) => {
      * These three are sampled toward the sun through civil twilight, and the
      * gradient keeps them apart: warm only where the sun is, cold overhead.
      */
-    const DAWN_HORIZON = [132, 88, 70];  // the amber band on the horizon itself
-    const DAWN_MID = [72, 58, 88];       // rose-violet, the transition above it
+    /*
+     * The horizon went from (132,88,70) to (158,86,48), which is a stronger
+     * colour that is also a *darker* one, and the two are not in tension the way
+     * they look. Relative luminance weights green at 0.72 and red at 0.21, so
+     * pulling green and blue down while pushing red up saturates the orange and
+     * drops the luminance at the same time: it reads considerably hotter and
+     * measures better against white type than the muddier version did.
+     *
+     * That is the whole reason the old one was muddy. It was desaturated toward
+     * grey to keep it dim, when the thing making it dim could have been the
+     * colour itself.
+     */
+    const DAWN_HORIZON = [158, 86, 48];  // the band on the horizon itself
+    const DAWN_MID = [78, 54, 82];       // rose-violet, the transition above it
     const DAWN_TOP = [14, 24, 52];       // still night overhead, no longer black
 
     /*
@@ -973,11 +1020,14 @@ const AnimatedBackground = ({ children }) => {
      *
      * The two want different amounts of it, which is why there are two numbers.
      *
-     * The sun is a *small hard disc inside an enormous glow*. In a photograph of
-     * a sunrise the disc is something you could cover with a fingernail and the
-     * bloom takes half the frame; getting that ratio backwards is most of what
-     * makes a drawn sun look drawn. Nine times was the cartoon version — a big
-     * soft ball — so it is five, with the glow doing the work instead.
+     * The sun wants a *small hard disc inside an enormous glow* — in a
+     * photograph of a sunrise the disc is something you could cover with a
+     * fingernail and the bloom takes half the frame. Five times was that
+     * argument taken to its conclusion and it came out too timid: at the bottom
+     * of the page the disc was twenty pixels across, which is a bright dot on
+     * the horizon rather than a sunrise. Nine is the size asked for, and the
+     * three-layer bloom introduced alongside it is what keeps it from reading as
+     * a ball — the ratio is what matters, and the ratio is preserved.
      *
      * The moon is the opposite case. It has no glow to speak of and its whole
      * interest is its shape: a crescent is only a crescent if you can see the
@@ -990,7 +1040,7 @@ const AnimatedBackground = ({ children }) => {
      * which of its limbs is lit are all computed, and those are the parts
      * somebody could check by stepping outside.
      */
-    const SUN_EXAGGERATION = 5;
+    const SUN_EXAGGERATION = 9;
     const MOON_EXAGGERATION = 9;
 
     /** Screen position of an alt/az direction, or null if it is behind the view. */
@@ -1080,7 +1130,7 @@ const AnimatedBackground = ({ children }) => {
      * minutes before it sets are the ones worth seeing and cutting it off at
      * exactly zero makes it vanish mid-descent.
      */
-    const drawSun = (when, cam) => {
+    const drawSun = (when, cam, exposure = 1) => {
       const { altitude, azimuth } = sunPosition(new Date(when), OBSERVER);
       if (altitude < -3) return;
 
@@ -1107,9 +1157,9 @@ const AnimatedBackground = ({ children }) => {
       // is the right way round, and the reason the sun reads as brighter now
       // while actually putting less light into the pixels behind the type.
       context.globalCompositeOperation = 'lighter';
-      haloAt(spot.x, spot.y, r * (18 + low * 14), body, 0.10 + low * 0.05);
-      haloAt(spot.x, spot.y, r * 6, body, 0.13 + low * 0.05);
-      haloAt(spot.x, spot.y, r * 2.2, body, 0.30 * strength);
+      haloAt(spot.x, spot.y, r * (18 + low * 14), body, (0.10 + low * 0.05) * exposure);
+      haloAt(spot.x, spot.y, r * 6, body, (0.13 + low * 0.05) * exposure);
+      haloAt(spot.x, spot.y, r * 2.2, body, 0.30 * strength * exposure);
 
       /*
        * The disc is painted, not added, and that is the difference between a
@@ -1158,7 +1208,11 @@ const AnimatedBackground = ({ children }) => {
      */
     const horizonReach = (cam) => {
       const bottomAltitude = cam.altitude - cam.edge;
-      return Math.min(1, Math.max(0.34, 1 - bottomAltitude / 9));
+      // The floor came down from 0.34. Twenty minutes after sunset is a dark
+      // sky with a bright edge, not a lit one, and at a third of the horizon
+      // band reaching a frame aimed six degrees over it the hero read as
+      // evening rather than night.
+      return Math.min(1, Math.max(0.2, 1 - bottomAltitude / 9));
     };
 
     const fillBackground = (depth = 0, dawn = null, when = null, cam = null) => {
@@ -1182,11 +1236,27 @@ const AnimatedBackground = ({ children }) => {
       // viewport rather than a sunrise — a sky that had been tinted, not lit.
       // Keeping the top nearly as dark as it was at midnight is what gives the
       // horizon something to be brighter *than*.
+      /*
+       * The sky overhead stays night, the whole way down the page.
+       *
+       * These multipliers were 0.5 and 0.62 and are now 0.22 and 0.32, and that
+       * is the single change that matters most here. Twilight does not light the
+       * sky evenly — it lights the edge of it, and the part directly above you
+       * stays close to black from dusk right through to the last minutes before
+       * sunrise. Carrying the glow upward was doing two kinds of damage at once:
+       * it made the hero read as an evening rather than a night, and it spent
+       * the brightness budget in the one place that could not use it, because a
+       * horizon can only look bright against something dark.
+       *
+       * All of it goes to the bottom stop instead. That is also where the page
+       * can afford it — the footer scrim is there, and the type above the
+       * horizon band is the sparse kind.
+       */
       const reach = horizonReach(view);
-      gradient.addColorStop(0, rgbStr(mixArr(nightTop, DAWN_TOP, glow * 0.5)));
+      gradient.addColorStop(0, rgbStr(mixArr(nightTop, DAWN_TOP, glow * 0.22)));
       gradient.addColorStop(
         0.74,
-        rgbStr(mixArr(mixArr(nightTop, nightBottom, 0.74), DAWN_MID, glow * 0.62 * (0.55 + reach * 0.45)))
+        rgbStr(mixArr(mixArr(nightTop, nightBottom, 0.74), DAWN_MID, glow * 0.32 * (0.55 + reach * 0.45)))
       );
       gradient.addColorStop(1, rgbStr(mixArr(nightBottom, DAWN_HORIZON, glow * reach)));
 
@@ -1230,7 +1300,9 @@ const AnimatedBackground = ({ children }) => {
        * does to the background it has to do, inverted, to everything drawn on it.
        */
       const when = timeAtDepth(depth);
-      const dawn = twilightGlow(when);
+      // The physical twilight, and how much of it this part of the page shows.
+      // Everything downstream — sky, stars, the sun's bloom — uses the second.
+      const dawn = twilightGlow(when) * twilightEnvelope(depth);
       // One camera for the whole frame. The stars are projected through it only
       // when the clock moves on, and the sun and moon every frame, so handing
       // both the same object is what stops them drifting apart from each other.
@@ -1391,7 +1463,10 @@ const AnimatedBackground = ({ children }) => {
       // it is routinely visible in a blue afternoon, which is the whole reason
       // people are surprised to see it there. The sun does not dim at all.
       drawMoon(when, cam, 0.35 + starVisibility * 0.65);
-      drawSun(when, cam);
+      // The sun's bloom is twilight too, so it follows the same exposure. The
+      // disc does not: if the sun is up it is up, and at the top of the page it
+      // is below the frame anyway.
+      drawSun(when, cam, dawn);
 
       context.globalCompositeOperation = 'source-over';
 
