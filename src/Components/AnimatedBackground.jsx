@@ -1118,15 +1118,33 @@ const AnimatedBackground = ({ children }) => {
       // vision at that brightness — photographed, or drawn, it is a faintly
       // warm white. The old 206,214,235 was a deliberate blue and read as
       // metallic.
-      const lit = 0.25 + illuminated * 0.75;
+      /*
+       * The glow no longer scales all the way down with the phase.
+       *
+       * It was 0.25 + illuminated * 0.75, which is honest — a three per cent
+       * crescent really does throw almost no light — and it meant that for the
+       * week either side of new moon the moon was drawn with a quarter of its
+       * glow and effectively disappeared. That is the worst possible place to
+       * be strictly correct, because a young crescent is also the only moon
+       * that is up during the early evening, which is the top of this page.
+       *
+       * A floor of 0.45 keeps a sliver reading as a small bright thing with a
+       * halo rather than a scratch. The phase itself stays exact; it is only
+       * how much light the drawing gives it that is lifted.
+       */
+      const lit = 0.45 + illuminated * 0.55;
       context.globalCompositeOperation = 'lighter';
-      haloAt(spot.x, spot.y, r * 6.5, '226, 224, 208', 0.15 * lit * fade);
-      haloAt(spot.x, spot.y, r * 2.2, '236, 232, 216', 0.18 * lit * fade);
+      haloAt(spot.x, spot.y, r * 6.5, '228, 228, 216', 0.17 * lit * fade);
+      haloAt(spot.x, spot.y, r * 2.2, '244, 243, 232', 0.22 * lit * fade);
 
       // The disc occludes: a star behind the moon is behind the moon.
       context.globalCompositeOperation = 'source-over';
       context.globalAlpha = fade;
-      context.fillStyle = 'rgb(244, 240, 224)';
+      // White, with only a trace of warmth in it. The moon you remember looking
+      // at is white — the warmth belongs in the halo, and putting it in the disc
+      // as well turned it the colour of the sun, which is the one thing it must
+      // not be mistaken for on a page that draws both.
+      context.fillStyle = 'rgb(250, 249, 243)';
       context.beginPath();
       const waist = Math.abs(2 * illuminated - 1) * r;
       const inward = illuminated < 0.5;   // crescent: terminator cuts into the lit side
