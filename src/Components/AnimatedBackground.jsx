@@ -1068,7 +1068,7 @@ const AnimatedBackground = ({ children }) => {
     // to read: the moon needs enough disc to show a phase and no more, while the
     // sun is the thing the whole scroll arrives at and has to carry the bottom
     // of the page on its own.
-    const SUN_EXAGGERATION = 14;
+    const SUN_EXAGGERATION = 20;
     const MOON_EXAGGERATION = 9;
 
     /** Screen position of an alt/az direction, or null if it is behind the view. */
