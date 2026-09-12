@@ -253,7 +253,7 @@ export const caseStudies = [
       { value: '16.2%', label: 'of concurrent edits diverged, before' },
       { value: '0', label: 'divergences across 920,000 checks, after' },
       { value: '0', label: 'runtime dependencies' },
-      { value: '9', label: 'bugs found above the algebra, none in it' },
+      { value: '11', label: 'bugs found, two of them where I had stopped looking' },
     ],
     sections: [
       {
@@ -306,6 +306,16 @@ export const caseStudies = [
       {
         heading: 'What that pattern is actually telling me',
         body: 'Nine bugs now, and not one of them in the transform function. Every single one lived in the layer above it: the state machine, the fan-out, the reconnect. The algebra was the part I was afraid of and the part that turned out to be provable, because a property test can generate a million cases and check each one against a law. The protocol around it has no such law — its correctness is a story about timing, and the only way to check a story about timing is to build the thing that has the timing. Each layer needed a harness the layer below could not provide: property tests for the pair, simulated sessions for the protocol, a playground for the fan-out, a real socket for everything asynchronous. I keep expecting to be finished and keep finding the next harness.',
+      },
+      {
+        heading: 'Then I went looking in the one place I had stopped suspecting',
+        body:
+          'Having said nine times that the bugs live above the algebra, I pointed hostile input at the algebra itself — not random operations, which the fuzzer already covers, but malformed ones: a missing type, a string where an object belongs, a position that is not a number. Two of the four primitives failed. `apply` dispatched on `if (type === \'insert\')` and fell through to delete for everything else, so an operation with a typo\'d type silently removed text rather than being refused. `transform` guards each of its branches on a type comparison and has no final else, so a malformed operand matched nothing, fell through to arithmetic against undefined, and produced an operation with a NaN position — which `apply` then clamped to zero, landing the text in the wrong place instead of erroring. Neither was reachable over the wire: the server validates messages on arrival and again after rebasing. What was reachable is somebody using this library and building an operation by hand. The strict reading of the earlier claim survives — neither bug is in the transform arithmetic, which is still the part a property test proved and kept proved. But "the algebra is the safe part" had quietly become "the algebra\'s files are the safe part", and those are not the same sentence. The correct version is narrower: the maths was provable and got proved; the argument handling around it is ordinary code and was never checked at all.',
+      },
+      {
+        heading: 'The types were a claim with nothing pointed at it',
+        body:
+          'Every type declaration in the package is hand-written, and nothing had ever compared them to the JavaScript — which is this project\'s own subject, one layer further down, sitting in the repository for months. So I wrote a file that imports the entire public API through the package\'s own subpath exports and ran the TypeScript compiler over it. Three real bugs in the first run. One module imported a type from a file that does not export it, which is a hard compile error for anyone importing that entry point and had been shipping for weeks. One function was declared as returning a whole union when it only ever returns a single variant, so every caller had to narrow to reach fields that are always present. And the option that makes the fuzzer able to prove it can fail — the feature I had published the week before and written a section of this page about — had no type at all, so it could not be called from TypeScript. I shipped the runtime and forgot the declaration, and nothing anywhere would have told me. `npm test` runs the compiler now, and reverting any of the three makes it fail. The declarations are checkable rather than hopeful.',
       },
       {
         heading: 'What a server is actually for',
