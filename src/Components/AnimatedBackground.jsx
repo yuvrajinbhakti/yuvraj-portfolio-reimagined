@@ -1159,8 +1159,24 @@ const AnimatedBackground = ({ children }) => {
       // second, over a path length that grows fast near the horizon — which is
       // the same fact as the sky being blue, seen from the other end, and why a
       // setting sun is one you can look at.
+      /*
+       * Two colours, not one, and this is what the sun was missing.
+       *
+       * It used to draw the disc and its halos in the same reddened orange, and
+       * that is not how a sunrise looks in life or in a photograph. The disc
+       * itself is overwhelmingly bright — far past whatever is registering it,
+       * eye or sensor — so it reads near-white with only a trace of gold, while
+       * everything it has lost to the atmosphere is out in the glow around it.
+       * Painting both the same orange gave a flat mid-tone lozenge: the colour
+       * of a sunset with none of the light of one.
+       *
+       * So the core is a pale hot gold and the bloom carries the orange. Same
+       * arrangement that makes the moon work — a brilliant middle with the
+       * colour outside it.
+       */
       const low = Math.max(0, Math.min(1, (10 - altitude) / 13));
-      const body = `255, ${Math.round(244 - low * 95)}, ${Math.round(214 - low * 190)}`;
+      const core = `255, ${Math.round(248 - low * 34)}, ${Math.round(226 - low * 78)}`;
+      const body = `255, ${Math.round(196 - low * 46)}, ${Math.round(132 - low * 68)}`;
       const strength = 1 - low * 0.3;
 
       const r = Math.atan(696340 / 149597870) * cam.scale * SUN_EXAGGERATION;
@@ -1175,9 +1191,13 @@ const AnimatedBackground = ({ children }) => {
       // is the right way round, and the reason the sun reads as brighter now
       // while actually putting less light into the pixels behind the type.
       context.globalCompositeOperation = 'lighter';
-      haloAt(spot.x, spot.y, r * (18 + low * 14), body, (0.10 + low * 0.05) * exposure);
-      haloAt(spot.x, spot.y, r * 6, body, (0.13 + low * 0.05) * exposure);
-      haloAt(spot.x, spot.y, r * 2.2, body, 0.30 * strength * exposure);
+      // Alphas roughly doubled. The old ones were set while the sky underneath
+      // was being washed bright, where a strong glow would only have added to
+      // the mud; against a dark sky there is room for it, and a glow is what
+      // makes a light source look like one.
+      haloAt(spot.x, spot.y, r * (18 + low * 14), body, (0.17 + low * 0.08) * exposure);
+      haloAt(spot.x, spot.y, r * 7, body, (0.22 + low * 0.08) * exposure);
+      haloAt(spot.x, spot.y, r * 2.6, core, 0.45 * strength * exposure);
 
       /*
        * The disc is painted, not added, and that is the difference between a
@@ -1204,7 +1224,7 @@ const AnimatedBackground = ({ children }) => {
        * reads as wrong without being nameable.
        */
       context.globalCompositeOperation = 'source-over';
-      context.fillStyle = `rgb(${body})`;
+      context.fillStyle = `rgb(${core})`;
       context.beginPath();
       context.ellipse(spot.x, spot.y, r, r * (1 - low * 0.2), 0, 0, TAU);
       context.fill();
@@ -1270,17 +1290,24 @@ const AnimatedBackground = ({ children }) => {
        * can afford it — the footer scrim is there, and the type above the
        * horizon band is the sparse kind.
        */
-      // The middle stop moved up from 0.74 to 0.64 and its weight from 0.32 to
-      // 0.44. Held at 0.74 the dawn was a band along the bottom twelve per cent
-      // of the frame — a horizon rather than a sunrise, correct and thin.
-      // Raising it lets the light climb into the lower third, which is where a
-      // sunrise actually lives. The footer type was brightened to 65% white to
-      // pay for it; that is what the headroom was spent on.
+      /*
+       * The middle stop went 0.74 -> 0.64 to spread the dawn up the frame, and
+       * that was the wrong move. Spread over the lower third, the orange averaged
+       * into the navy and the whole bottom of the page turned a flat mid-brown —
+       * more light, less sunrise. It also took away the one thing the sun needed,
+       * because a mid-bright disc on a mid-bright sky has nothing to be brighter
+       * than, and it read as a sticker.
+       *
+       * The moon is the proof. It looks right for one reason: a brilliant object
+       * on a dark field. So the sky goes back to dark and the orange is
+       * concentrated into the bottom fifth as a band, which is both what a
+       * sunrise looks like and what gives the sun somewhere to burn.
+       */
       const reach = horizonReach(view);
       gradient.addColorStop(0, rgbStr(mixArr(nightTop, DAWN_TOP, glow * 0.22)));
       gradient.addColorStop(
-        0.64,
-        rgbStr(mixArr(mixArr(nightTop, nightBottom, 0.64), DAWN_MID, glow * 0.44 * (0.55 + reach * 0.45)))
+        0.8,
+        rgbStr(mixArr(mixArr(nightTop, nightBottom, 0.8), DAWN_MID, glow * 0.28 * (0.55 + reach * 0.45)))
       );
       gradient.addColorStop(1, rgbStr(mixArr(nightBottom, DAWN_HORIZON, glow * reach)));
 
