@@ -971,20 +971,27 @@ const AnimatedBackground = ({ children }) => {
      * true half-degree moon on a phone screen is a pixel and a half, and nobody
      * would call that a moon.
      *
-     * But there is a limit, and nine times was past it. A big soft ball is the
-     * cartoon sun; the real one is a *small hard disc inside an enormous glow*.
-     * In a photograph of a sunrise the disc is something you could cover with a
-     * fingernail and the bloom takes half the frame, and getting that ratio
-     * backwards is most of what makes a drawn sun look drawn. Five times keeps
-     * the moon wide enough to read a phase off while leaving the sun small
-     * enough that the glow does the work.
+     * The two want different amounts of it, which is why there are two numbers.
+     *
+     * The sun is a *small hard disc inside an enormous glow*. In a photograph of
+     * a sunrise the disc is something you could cover with a fingernail and the
+     * bloom takes half the frame; getting that ratio backwards is most of what
+     * makes a drawn sun look drawn. Nine times was the cartoon version — a big
+     * soft ball — so it is five, with the glow doing the work instead.
+     *
+     * The moon is the opposite case. It has no glow to speak of and its whole
+     * interest is its shape: a crescent is only a crescent if you can see the
+     * terminator curve, and under about thirty pixels across a thin one
+     * degenerates into a bright dash. Nine times is where the phase becomes
+     * legible, so nine is where it stays.
      *
      * The licence is taken in the radius and nowhere else: where they sit, when
      * they rise and set, how far away the moon is on the night you look, and
      * which of its limbs is lit are all computed, and those are the parts
      * somebody could check by stepping outside.
      */
-    const BODY_EXAGGERATION = 5;
+    const SUN_EXAGGERATION = 5;
+    const MOON_EXAGGERATION = 9;
 
     /** Screen position of an alt/az direction, or null if it is behind the view. */
     const projectBody = (altitude, azimuth, cam) => {
@@ -1040,7 +1047,7 @@ const AnimatedBackground = ({ children }) => {
       const { illuminated, waxing } = moonPhase(date);
       // Angular radius from the actual distance, so perigee really is bigger.
       const angular = Math.atan(1737.4 / distance);
-      const r = angular * cam.scale * BODY_EXAGGERATION;
+      const r = angular * cam.scale * MOON_EXAGGERATION;
 
       // A thin crescent carries very little light and a full moon washes out the
       // sky around it; the halo follows the lit fraction rather than being fixed.
@@ -1088,7 +1095,7 @@ const AnimatedBackground = ({ children }) => {
       const body = `255, ${Math.round(244 - low * 95)}, ${Math.round(214 - low * 190)}`;
       const strength = 1 - low * 0.3;
 
-      const r = Math.atan(696340 / 149597870) * cam.scale * BODY_EXAGGERATION;
+      const r = Math.atan(696340 / 149597870) * cam.scale * SUN_EXAGGERATION;
 
       // The bloom widens as it reddens. A sun on the horizon is not a brighter
       // disc than a sun overhead — it is a dimmer one inside a much larger glow,
