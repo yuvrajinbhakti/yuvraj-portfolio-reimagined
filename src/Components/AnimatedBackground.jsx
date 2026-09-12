@@ -1076,8 +1076,18 @@ const AnimatedBackground = ({ children }) => {
       };
     };
 
-    /** A soft halo. Both bodies have one; the sun's is enormous and the moon's isn't. */
+    /**
+     * A soft halo. Both bodies have one; the sun's is enormous and the moon's isn't.
+     *
+     * The radius is clamped, which is a cost fix rather than a visual one. The
+     * sun's widest halo is a multiple of its own disc, so raising the sun to
+     * fourteen times life size also took that fill to a radius of about nine
+     * hundred and sixty pixels — an area several times the viewport, filled
+     * every frame, almost all of it off-screen and all of it paid for. Bounding
+     * it to the frame's own diagonal changes nothing anybody can see.
+     */
     const haloAt = (x, y, radius, color, strength) => {
+      radius = Math.min(radius, Math.hypot(width, height));
       const halo = context.createRadialGradient(x, y, 0, x, y, radius);
       halo.addColorStop(0, `rgba(${color}, ${strength})`);
       halo.addColorStop(0.35, `rgba(${color}, ${strength * 0.28})`);
@@ -1279,6 +1289,165 @@ const AnimatedBackground = ({ children }) => {
       // band reaching a frame aimed six degrees over it the hero read as
       // evening rather than night.
       return Math.min(1, Math.max(0.2, 1 - bottomAltitude / 9));
+    };
+
+    /*
+     * Cloud, lit from underneath.
+     *
+     * The gradient could be coloured perfectly and the bottom of the page would
+     * still look plain, because nothing was *in* it. What makes a photograph of
+     * a sunrise worth looking at is not the sky, it is cloud catching light from
+     * below while the sky behind stays dark — the sun lights their undersides
+     * before it clears the horizon, which is the one time of day light arrives
+     * from underneath, and the reason dawn looks like nothing else.
+     *
+     * It is also what gives the sun a size. A disc alone in an empty sky has
+     * nothing to be measured against; put banks of cloud in the same frame and
+     * the same disc reads much larger.
+     *
+     * Sea was the other candidate and is the reason there isn't one. Chandigarh
+     * is landlocked. Every other thing here is checkable — the star positions,
+     * the moon's phase, where the sun comes up — and an ocean under a real
+     * Chandigarh sky would be the first invented thing on the page, and the
+     * largest. Cloud costs nothing in honesty: there is cloud over everywhere.
+     *
+     * Placed in the sky rather than on the screen, which matters once the view
+     * starts to tilt and turn over the last stretch. Each one has a real bearing
+     * and a real height above the horizon and goes through the same projection
+     * as everything else, so they swing with the camera instead of sitting on
+     * the glass. They sit between one and twelve degrees up — dawn cloud is low
+     * cloud — which also keeps them above the sun rather than across it.
+     */
+    const CLOUD_COUNT = 7;
+    let clouds = null;
+    /*
+     * The bearing the current bank was laid out for.
+     *
+     * Built lazily against this rather than eagerly from refreshSunrise, which
+     * is where it belongs logically and where it cannot go: refreshSunrise runs
+     * at mount, above this line, and reaching down to a `const` declared later
+     * is a temporal dead zone — the component threw on first render and the
+     * page came up blank. Rebuilding when the bearing has moved gets the same
+     * result, including the rebuild when the page rolls over to the next night.
+     */
+    let cloudsBuiltFor = null;
+
+    const buildClouds = () => {
+      // Fixed seed: the sky should be the same sky between reloads, and a cloud
+      // bank that rearranges itself every refresh reads as noise.
+      let seed = 0x5eed1e;
+      const rnd = () => {
+        seed = (seed * 1664525 + 1013904223) >>> 0;
+        return seed / 4294967296;
+      };
+
+      clouds = [];
+      for (let i = 0; i < CLOUD_COUNT; i++) {
+        const puffs = [];
+        const count = 4 + Math.floor(rnd() * 4);
+        for (let p = 0; p < count; p++) {
+          puffs.push({
+            // Offsets in degrees from the cloud's own centre.
+            dx: (p / (count - 1) - 0.5) * (1 + rnd() * 0.5),
+            dy: (rnd() - 0.5) * 0.5,
+            size: 0.45 + rnd() * 0.55,
+          });
+        }
+        clouds.push({
+          // Spread either side of where the sun will come up, so the bank is
+          // where the light is rather than scattered round the whole sky.
+          azimuth: sunriseAzimuth + (rnd() - 0.5) * 150,
+          // Two to twenty-six degrees. The first attempt used one to twelve,
+          // which is where dawn cloud really sits and was the wrong answer for
+          // the frame: with the view tilted down that band lands between
+          // seventy-five and ninety per cent of the way down, which is behind
+          // the sun and behind the last rows of type. The empty part of the
+          // picture is higher than the real cloud deck, so the deck goes up.
+          altitude: 2.5 + rnd() * 23,
+          width: 8 + rnd() * 15,        // degrees across
+          squash: 0.22 + rnd() * 0.16,  // how flat; cloud is wider than it is tall
+          drift: 0.4 + rnd() * 0.7,     // degrees of bearing per hour
+          puffs,
+        });
+      }
+    };
+
+    const CLOUD_DARK = [30, 27, 46];
+    const CLOUD_LIT = [214, 132, 84];
+
+    const drawClouds = (when, cam, exposure) => {
+      if (exposure < 0.02) return;
+      if (cloudsBuiltFor !== sunriseAzimuth) {
+        buildClouds();
+        cloudsBuiltFor = sunriseAzimuth;
+      }
+      if (!clouds) return;
+
+      const sun = sunPosition(new Date(when), OBSERVER);
+      // Hours since the night began, so the bank drifts across the page rather
+      // than across the wall clock.
+      const hours = (when - nightAt) / 3600000;
+
+      context.globalCompositeOperation = 'source-over';
+      for (const cloud of clouds) {
+        const azimuth = cloud.azimuth + cloud.drift * hours;
+        const spot = projectBody(cloud.altitude, azimuth, cam);
+        if (!spot) continue;
+
+        // Pixels per degree here, measured rather than assumed — the
+        // projection stretches toward the edges and a cloud has to stretch too.
+        const edgePoint = projectBody(cloud.altitude, azimuth + 1, cam);
+        if (!edgePoint) continue;
+        const perDegree = Math.abs(edgePoint.x - spot.x);
+        if (!(perDegree > 0.2)) continue;
+
+        const halfWidth = cloud.width * perDegree * 0.5;
+        if (spot.x + halfWidth < 0 || spot.x - halfWidth > width) continue;
+
+        /*
+         * How lit this one is: the sun has to be near it in bearing *and* low
+         * enough to be shining along the underside rather than down onto the
+         * top. Both fall off, so a cloud away to the side stays a grey bank
+         * while the ones over the sunrise go to copper.
+         */
+        const offBearing = Math.abs(((azimuth - sun.azimuth + 540) % 360) - 180);
+        const aligned = Math.max(0, 1 - offBearing / 75);
+        // Widened from 14 degrees. Underlighting does not switch off the moment
+        // the sun clears the horizon — it fades over the first half hour or so,
+        // and a hard cutoff made the banks drop to grey while the sky beneath
+        // them was still burning.
+        const grazing = Math.max(0, 1 - Math.abs(sun.altitude) / 22);
+        const lit = aligned * grazing;
+
+        for (const puff of cloud.puffs) {
+          const px = spot.x + puff.dx * cloud.width * perDegree;
+          const py = spot.y + puff.dy * cloud.width * perDegree * cloud.squash;
+          const radius = puff.size * cloud.width * perDegree * 0.5;
+          if (radius < 1) continue;
+
+          // Underside catches the light, top stays in shadow. Approximated by
+          // the puff's own height within the cloud rather than a second
+          // gradient per puff, which at seven clouds a frame would be thirty
+          // gradient objects a frame for a difference nobody could see.
+          const under = Math.max(0, Math.min(1, 0.5 + puff.dy * 2));
+          const warmth = lit * under;
+          const colour = mixArr(CLOUD_DARK, CLOUD_LIT, warmth);
+          const alpha = exposure * (0.26 + warmth * 0.55);
+
+          context.save();
+          context.translate(px, py);
+          context.scale(1, cloud.squash);
+          const grad = context.createRadialGradient(0, 0, 0, 0, 0, radius);
+          grad.addColorStop(0, `rgba(${colour.map(Math.round).join(',')}, ${alpha})`);
+          grad.addColorStop(0.55, `rgba(${colour.map(Math.round).join(',')}, ${alpha * 0.55})`);
+          grad.addColorStop(1, `rgba(${colour.map(Math.round).join(',')}, 0)`);
+          context.fillStyle = grad;
+          context.beginPath();
+          context.arc(0, 0, radius, 0, TAU);
+          context.fill();
+          context.restore();
+        }
+      }
     };
 
     const fillBackground = (depth = 0, dawn = null, when = null, cam = null) => {
@@ -1546,6 +1715,10 @@ const AnimatedBackground = ({ children }) => {
       // disc does not: if the sun is up it is up, and at the top of the page it
       // is below the frame anyway.
       drawSun(when, cam, dawn);
+      // After the sun, because cloud is in front of it — that is what a lit
+      // underside means. They sit above it in the sky rather than across it, so
+      // the disc stays clear and the banks take the light off it.
+      drawClouds(when, cam, dawn);
 
       context.globalCompositeOperation = 'source-over';
 
