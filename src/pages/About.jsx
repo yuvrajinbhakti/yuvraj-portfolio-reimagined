@@ -348,7 +348,14 @@ const About = () => {
                       className="basis-1/3 sm:basis-1/4 md:basis-1/6 flex justify-center px-3"
                     >
                       <div className="flex flex-col items-center group">
-                        <div className="w-16 h-16 rounded-xl flex justify-center items-center bg-[#0f172a]/60 backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-110 border border-blue-500/20">
+                        {/* bg-[#0f172a]/75 rather than /60 with a backdrop-blur.
+                            Fourteen 64x64 tiles each holding a compositing layer
+                            that re-blurs whenever the sky canvas behind them
+                            repaints — and at 60% opacity over a dark sky there
+                            was almost nothing left to see through in the first
+                            place. The extra opacity reads the same and costs
+                            nothing per frame. */}
+                        <div className="w-16 h-16 rounded-xl flex justify-center items-center bg-[#0f172a]/75 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-110 border border-blue-500/20">
                           <img
                             src={skill.imageUrl}
                             alt={skill.name}

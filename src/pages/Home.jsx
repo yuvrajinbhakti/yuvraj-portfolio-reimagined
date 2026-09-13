@@ -460,10 +460,14 @@ const Home = () => {
         <div className="fixed bottom-4 left-4 md:bottom-6 md:left-6 z-50">
           <button
             onClick={() => setIsPlayingMusic(!isPlayingMusic)}
-            className={`w-9 h-9 rounded-full flex items-center justify-center border backdrop-blur-md transition-all duration-300 ${
+            /* 36x36. A 12px backdrop blur under a button this size frosts a
+               region smaller than the blur radius, and this one is position:
+               fixed over the sky canvas — so it was re-blurring a repainting
+               surface for every frame of the whole visit. */
+            className={`w-9 h-9 rounded-full flex items-center justify-center border transition-all duration-300 ${
               isPlayingMusic
-                ? 'bg-white/10 border-white/25 opacity-90'
-                : 'bg-white/5 border-white/10 opacity-40 hover:opacity-90 hover:border-white/25'
+                ? 'bg-white/15 border-white/25 opacity-90'
+                : 'bg-white/10 border-white/10 opacity-40 hover:opacity-90 hover:border-white/25'
             }`}
             aria-label={isPlayingMusic ? 'Mute background music' : 'Play background music'}
             aria-pressed={isPlayingMusic}

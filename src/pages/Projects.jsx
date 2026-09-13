@@ -148,11 +148,17 @@ const ProjectCard = ({ project, index, setCursorVariant }) => {
               animate={isInView ? { opacity: 1, scale: 1 } : {}}
               transition={{ delay: 0.4 + index * 0.05, duration: 0.3 }}
             >
-              <span 
-                className={`px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-md border ${
-                  project.status === 'Completed' 
-                    ? 'bg-emerald-500/15 text-emerald-300 border-emerald-400/30' 
-                    : 'bg-amber-500/15 text-amber-300 border-amber-400/30'
+              {/* No backdrop-blur. A 12px blur radius on a chip this size is a
+                  blur kernel wider than the chip — there is nothing legible
+                  behind it to frost — but it still costs a compositing layer
+                  that re-blurs every time the sky canvas behind it repaints,
+                  which is sixty times a second. The extra 10% of background
+                  opacity does the same job for free. */}
+              <span
+                className={`px-2.5 py-1 rounded-full text-xs font-medium border ${
+                  project.status === 'Completed'
+                    ? 'bg-emerald-500/25 text-emerald-300 border-emerald-400/30'
+                    : 'bg-amber-500/25 text-amber-300 border-amber-400/30'
                 }`}
               >
                 {project.status}
@@ -162,11 +168,15 @@ const ProjectCard = ({ project, index, setCursorVariant }) => {
             {/* Simplified Hover Overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent flex items-end rounded-t-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               <div className="p-3 w-full">
+                {/* The tags below carried a backdrop-blur-md while sitting
+                    inside a from-black/70 hover overlay — blurring an
+                    already-opaque gradient, so it could not have been visible
+                    even in principle, and it cost a layer per tag. */}
                 <div className="flex flex-wrap gap-1.5">
                   {project.tags && project.tags.slice(0, 3).map((tag) => (
-                    <span 
-                      key={tag} 
-                      className="text-xs bg-white/10 backdrop-blur-md text-white px-2 py-0.5 rounded-full border border-white/20"
+                    <span
+                      key={tag}
+                      className="text-xs bg-white/15 text-white px-2 py-0.5 rounded-full border border-white/20"
                     >
                       {tag}
                     </span>
@@ -601,10 +611,28 @@ const Projects = () => {
                 <motion.button
                   key={tag}
                   onClick={() => setActiveFilter(tag)}
-                  className={`px-3 py-2 md:px-4 md:py-2 rounded-full text-sm font-semibold transition-all duration-300 relative overflow-hidden backdrop-blur-md will-change-transform cursor-pointer touch-target ${
+                  /*
+                   * There are thirty-one of these, and they carried two costs
+                   * each that neither the eye nor the interaction needed.
+                   *
+                   * backdrop-blur-md: a 12px blur under a chip about 70x32.
+                   * The kernel is wider than the element, so it frosts nothing
+                   * a visitor could resolve — but it promotes a compositing
+                   * layer that must re-blur whenever what is behind it changes,
+                   * and what is behind it is a full-screen canvas repainting at
+                   * sixty frames a second. Thirty-one of those.
+                   *
+                   * will-change-transform: a permanent promotion hint for a
+                   * transform that only exists during a hover. will-change is
+                   * meant to be set just before an animation and dropped after;
+                   * left on, it is thirty-one layers held on the compositor for
+                   * the life of the page. Framer Motion already sets it for the
+                   * duration of the whileHover it actually runs.
+                   */
+                  className={`px-3 py-2 md:px-4 md:py-2 rounded-full text-sm font-semibold transition-all duration-300 relative overflow-hidden cursor-pointer touch-target ${
                     activeFilter === tag
-                      ? "bg-white/5 text-white shadow-md border border-white/20"
-                      : "bg-black/15 text-gray-300 hover:bg-white/10 border border-white/10 hover:border-white/20"
+                      ? "bg-white/10 text-white shadow-md border border-white/20"
+                      : "bg-black/30 text-gray-300 hover:bg-white/10 border border-white/10 hover:border-white/20"
                   }`}
                   initial={{ opacity: 0, y: 15, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}

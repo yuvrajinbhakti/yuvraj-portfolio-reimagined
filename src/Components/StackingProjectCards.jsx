@@ -82,7 +82,7 @@ const ProjectCard = ({ project }) => {
               distinguishes it from its neighbours. It earns its place the day
               something is in progress. */}
           {project.status && project.status !== 'Completed' && (
-            <span className="absolute top-4 right-4 px-2 py-1 rounded-full text-xs font-medium bg-amber-500/15 text-amber-300 border border-amber-400/30 backdrop-blur-md">
+            <span className="absolute top-4 right-4 px-2 py-1 rounded-full text-xs font-medium bg-amber-500/25 text-amber-300 border border-amber-400/30">
               {project.status}
             </span>
           )}
