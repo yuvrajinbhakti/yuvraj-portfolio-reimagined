@@ -141,11 +141,35 @@ const ScrollManager = () => {
        * work and the four former pages, and there is no reason to assume it
        * renders inside a second and a half on a cold load or a slow phone.
        *
-       * Nothing is spent by waiting longer. If the element never appears the
-       * loop exits having done nothing, which is the same outcome, later.
+       * Fifteen seconds is deliberately far more than a render should need, and
+       * the reason is the same background tab as everything else here: React
+       * deprioritises rendering a document nobody is looking at, so a chunk that
+       * mounts in a moment on a visible page can take many times that on a
+       * hidden one. Measured here, the four sections were not in the DOM at nine
+       * seconds and were there shortly after — against a six-second cap the
+       * handler had already given up, and the anchor silently did nothing.
+       *
+       * Nothing is spent by waiting longer. The work is one getElementById
+       * every fifty milliseconds until the target exists, and if it never
+       * appears the loop exits having done nothing — the same outcome, later.
        */
-      const deadline = start + 6000;
+      const deadline = start + 15000;
 
+      /*
+       * Polled on a timer rather than on animation frames.
+       *
+       * requestAnimationFrame does not run in a background tab, and a link to
+       * an anchor is very often opened in one — middle-click, cmd-click, "open
+       * in new tab". The loop would sit dead while the tab slept, the deadline
+       * would expire against a clock that keeps running regardless, and by the
+       * time anyone looked at the tab there would be nothing left to do: the
+       * page would simply be at the top with the anchor in the address bar.
+       *
+       * A timer is throttled in the background but it still fires, so the wait
+       * survives. Fifty milliseconds is far finer than this needs — the work is
+       * one getElementById until the target exists — and the smooth scroll it
+       * ends with is still the browser's own.
+       */
       const attempt = () => {
         const now = performance.now();
         if (now - start >= exitMs) {
@@ -164,7 +188,24 @@ const ScrollManager = () => {
              * neither problem, and there is nothing left to run afterwards.
              */
             ScrollTrigger.refresh();
-            target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+            /*
+             * Smooth only if the page is actually on screen.
+             *
+             * A hidden tab does not render, and a browser will not animate a
+             * scroll it is not drawing — it discards the request entirely
+             * rather than jumping to the end. Measured: with the tab hidden,
+             * scrollIntoView({behavior:'smooth'}) leaves scrollY at 0, while
+             * the same call with 'auto' lands exactly on the anchor. So the
+             * background-tab case — middle-click, cmd-click, open in new tab,
+             * which is how a link to a section often gets opened — would find
+             * its target, ask to scroll, be ignored, and present the reader
+             * with the top of the page and an anchor in the address bar.
+             *
+             * Instant is the right answer there anyway: nobody is watching, so
+             * there is no animation to appreciate, only a position to be in.
+             */
+            const animate = !reduce && document.visibilityState === 'visible';
+            target.scrollIntoView({ behavior: animate ? 'smooth' : 'auto', block: 'start' });
             return;
           }
           // The anchor never appeared — a stale link, or a heading that has
@@ -172,12 +213,12 @@ const ScrollManager = () => {
           // scrolling somewhere arbitrary would be worse.
           if (now > deadline) return;
         }
-        frame = requestAnimationFrame(attempt);
+        frame = setTimeout(attempt, 50);
       };
 
-      frame = requestAnimationFrame(attempt);
+      frame = setTimeout(attempt, 50);
       return () => {
-        cancelAnimationFrame(frame);
+        clearTimeout(frame);
         stopRefresh?.();
       };
     }
