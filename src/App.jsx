@@ -14,7 +14,20 @@ import PropTypes from 'prop-types';
 // Routes are imported per-file rather than through ./pages, because pulling
 // them from the barrel would drag every page (and three.js with them) into the
 // entry chunk and defeat the split.
-const Home = lazy(() => import('./pages/Home'));
+//
+// Home is static, and the other two are lazy, because they are different kinds
+// of route. Splitting a chunk only pays when there are visitors who do not need
+// it; Home is the landing page, so lazy-loading it bought nothing and cost a
+// serial round trip. The browser cannot discover a dynamic import until the
+// entry chunk has downloaded, parsed and run far enough to hit the Suspense
+// boundary — measured here as a second request wave starting at 58ms when the
+// first wave was already done at 46ms, and on a real connection that gap is a
+// whole RTT rather than 12ms. Imported statically it joins the entry's graph,
+// so Vite emits a modulepreload for it and it arrives alongside the vendors
+// instead of after them.
+//
+// CaseStudy and NotFound stay lazy: most visits never reach either.
+import Home from './pages/Home';
 const CaseStudy = lazy(() => import('./pages/CaseStudy'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 

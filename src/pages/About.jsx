@@ -131,9 +131,14 @@ const About = () => {
                   date={experience.date}
                   icon={
                     <div className="flex justify-center items-center w-full h-full">
+                      {/* Roughly 6,100px down a 12,000px page. Nothing here is
+                          on screen when the page loads, so none of it belongs
+                          in the first wave of requests. */}
                       <img
                         src={experience.icon}
                         alt={experience.company_name}
+                        loading="lazy"
+                        decoding="async"
                         className="w-[60%] h-[60%] object-contain"
                       />
                     </div>
@@ -358,6 +363,8 @@ const About = () => {
                         <div className="w-16 h-16 rounded-xl flex justify-center items-center bg-[#0f172a]/75 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-110 border border-blue-500/20">
                           <img
                             src={skill.imageUrl}
+                            loading="lazy"
+                            decoding="async"
                             alt={skill.name}
                             className={`w-8 h-8 object-contain ${
                               skill.tone === 'invert' ? 'icon-invert' : skill.tone === 'lift' ? 'icon-lift' : ''

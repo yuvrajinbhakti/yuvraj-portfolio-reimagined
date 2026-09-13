@@ -98,10 +98,15 @@ const ProjectCard = ({ project, index, setCursorVariant }) => {
             <div className="absolute inset-0 bg-white/5" />
             
             <div className="w-full h-full relative z-10">
+              {/* The project grid starts about 7,500px down. Every thumbnail in
+                  it was being fetched during the initial load, competing with
+                  the chunks needed to render the top of the page. */}
               {!imageError && project.image ? (
                 <motion.img
                   src={project.image}
                   alt={project.name}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover transition-all duration-300"
                   onError={() => setImageError(true)}
                   whileHover={{ 
@@ -121,6 +126,8 @@ const ProjectCard = ({ project, index, setCursorVariant }) => {
                     <motion.img
                       src={project.iconUrl}
                       alt={project.name}
+                      loading="lazy"
+                      decoding="async"
                       className="w-16 h-16 object-contain filter brightness-0 invert opacity-90 relative z-10"
                       whileHover={{ scale: 1.05 }}
                       transition={{ duration: 0.2 }}
