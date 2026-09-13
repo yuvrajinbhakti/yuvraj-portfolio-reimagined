@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import PropTypes from 'prop-types'
@@ -13,6 +13,11 @@ const navItems = [
   { to: '/#contact', label: 'Contact' }
 ]
 
+// Module scope so the array identity is stable — as a literal inside the
+// component it would be a new array every render and re-subscribe the scroll
+// listener each time.
+const navSectionIds = navItems.map((item) => item.to.replace('/#', ''))
+
 // Declared at module scope, not inside Navbar. Defining a component inside
 // another component gives it a new type on every render, so React unmounts and
 // remounts the whole nav on each state change — which restarts animations and,
@@ -22,26 +27,92 @@ const navItems = [
 // make navigation look like the most important thing on screen. A nav is a
 // signpost. Text, with the current page marked, and a rule that draws in on
 // hover: the affordance without the furniture.
-const NavItem = ({ to, label, onClick }) => (
-  <NavLink
+/*
+ * Which one is marked current is passed in, not asked of the router.
+ *
+ * These are plain Links, not NavLinks, because NavLink's whole job is deciding
+ * `isActive` for itself and it decides it from the path, ignoring the fragment.
+ * That was exactly right while these were four routes and became wrong the
+ * moment they became four anchors on one page: every item now resolves to `/`,
+ * so NavLink considered every item active. It drew all four underlines at once
+ * and — worse, because it is silent — stamped aria-current="page" on all four,
+ * so a screen reader announced every entry in the bar as the current page.
+ *
+ * A nav that marks everything as current marks nothing. The old note follows.
+ *
+ * NavLink decided `isActive` from the path and ignored the fragment, which was
+ * exactly right while these were four routes and became wrong the moment they
+ * became four anchors on one page: every item now points at `/`, so every item
+ * matched, and the bar drew all four underlines at once. A nav that marks
+ * everything as the current page marks nothing.
+ *
+ * On a single page the honest answer is not in the URL anyway — it is where the
+ * reader has scrolled to. See useActiveSection.
+ */
+const NavItem = ({ to, label, active = false, onClick }) => (
+  <Link
     to={to}
+    aria-current={active ? 'true' : undefined}
     onClick={onClick}
-    className={({ isActive }) => `
+    className={`
       relative py-2 block text-center md:text-left transition-colors duration-200
-      ${isActive ? 'text-white' : 'text-white/60 hover:text-white'}
+      ${active ? 'text-white' : 'text-white/60 hover:text-white'}
       after:absolute after:left-0 after:right-0 after:-bottom-0.5 after:h-px
       after:bg-blue-400 after:origin-left after:transition-transform after:duration-300
-      ${isActive ? 'after:scale-x-100' : 'after:scale-x-0 hover:after:scale-x-100'}
+      ${active ? 'after:scale-x-100' : 'after:scale-x-0 hover:after:scale-x-100'}
     `}
   >
     {label}
-  </NavLink>
+  </Link>
 )
 
 NavItem.propTypes = {
   to: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
+  active: PropTypes.bool,
   onClick: PropTypes.func
+}
+
+/*
+ * Which section the reader is actually in.
+ *
+ * A signpost on a single page should say where you are, and the only thing that
+ * knows that is the scroll position. Each item's own id is checked against a
+ * line just under the bar: the current section is the last one whose top has
+ * crossed it, which is the same rule the eye uses.
+ *
+ * Nothing is current in the hero, and nothing is current on a case study —
+ * those have none of these ids — so the bar correctly marks nothing rather than
+ * guessing.
+ */
+const useActiveSection = (ids) => {
+  const [active, setActive] = useState(null)
+
+  useEffect(() => {
+    // Read straight from the scroll handler rather than through rAF. It is four
+    // getBoundingClientRect calls and no writes, so there is nothing to thrash,
+    // and it keeps working in a tab that is not being drawn — where rAF does
+    // not run at all.
+    const measure = () => {
+      const line = 96
+      let current = null
+      for (const id of ids) {
+        const el = document.getElementById(id)
+        if (el && el.getBoundingClientRect().top <= line) current = id
+      }
+      setActive((prev) => (prev === current ? prev : current))
+    }
+
+    measure()
+    window.addEventListener('scroll', measure, { passive: true })
+    window.addEventListener('resize', measure, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', measure)
+      window.removeEventListener('resize', measure)
+    }
+  }, [ids])
+
+  return active
 }
 
 const Navbar = () => {
@@ -52,6 +123,7 @@ const Navbar = () => {
   const menuRef = useRef(null)
   const triggerRef = useRef(null)
   const { open: openPalette, prefetch: prefetchPalette } = useCommandPalette()
+  const activeSection = useActiveSection(navSectionIds)
 
   const closeMenu = useCallback(() => setIsMenuOpen(false), [])
 
@@ -197,7 +269,7 @@ const Navbar = () => {
             path lands around 0.020 vertical travel over width, against the
             heading's 0.026. It draws after the name has finished unpacking and
             retracts when the pointer leaves. */}
-        <NavLink
+        <Link
           to="/"
           aria-label="Yuvraj Singh Nain — home"
           onMouseEnter={() => setMarkHovered(true)}
@@ -219,7 +291,7 @@ const Navbar = () => {
             N<span className="wordmark__rest">ain</span>
 
           </span>
-        </NavLink>
+        </Link>
 
         {/* Desktop Navigation.
             Wrapped with the search control rather than sitting beside it: the
@@ -229,7 +301,7 @@ const Navbar = () => {
         <div className="hidden md:flex items-center gap-6">
           <nav className="flex text-sm gap-7 font-medium">
             {navItems.map((item) => (
-              <NavItem key={item.to} {...item} />
+              <NavItem key={item.to} {...item} active={activeSection === item.to.replace('/#', '')} />
             ))}
           </nav>
 
@@ -381,8 +453,9 @@ const Navbar = () => {
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ delay: index * 0.1, duration: 0.3 }}
                   >
-                    <NavItem 
-                      {...item} 
+                    <NavItem
+                      {...item}
+                      active={activeSection === item.to.replace('/#', '')}
                       onClick={() => setIsMenuOpen(false)}
                     />
                   </motion.div>
