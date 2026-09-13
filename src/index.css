@@ -1236,3 +1236,40 @@ body:has(.card[data-color="green"]:hover) {
 @media (prefers-reduced-motion: reduce) {
   .cursor-pill__body { transition: none; }
 }
+
+/*
+ * The timeline icons sat outside their own circles.
+ *
+ * react-vertical-timeline-component centres its icon with the old
+ * position/negative-margin trick, hard-coded to a 24px glyph:
+ *
+ *   .vertical-timeline-element-icon svg {
+ *     position: relative; left: 50%; top: 50%;
+ *     width: 24px; height: 24px; margin-left: -12px; margin-top: -12px;
+ *   }
+ *
+ * That works for the bare 24px svg it expects. Ours is wrapped in a flex box
+ * that already centres it, and the glyph is 32px — so the rule shifts it right
+ * and down by half the circle and pulls back only twelve pixels, which is how
+ * the graduation caps ended up hanging off the bottom-right rim.
+ *
+ * Undoing the offsets rather than matching the numbers: the wrapper is doing
+ * the centring, and a second mechanism trying to centre the same element is
+ * what caused this in the first place.
+ *
+ * The extra `.vertical-timeline` on the front is load-bearing. The library's
+ * rule and the obvious override have identical specificity, so the winner is
+ * decided by which stylesheet the bundler happens to emit last — and the
+ * library's arrives from an import inside About.jsx, after this file. Measured
+ * with the plain selector: the glyph stayed 24px and stayed 24px off centre in
+ * both directions. Qualifying it beats the tie outright instead of hoping.
+ *
+ * Size is left alone here and set on the element, so an icon can change size
+ * without anyone having to remember this file exists.
+ */
+.vertical-timeline .vertical-timeline-element-icon svg {
+  position: static;
+  left: auto;
+  top: auto;
+  margin: 0;
+}
