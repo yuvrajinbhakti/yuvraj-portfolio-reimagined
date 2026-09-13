@@ -2,12 +2,22 @@ import { motion } from 'framer-motion';
 import { useRef } from 'react';
 import InteractiveTerminal from '../Components/InteractiveTerminal';
 import CodePlayground from '../Components/CodePlayground';
-import AnimatedBackground from '../Components/AnimatedBackground';
-import useDocumentMeta from '../hooks/useDocumentMeta';
 
+/*
+ * A section of the one page now, not a route of its own.
+ *
+ * It used to mount its own AnimatedBackground, and so did About, Projects and
+ * Contact — five independent skies, each running the whole night from dusk to
+ * sunrise across its own scroll height. The background is built on the idea
+ * that the page is one night ending in one sunrise, and five copies of it made
+ * that false five times over: this page alone got a complete dusk-to-dawn
+ * inside four and a half thousand pixels.
+ *
+ * So the sky belongs to the page and the page is one. This keeps its own
+ * anchor id, because the palette and the nav still aim at it — they just scroll
+ * now instead of navigating.
+ */
 const Interactive = () => {
-  useDocumentMeta({ path: '/playground' });
-
   const containerRef = useRef(null);
 
 
@@ -56,10 +66,12 @@ const Interactive = () => {
   };
 
   return (
-    <div className="min-h-screen bg-transparent text-white" ref={containerRef}>
-      <AnimatedBackground>
-        {/* Hero Section with Enhanced Animations */}
-        <section className="relative pt-24 md:pt-32 pb-20 px-4 overflow-hidden">
+    <div className="bg-transparent text-white" ref={containerRef}>
+      {/* min-h-screen and the navbar clearance both went with the route. A
+          section in the middle of a page does not need to fill a screen on its
+          own, and nothing above it is a fixed bar to duck under. */}
+      <div>
+        <section className="relative pt-12 md:pt-20 pb-20 px-4 overflow-hidden">
           <div className="max-w-6xl mx-auto text-center relative z-10">
             <motion.div
               initial={{ opacity: 0, y: -20 }}
@@ -128,7 +140,7 @@ const Interactive = () => {
 
           </div>
         </section>
-      </AnimatedBackground>
+      </div>
     </div>
   );
 };

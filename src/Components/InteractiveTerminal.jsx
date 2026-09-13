@@ -290,12 +290,24 @@ const InteractiveTerminal = () => {
     }
   }, [history]);
 
-  // Focus input on mount
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, []);
+  /*
+   * No focus on mount. Clicking the terminal still focuses it — see the
+   * onClick on the body below — which is the only time anyone actually wants
+   * the caret in here.
+   *
+   * Focusing on mount was harmless while this lived on its own route, where the
+   * terminal was the first thing on the page. It stopped being harmless the
+   * moment the playground became a section ten thousand pixels down a single
+   * page: the browser scrolls whatever gains focus into view, so every visit to
+   * the site — any route, hash or not — threw the reader straight past the hero,
+   * the work and the case studies and landed them on the terminal. It did not
+   * go through scrollTo or scrollIntoView, so nothing showed up in a scroll
+   * log; the page simply arrived already ten thousand pixels down.
+   *
+   * Stealing focus on mount is worth avoiding on its own terms too. It moves
+   * the caret out from under the keyboard user before they have chosen to come
+   * here, and on a phone it opens the keyboard unbidden.
+   */
 
   // Welcome message
   useEffect(() => {

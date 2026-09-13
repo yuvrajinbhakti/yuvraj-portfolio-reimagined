@@ -1,4 +1,4 @@
-import { Route, BrowserRouter as Router, Routes, useLocation, useNavigationType } from 'react-router-dom';
+import { Route, BrowserRouter as Router, Routes, Navigate, useLocation, useNavigationType } from 'react-router-dom';
 import Navbar from './Components/Navbar';
 import Footer from './Components/Footer';
 import CursorPresenceProvider from './Components/CursorPresenceProvider';
@@ -15,10 +15,6 @@ import PropTypes from 'prop-types';
 // them from the barrel would drag every page (and three.js with them) into the
 // entry chunk and defeat the split.
 const Home = lazy(() => import('./pages/Home'));
-const About = lazy(() => import('./pages/About'));
-const Projects = lazy(() => import('./pages/Projects'));
-const Interactive = lazy(() => import('./pages/Interactive'));
-const Contact = lazy(() => import('./pages/Contact'));
 const CaseStudy = lazy(() => import('./pages/CaseStudy'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
@@ -138,15 +134,37 @@ const ScrollManager = () => {
       let stopRefresh;
       const start = performance.now();
       const exitMs = reduce ? 100 : 200; // mirrors PageTransition's exit duration
-      const deadline = start + 1500;
+      /*
+       * How long to wait for the anchor to exist. It was 1500ms, which was
+       * generous when every section was its own small lazily-loaded route, and
+       * is not once they are merged: the home chunk now carries the hero, the
+       * work and the four former pages, and there is no reason to assume it
+       * renders inside a second and a half on a cold load or a slow phone.
+       *
+       * Nothing is spent by waiting longer. If the element never appears the
+       * loop exits having done nothing, which is the same outcome, later.
+       */
+      const deadline = start + 6000;
 
       const attempt = () => {
         const now = performance.now();
         if (now - start >= exitMs) {
           const target = document.getElementById(id);
           if (target) {
+            /*
+             * Refresh before aiming, not after.
+             *
+             * ScrollTrigger.refresh() recalculates by saving the scroll offset,
+             * re-measuring, and putting the offset back — and it does that
+             * through references captured when it was imported, so it is
+             * invisible to anything patched onto window later. Run after an
+             * anchor scroll it can therefore quietly undo it, which is the same
+             * hazard the comment on refreshTriggersWhenSettled describes for
+             * scrolls still in flight. Measuring first and aiming second has
+             * neither problem, and there is nothing left to run afterwards.
+             */
+            ScrollTrigger.refresh();
             target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
-            stopRefresh = refreshTriggersWhenSettled();
             return;
           }
           // The anchor never appeared — a stale link, or a heading that has
@@ -222,11 +240,25 @@ const AnimatedRoutes = () => {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<PageTransition><Home /></PageTransition>} />
-        <Route path="/about" element={<PageTransition><About /></PageTransition>} />
-        <Route path="/projects" element={<PageTransition><Projects /></PageTransition>} />
+
+        {/*
+         * About, Projects, Playground and Contact are sections of the home page
+         * now rather than routes, so these four redirect to their anchors.
+         *
+         * They are kept rather than deleted because the addresses are out in the
+         * world — in the nav people have bookmarked, in anything shared, and in
+         * whatever Google has indexed. Deleting a route does not delete the
+         * links to it; it just turns them into a 404. `replace` keeps them out
+         * of the back-button history, so going back from an old /about link
+         * returns to wherever the visitor actually came from.
+         */}
+        <Route path="/about" element={<Navigate to="/#about" replace />} />
+        <Route path="/projects" element={<Navigate to="/#projects" replace />} />
+        <Route path="/playground" element={<Navigate to="/#playground" replace />} />
+        <Route path="/contact" element={<Navigate to="/#contact" replace />} />
+
+        {/* The long-form writing keeps its own addresses. */}
         <Route path="/work/:slug" element={<PageTransition><CaseStudy /></PageTransition>} />
-        <Route path="/playground" element={<PageTransition><Interactive /></PageTransition>} />
-        <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
       </Routes>
     </AnimatePresence>

@@ -5,9 +5,7 @@ import { projects } from "../constants";
 import { caseStudyForProject } from "../constants/caseStudies";
 import CTA from "../Components/CTA";
 import { motion, useScroll, useTransform, useInView, useMotionValue, useSpring } from "framer-motion";
-import AnimatedBackground from "../Components/AnimatedBackground";
 import GlassCard from "../Components/GlassCard";
-import useDocumentMeta from '../hooks/useDocumentMeta';
 
 // Move ProjectCard outside to prevent recreation on every render
 const ProjectCard = ({ project, index, setCursorVariant }) => {
@@ -314,7 +312,6 @@ ProjectCard.propTypes = {
 };
 
 const Projects = () => {
-  useDocumentMeta({ path: '/projects' });
 
   const [activeFilter, setActiveFilter] = useState("All");
   const [filteredProjects, setFilteredProjects] = useState(projects);
@@ -458,8 +455,8 @@ const Projects = () => {
         style={{ width: progressBarWidth }}
       />
       
-      <AnimatedBackground>
-        <section className="w-full pt-24 md:pt-32 px-4 md:px-8 mb-12 md:mb-16" style={{ willChange: 'transform' }}>
+      <div>
+        <section className="w-full pt-12 md:pt-20 px-4 md:px-8 mb-12 md:mb-16" style={{ willChange: 'transform' }}>
           <div className="max-w-6xl mx-auto">
             {/* Hero Section */}
             <motion.div
@@ -693,7 +690,7 @@ const Projects = () => {
             </motion.div>
           </div>
         </section>
-      </AnimatedBackground>
+      </div>
     </div>
   );
 };

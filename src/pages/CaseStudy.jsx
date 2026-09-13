@@ -145,7 +145,7 @@ const CaseStudy = () => {
   }, [anchors]);
 
   // Hooks must run unconditionally, so the redirect happens after them.
-  if (!study) return <Navigate to="/projects" replace />;
+  if (!study) return <Navigate to="/#projects" replace />;
 
   const fade = (delay = 0) =>
     reduce
@@ -175,7 +175,7 @@ const CaseStudy = () => {
 
   return (
     <div className="w-full">
-      <AnimatedBackground>
+      <AnimatedBackground still>
         <div className="w-full pt-28 md:pt-36 pb-16 px-4 md:px-8">
           {/* Below xl this is a plain centred column, exactly as before. From xl
               the outline claims a track of its own beside the prose — there is
@@ -187,7 +187,7 @@ const CaseStudy = () => {
               {/* Back */}
               <motion.div {...fade()}>
                 <Link
-                  to="/projects"
+                  to="/#projects"
                   className="inline-flex items-center gap-2 text-sm text-white/60 hover:text-blue-400 transition-colors mb-8"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

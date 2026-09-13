@@ -28,10 +28,10 @@ const ICONS = {
 
 // Ordered by what a lost visitor most likely wanted.
 const SUGGESTED = [
-  { to: '/projects', label: 'Projects', icon: 'projects' },
-  { to: '/about', label: 'About', icon: 'about' },
-  { to: '/playground', label: 'Playground', icon: 'playground' },
-  { to: '/contact', label: 'Contact', icon: 'contact' },
+  { to: '/#projects', label: 'Projects', icon: 'projects' },
+  { to: '/#about', label: 'About', icon: 'about' },
+  { to: '/#playground', label: 'Playground', icon: 'playground' },
+  { to: '/#contact', label: 'Contact', icon: 'contact' },
 ];
 
 const Icon = ({ name }) => (

@@ -7,10 +7,10 @@ import { useCommandPalette } from '../contexts/commandPalette'
 import { MOD_KEY } from '../utils/platform'
 
 const navItems = [
-  { to: '/about', label: 'About' },
-  { to: '/projects', label: 'Projects' },
-  { to: '/playground', label: 'Playground' },
-  { to: '/contact', label: 'Contact' }
+  { to: '/#about', label: 'About' },
+  { to: '/#projects', label: 'Projects' },
+  { to: '/#playground', label: 'Playground' },
+  { to: '/#contact', label: 'Contact' }
 ]
 
 // Declared at module scope, not inside Navbar. Defining a component inside

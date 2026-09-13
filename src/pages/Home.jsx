@@ -10,6 +10,11 @@ import ScrollReveal from "../Components/ScrollReveal";
 import GlassCard from "../Components/GlassCard";
 import SocialIcon from "../Components/SocialIcon";
 import StackingProjectCards from "../Components/StackingProjectCards";
+// Former routes, now sections of this one. See where they are rendered below.
+import About from "./About";
+import Projects from "./Projects";
+import Interactive from "./Interactive";
+import Contact from "./Contact";
 // Plain SVG — imported directly because it is a couple of hundred bytes and
 // carries no WebGL context, unlike the three.js version it replaced.
 import ServiceIcon from "../Components/ServiceIcon";
@@ -39,7 +44,7 @@ const SERVICES = [
     proof: '+25% platform adoption',
     // Where the claim is substantiated. /about opens on the experience tab by
     // default, which is the Razorpay role in full.
-    to: '/about',
+    to: '/#about',
     linkLabel: 'The work at Razorpay',
   },
   {
@@ -59,7 +64,7 @@ const SERVICES = [
     description:
       'Amazon ML Summer School alumnus. Built an ML-powered fraud detection system for real-time transaction monitoring.',
     proof: 'Top 0.2% of 91,000 applicants',
-    to: '/about',
+    to: '/#about',
     linkLabel: 'Background and coursework',
   },
 ];
@@ -285,7 +290,7 @@ const Home = () => {
                 {/* CTA Buttons — mid-speed parallax layer */}
                 <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-4 justify-center mb-6 sm:mb-8 md:mb-10 px-2 sm:px-4" style={{ y: midY }}>
                   <Link
-                    to="/projects"
+                    to="/#projects"
                     className="w-full sm:w-auto px-6 py-3 sm:px-7 md:px-8 sm:py-3 md:py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 transform hover:translate-y-[-2px] hover:shadow-xl flex items-center justify-center gap-2 text-sm sm:text-base font-medium"
                   >
                     <span>View Projects</span>
@@ -294,7 +299,7 @@ const Home = () => {
                     </svg>
                   </Link>
                   <Link
-                    to="/contact"
+                    to="/#contact"
                     className="w-full sm:w-auto px-6 py-3 sm:px-7 md:px-8 sm:py-3 md:py-4 bg-transparent border border-white/30 text-white rounded-lg hover:bg-white/10 transition-all duration-300 transform hover:translate-y-[-2px] hover:shadow-xl text-sm sm:text-base font-medium"
                   >
                     Contact Me
@@ -420,6 +425,30 @@ const Home = () => {
           
           {/* Horizontal Scroll Project Showcase */}
           <StackingProjectCards />
+
+          {/*
+           * The rest of the site, in order, under one sky.
+           *
+           * These four were routes until now, and each mounted its own
+           * AnimatedBackground — five separate skies, every one of them running
+           * a complete night from dusk to sunrise across its own scroll height.
+           * The background's whole argument is that the page is one night
+           * ending in one sunrise, and five copies of it made that false five
+           * times over; the playground alone fitted a full dusk-to-dawn into
+           * four and a half thousand pixels.
+           *
+           * One page, one night. The anchors are what the nav and the command
+           * palette aim at now — they scroll rather than navigate, so the sky
+           * keeps its place instead of starting the evening again.
+           *
+           * The case studies stay on their own routes. They are the long-form
+           * writing, they are linked from outside, and four of them inlined
+           * here would double a page that is already four and a half screens.
+           */}
+          <section id="about" className="scroll-mt-20"><About /></section>
+          <section id="projects" className="scroll-mt-20"><Projects /></section>
+          <section id="playground" className="scroll-mt-20"><Interactive /></section>
+          <section id="contact" className="scroll-mt-20"><Contact /></section>
         </div>
         
         {/* Sound control — the only persistent floating element left, and

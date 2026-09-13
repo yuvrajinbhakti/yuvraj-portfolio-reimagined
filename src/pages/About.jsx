@@ -7,11 +7,9 @@ import {
 } from "react-vertical-timeline-component";
 import "react-vertical-timeline-component/style.min.css";
 import CTA from "../Components/CTA";
-import AnimatedBackground from "../Components/AnimatedBackground";
 import ScrollReveal from "../Components/ScrollReveal";
 import GlassCard from "../Components/GlassCard";
 import { motion } from "framer-motion";
-import useDocumentMeta from '../hooks/useDocumentMeta';
 import { DrawnName } from '../Components/DrawnUnderline';
 
 // Self-drawing animated SVG timeline accent line
@@ -71,7 +69,6 @@ const AnimatedTimelineLine = ({ itemCount = 4 }) => {
 AnimatedTimelineLine.propTypes = { itemCount: PropTypes.number };
 
 const About = () => {
-  useDocumentMeta({ path: '/about' });
 
   const [activeTab, setActiveTab] = useState("experience");
 
@@ -267,8 +264,8 @@ const About = () => {
 
   return (
     <div className="w-full">
-      <AnimatedBackground>
-        <section className="w-full pt-24 md:pt-32 px-4 md:px-8 mb-12 md:mb-20">
+      <div>
+        <section className="w-full pt-12 md:pt-20 px-4 md:px-8 mb-12 md:mb-20">
           <div className="max-w-6xl mx-auto">
             <ScrollReveal animation="fade">
               <div className="flex flex-col items-center">
@@ -453,7 +450,7 @@ const About = () => {
             </div>
           </div>
         </section>
-      </AnimatedBackground>
+      </div>
     </div>
   );
 };

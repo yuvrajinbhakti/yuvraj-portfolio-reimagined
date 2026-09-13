@@ -1,14 +1,10 @@
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import AnimatedBackground from "../Components/AnimatedBackground";
 import ScrollReveal from "../Components/ScrollReveal";
 import GlassCard from "../Components/GlassCard";
 import { sendContactEmail, isEmailJSConfigured, createMailtoLink } from "../utils/emailService";
-import useDocumentMeta from '../hooks/useDocumentMeta';
 
 const Contact = () => {
-  useDocumentMeta({ path: '/contact' });
-
   const formRef = useRef(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -91,8 +87,8 @@ const Contact = () => {
 
   return (
     <div className="w-full">
-      <AnimatedBackground>
-        <section className="w-full pt-24 md:pt-32 px-4 md:px-8 mb-12 md:mb-20">
+      <div>
+        <section className="w-full pt-12 md:pt-20 px-4 md:px-8 mb-12 md:mb-20">
           <div className="max-w-6xl mx-auto">
             <ScrollReveal animation="fade">
               <motion.h1 
@@ -346,7 +342,7 @@ const Contact = () => {
             </div>
           </div>
         </section>   
-      </AnimatedBackground>
+      </div>
     </div>
   );
 };

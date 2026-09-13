@@ -22,7 +22,17 @@ import { setSkyTime, resetSkyTime } from '../utils/skyClock';
 import PropTypes from 'prop-types';
 import { useReducedMotion } from 'framer-motion';
 
-const AnimatedBackground = ({ children }) => {
+/*
+ * `still` pins the sky instead of running the night across the scroll.
+ *
+ * The scroll-driven night is the argument the home page makes, and it is the
+ * wrong thing underneath a case study. Those pages are long-form reading, and
+ * a sunrise arriving under the text while somebody is halfway through a
+ * paragraph is an animation competing with prose. Held at the darkest point of
+ * the night they get the star field, which is what the background was for
+ * before any of this, and nothing that moves.
+ */
+const AnimatedBackground = ({ children, still = false }) => {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
   const reduce = useReducedMotion();
@@ -196,6 +206,9 @@ const AnimatedBackground = ({ children }) => {
       // Somebody who has asked their system for less motion has not asked for a
       // sky that runs at a thousand times real speed under their thumb. They get
       // the top of the page, held still: the same dusk everyone else opens on.
+      // Held pages sit at solar midnight — the darkest the sky gets, and the
+      // one moment of the night that is not on its way somewhere.
+      if (still) return timeline ? timeline.deepest.getTime() : nightAt;
       if (reduce) return nightAt;
 
       if (!timeline) return nightAt;
@@ -419,7 +432,7 @@ const AnimatedBackground = ({ children }) => {
      */
     const HORIZON_DROP = 26;
     const horizonTilt = (depth) => {
-      if (reduce) return 0;
+      if (reduce || still) return 0;
       const t = Math.max(0, Math.min(1, (depth - 0.6) / 0.4));
       return t * t * HORIZON_DROP;
     };
@@ -447,7 +460,7 @@ const AnimatedBackground = ({ children }) => {
      * the page reads as a scroll that ran out rather than a view that settled.
      */
     const viewAzimuth = (depth) => {
-      if (reduce) return VIEW_AZIMUTH;
+      if (reduce || still) return VIEW_AZIMUTH;
       const t = Math.max(0, Math.min(1, (depth - 0.55) / 0.45));
       const eased = t * t * (3 - 2 * t);
       // Signed shortest way round, so it turns east through south-east rather
@@ -2013,7 +2026,7 @@ const AnimatedBackground = ({ children }) => {
       if (stillFrame !== null) cancelAnimationFrame(stillFrame);
       if (meteorTimeoutId !== null) clearTimeout(meteorTimeoutId);
     };
-  }, [reduce]);
+  }, [reduce, still]);
   
   // NOTE: 3D perspective transform removed — it was creating a stacking context
   // that prevented native vertical scrolling on the page.
@@ -2050,6 +2063,7 @@ const AnimatedBackground = ({ children }) => {
 
 AnimatedBackground.propTypes = {
   children: PropTypes.node,
+  still: PropTypes.bool,
 };
 
 export default AnimatedBackground; 

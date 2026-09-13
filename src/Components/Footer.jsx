@@ -237,7 +237,7 @@ const Footer = () => {
                     {study.title}
                   </Link>
                 ))}
-                <Link to="/projects" className="group relative inline-block w-fit py-1 -my-1 text-white/65 hover:text-white transition-colors text-sm after:absolute after:left-0 after:right-0 after:bottom-[2px] after:h-px after:bg-blue-400 after:origin-left after:scale-x-0 after:transition-transform after:duration-300 hover:after:scale-x-100">
+                <Link to="/#projects" className="group relative inline-block w-fit py-1 -my-1 text-white/65 hover:text-white transition-colors text-sm after:absolute after:left-0 after:right-0 after:bottom-[2px] after:h-px after:bg-blue-400 after:origin-left after:scale-x-0 after:transition-transform after:duration-300 hover:after:scale-x-100">
                   All projects
                 </Link>
               </nav>

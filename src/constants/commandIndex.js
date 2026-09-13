@@ -50,28 +50,28 @@ const PAGES = [
     keywords: `resume cv bio career experience razorpay amazon timeline ${skills
       .map((s) => s.name)
       .join(' ')}`,
-    to: '/about',
+    to: '/#about',
   },
   {
     id: 'page:/projects',
     title: 'Projects',
     subtitle: 'Selected engineering work, with case studies',
     keywords: 'work portfolio builds repos github side projects',
-    to: '/projects',
+    to: '/#projects',
   },
   {
     id: 'page:/playground',
     title: 'Playground',
     subtitle: 'A live code editor and an interactive terminal',
     keywords: 'demo sandbox repl editor terminal shell try run interactive',
-    to: '/playground',
+    to: '/#playground',
   },
   {
     id: 'page:/contact',
     title: 'Contact',
     subtitle: 'Get in touch about roles or collaboration',
     keywords: 'email hire reach out message availability roles job',
-    to: '/contact',
+    to: '/#contact',
   },
 ].map((p) => ({ ...p, type: 'page', group: 'Pages', hint: 'Page', run: { kind: 'navigate', to: p.to } }));
 
