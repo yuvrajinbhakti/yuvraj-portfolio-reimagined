@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { projects } from "../constants";
 import { caseStudyForProject } from "../constants/caseStudies";
-import CTA from "../Components/CTA";
 import { motion, useScroll, useTransform, useInView, useMotionValue, useSpring } from "framer-motion";
 import GlassCard from "../Components/GlassCard";
 
@@ -522,7 +521,11 @@ const Projects = () => {
                     86.4px the class implies. Had it applied it would have made
                     this worse, by shortening the line box further. */}
                 <div className="overflow-hidden mb-1">
-                  <motion.h1
+                  {/* h2, not h1. Each of these was the title of its own route, and one h1
+                    per document is the whole point of h1 — five of them on one page
+                    leaves a screen reader's heading list with five competing titles
+                    and no outline. The hero keeps the only h1 on the page. */}
+                <motion.h2
                     className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight pb-[0.12em]"
                     initial={{ y: 80 }}
                     animate={{ y: 0 }}
@@ -532,7 +535,7 @@ const Projects = () => {
                     <span className="text-white">
                       Projects
                     </span>
-                  </motion.h1>
+                  </motion.h2>
                 </div>
 
                 {/* Animated underline */}
@@ -678,16 +681,12 @@ const Projects = () => {
               </motion.div>
             )}
 
-            {/* Simplified CTA Section */}
-            <motion.div 
-              className="mt-16 md:mt-20"
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.6 }}
-            >
-              <CTA />
-            </motion.div>
+            {/* The CTA that used to close this page is gone, as it is in About.
+                It earned its place when Projects was a route and this was the
+                bottom of it. On one page it lands at about three-quarters of the
+                way down and asks the reader to get in touch with the playground
+                and the actual contact section still ahead — the second identical
+                ask before the real one. The end of the page does this once. */}
           </div>
         </section>
       </div>

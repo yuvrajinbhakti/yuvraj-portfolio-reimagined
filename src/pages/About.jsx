@@ -1,14 +1,12 @@
 import { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
-import { skills, experiences, RESUME_URL } from "../constants";
+import { skills, experiences } from "../constants";
 import {
   VerticalTimeline,
   VerticalTimelineElement,
 } from "react-vertical-timeline-component";
 import "react-vertical-timeline-component/style.min.css";
-import CTA from "../Components/CTA";
 import ScrollReveal from "../Components/ScrollReveal";
-import GlassCard from "../Components/GlassCard";
 import { motion } from "framer-motion";
 import { DrawnName } from '../Components/DrawnUnderline';
 
@@ -269,7 +267,11 @@ const About = () => {
           <div className="max-w-6xl mx-auto">
             <ScrollReveal animation="fade">
               <div className="flex flex-col items-center">
-                <motion.h1 
+                {/* h2, not h1. Each of these was the title of its own route, and one h1
+                    per document is the whole point of h1 — five of them on one page
+                    leaves a screen reader's heading list with five competing titles
+                    and no outline. The hero keeps the only h1 on the page. */}
+                <motion.h2 
                   className="text-5xl font-bold mb-6 text-center"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -277,7 +279,7 @@ const About = () => {
                 >
                   Hello, I&apos;m{" "}
                   <DrawnName className="text-blue-400" double>Yuvraj</DrawnName>
-                </motion.h1>
+                </motion.h2>
                 
                 {/* Left-aligned prose, not a centred one-liner. This is the one
                     page where the reader wants to know who you are, and it
@@ -327,12 +329,23 @@ const About = () => {
               <div className="w-full max-w-4xl mx-auto mb-16">
                 <h2 className="text-3xl font-bold text-white mb-8 text-center">My Skills</h2>
                 
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-6 justify-items-center">
+                {/* Flex rather than grid, so the last row centres.
+                    A grid places every item in a column, so a final row that
+                    does not fill sits hard against the left edge — with fourteen
+                    skills in six columns the last two ended up under the first
+                    two, reading as a mistake rather than a row.
+                    The basis fractions reproduce the same three, four and six
+                    per row the grid columns gave, and the horizontal gap moved
+                    into the items as padding: six times one sixth is exactly a
+                    hundred per cent, so any gap on top of that would wrap the
+                    sixth item on its own. */}
+                <div className="flex flex-wrap justify-center gap-y-6">
                   {skills.map((skill, index) => (
                     <ScrollReveal
                       key={skill.name}
                       animation="scale"
                       delay={index * 0.05}
+                      className="basis-1/3 sm:basis-1/4 md:basis-1/6 flex justify-center px-3"
                     >
                       <div className="flex flex-col items-center group">
                         <div className="w-16 h-16 rounded-xl flex justify-center items-center bg-[#0f172a]/60 backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-110 border border-blue-500/20">
@@ -402,52 +415,17 @@ const About = () => {
               </div>
             </ScrollReveal>
 
-            {/* Social Links */}
-            <ScrollReveal animation="fade" delay={0.5}>
-              <GlassCard className="max-w-3xl mx-auto mt-12 sm:mt-16 p-4 sm:p-6 md:p-8">
-                <h2 className="text-xl sm:text-2xl md:text-2xl font-bold text-white mb-4 sm:mb-6 md:mb-6 text-center">Connect with Me</h2>
-                <div className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-6 md:gap-8">
-                  <a
-                    href="https://www.linkedin.com/in/yuvraj-singh-nain-76715921b/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full sm:w-auto flex items-center justify-center gap-2 sm:gap-3 text-blue-400 hover:text-blue-300 transition-all duration-300 transform hover:scale-105 px-4 py-3 sm:px-6 sm:py-3 rounded-lg hover:bg-blue-500/10 border border-blue-500/20 hover:border-blue-500/40 backdrop-blur-sm font-medium text-sm sm:text-base"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" className="sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-                    </svg>
-                    <span>LinkedIn</span>
-                  </a>
-                  <a
-                    href="https://github.com/yuvrajinbhakti"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full sm:w-auto flex items-center justify-center gap-2 sm:gap-3 text-gray-300 hover:text-white transition-all duration-300 transform hover:scale-105 px-4 py-3 sm:px-6 sm:py-3 rounded-lg hover:bg-gray-500/10 border border-gray-500/20 hover:border-gray-500/40 backdrop-blur-sm font-medium text-sm sm:text-base"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" className="sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                    </svg>
-                    <span>GitHub</span>
-                  </a>
-                  <a
-                    href={RESUME_URL}
-                    download
-                    className="w-full sm:w-auto flex items-center justify-center gap-2 sm:gap-3 text-green-400 hover:text-green-300 transition-all duration-300 transform hover:scale-105 px-4 py-3 sm:px-6 sm:py-3 rounded-lg hover:bg-green-500/10 border border-green-500/20 hover:border-green-500/40 backdrop-blur-sm font-medium text-sm sm:text-base"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" className="sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                      <polyline points="7 10 12 15 17 10"></polyline>
-                      <line x1="12" y1="15" x2="12" y2="3"></line>
-                    </svg>
-                    <span>Resume</span>
-                  </a>
-                </div>
-              </GlassCard>
-            </ScrollReveal>
+            {/* The social card that sat here is gone with the CTA below it.
+                Three ways to reach him inside the About section, at the halfway
+                point of a page whose last section is Contact — and the footer
+                carries the same three links on every screen. Repetition is not
+                emphasis; it just makes the real one arrive as the fourth ask. */}
 
-            <div className="mt-16">
-              <CTA />
-            </div>
+            {/* The CTA that used to close this page is gone. It made sense
+                when About was a route and this was the bottom of it; on one page
+                it asked the reader to get in touch at the halfway mark, with the
+                projects, the playground and the actual contact section still
+                below. The end of the page does that job once. */}
           </div>
         </section>
       </div>

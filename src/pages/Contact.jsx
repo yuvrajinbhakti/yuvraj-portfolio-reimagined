@@ -91,14 +91,18 @@ const Contact = () => {
         <section className="w-full pt-12 md:pt-20 px-4 md:px-8 mb-12 md:mb-20">
           <div className="max-w-6xl mx-auto">
             <ScrollReveal animation="fade">
-              <motion.h1 
+              {/* h2, not h1. Each of these was the title of its own route, and one h1
+                    per document is the whole point of h1 — five of them on one page
+                    leaves a screen reader's heading list with five competing titles
+                    and no outline. The hero keeps the only h1 on the page. */}
+                <motion.h2 
                 className="text-5xl font-bold text-center mb-2 text-white"
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
               >
                 Get In <span className="text-blue-400">Touch</span>
-              </motion.h1>
+              </motion.h2>
               <motion.p 
                 className="text-lg text-center mb-12 text-gray-300"
                 initial={{ opacity: 0 }}

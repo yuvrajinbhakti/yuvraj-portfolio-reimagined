@@ -78,9 +78,13 @@ const Interactive = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <h1 className="text-5xl md:text-7xl font-bold mb-6 text-white">
+              {/* h2, not h1. Each of these was the title of its own route, and one h1
+                    per document is the whole point of h1 — five of them on one page
+                    leaves a screen reader's heading list with five competing titles
+                    and no outline. The hero keeps the only h1 on the page. */}
+                <h2 className="text-5xl md:text-7xl font-bold mb-6 text-white">
                 Developer Playground
-              </h1>
+              </h2>
               <motion.p 
                 className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto"
                 initial={{ opacity: 0 }}
