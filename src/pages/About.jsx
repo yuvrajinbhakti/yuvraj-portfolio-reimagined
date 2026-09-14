@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
-import { skills, experiences } from "../constants";
+import { experiences } from "../constants";
 import {
   VerticalTimeline,
   VerticalTimelineElement,
@@ -277,7 +277,7 @@ const About = () => {
                     leaves a screen reader's heading list with five competing titles
                     and no outline. The hero keeps the only h1 on the page. */}
                 <motion.h2 
-                  className="text-5xl font-bold mb-6 text-center"
+                  className="text-3xl md:text-4xl font-bold mb-6 text-center"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
@@ -329,58 +329,15 @@ const About = () => {
               </div>
             </ScrollReveal>
 
-            {/* Skills Section */}
-            <ScrollReveal animation="fade">
-              <div className="w-full max-w-4xl mx-auto mb-16">
-                <h2 className="text-3xl font-bold text-white mb-8 text-center">My Skills</h2>
-                
-                {/* Flex rather than grid, so the last row centres.
-                    A grid places every item in a column, so a final row that
-                    does not fill sits hard against the left edge — with fourteen
-                    skills in six columns the last two ended up under the first
-                    two, reading as a mistake rather than a row.
-                    The basis fractions reproduce the same three, four and six
-                    per row the grid columns gave, and the horizontal gap moved
-                    into the items as padding: six times one sixth is exactly a
-                    hundred per cent, so any gap on top of that would wrap the
-                    sixth item on its own. */}
-                <div className="flex flex-wrap justify-center gap-y-6">
-                  {skills.map((skill, index) => (
-                    <ScrollReveal
-                      key={skill.name}
-                      animation="scale"
-                      delay={index * 0.05}
-                      className="basis-1/3 sm:basis-1/4 md:basis-1/6 flex justify-center px-3"
-                    >
-                      <div className="flex flex-col items-center group">
-                        {/* bg-[#0f172a]/75 rather than /60 with a backdrop-blur.
-                            Fourteen 64x64 tiles each holding a compositing layer
-                            that re-blurs whenever the sky canvas behind them
-                            repaints — and at 60% opacity over a dark sky there
-                            was almost nothing left to see through in the first
-                            place. The extra opacity reads the same and costs
-                            nothing per frame. */}
-                        <div className="w-16 h-16 rounded-xl flex justify-center items-center bg-[#0f172a]/75 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-110 border border-blue-500/20">
-                          <img
-                            src={skill.imageUrl}
-                            loading="lazy"
-                            decoding="async"
-                            alt={skill.name}
-                            className={`w-8 h-8 object-contain ${
-                              skill.tone === 'invert' ? 'icon-invert' : skill.tone === 'lift' ? 'icon-lift' : ''
-                            }`}
-                          />
-                        </div>
-                        <span className="mt-2 text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          {skill.name}
-                        </span>
-                      </div>
-                    </ScrollReveal>
-                  ))}
-                </div>
-              </div>
-            </ScrollReveal>
-            
+            {/* The skills wall went. Fourteen logos with the names hidden until
+                hover is the one section every template portfolio has and the
+                one no reader learns anything from: "React" as a picture says
+                less than the paragraph above it, which says React in production
+                for sixteen thousand merchants. The stack is named where it did
+                something — in the prose here, on each project card, and in the
+                case studies — which is the only place a technology means
+                anything. */}
+
             {/* Experience/Education/Achievements Tabs */}
             <ScrollReveal animation="fade">
               <div className="w-full max-w-4xl mx-auto">

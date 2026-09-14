@@ -247,12 +247,12 @@ const Footer = () => {
                   <Link
                     key={study.slug}
                     to={`/work/${study.slug}`}
-                    className="group relative inline-block w-fit py-1 -my-1 text-white/65 hover:text-white transition-colors text-sm after:absolute after:left-0 after:right-0 after:bottom-[2px] after:h-px after:bg-blue-400 after:origin-left after:scale-x-0 after:transition-transform after:duration-300 hover:after:scale-x-100"
+                    className="group relative inline-flex items-center min-h-[44px] w-fit py-1 -my-1 text-white/65 hover:text-white transition-colors text-sm after:absolute after:left-0 after:right-0 after:bottom-[2px] after:h-px after:bg-blue-400 after:origin-left after:scale-x-0 after:transition-transform after:duration-300 hover:after:scale-x-100"
                   >
                     {study.title}
                   </Link>
                 ))}
-                <Link to="/#projects" className="group relative inline-block w-fit py-1 -my-1 text-white/65 hover:text-white transition-colors text-sm after:absolute after:left-0 after:right-0 after:bottom-[2px] after:h-px after:bg-blue-400 after:origin-left after:scale-x-0 after:transition-transform after:duration-300 hover:after:scale-x-100">
+                <Link to="/#projects" className="group relative inline-flex items-center min-h-[44px] w-fit py-1 -my-1 text-white/65 hover:text-white transition-colors text-sm after:absolute after:left-0 after:right-0 after:bottom-[2px] after:h-px after:bg-blue-400 after:origin-left after:scale-x-0 after:transition-transform after:duration-300 hover:after:scale-x-100">
                   All projects
                 </Link>
               </nav>
@@ -273,7 +273,7 @@ const Footer = () => {
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group inline-flex w-fit items-center gap-2.5 py-1 -my-1 text-white/65 hover:text-white transition-colors duration-200 text-sm"
+                    className="group inline-flex w-fit items-center gap-2.5 min-h-[44px] py-1 -my-1 text-white/65 hover:text-white transition-colors duration-200 text-sm"
                   >
                     <span className="text-white/35 transition-colors group-hover:text-blue-300" aria-hidden="true">
                       {social.icon}

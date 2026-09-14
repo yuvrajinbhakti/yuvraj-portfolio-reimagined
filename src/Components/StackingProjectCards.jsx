@@ -113,7 +113,7 @@ const ProjectCard = ({ project }) => {
             {study && (
               <Link
                 to={`/work/${study.slug}`}
-                className="inline-flex items-center gap-1.5 py-1.5 -my-1.5 text-white hover:text-blue-300 transition-colors text-sm font-semibold"
+                className="inline-flex items-center gap-1.5 min-h-[44px] py-1.5 -my-1.5 text-white hover:text-blue-300 transition-colors text-sm font-semibold"
               >
                 Read case study
                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -126,7 +126,7 @@ const ProjectCard = ({ project }) => {
                 href={project.source_code_link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 py-1.5 -my-1.5 text-blue-400 hover:text-blue-300 transition-colors text-sm font-medium"
+                className="inline-flex items-center gap-1.5 min-h-[44px] py-1.5 -my-1.5 text-blue-400 hover:text-blue-300 transition-colors text-sm font-medium"
               >
                 Code
               </a>
@@ -136,7 +136,7 @@ const ProjectCard = ({ project }) => {
                 href={demoUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 py-1.5 -my-1.5 text-emerald-400 hover:text-emerald-300 transition-colors text-sm font-medium"
+                className="inline-flex items-center gap-1.5 min-h-[44px] py-1.5 -my-1.5 text-emerald-400 hover:text-emerald-300 transition-colors text-sm font-medium"
               >
                 {demoLabel}
               </a>
@@ -164,7 +164,7 @@ ProjectCard.propTypes = {
 
 const SectionHeading = () => (
   <div className="text-center mb-10 md:mb-14">
-    <h2 className="text-3xl md:text-5xl font-bold text-white mb-3">
+    <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
       Featured <span className="text-blue-400">Work</span>
     </h2>
     <p className="text-white/60 text-base md:text-lg max-w-xl mx-auto">
@@ -173,25 +173,45 @@ const SectionHeading = () => (
   </div>
 );
 
-const ViewAll = () => (
-  <div className="text-center mt-10">
-    <Link
-      to="/#projects"
-      className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-    >
-      View all projects
-      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-      </svg>
-    </Link>
-  </div>
-);
-
 // Four is enough to establish range without turning the landing page into a
-// tunnel; the rest live on /projects. The order is chosen so those four carry
-// all three case studies, and so ot-core sits directly beneath the editor it
-// was extracted from — the write-ups read in that order.
+// tunnel. The order is chosen so those four carry all the case studies, and so
+// ot-core sits directly beneath the editor it was extracted from — the
+// write-ups read in that order.
 const FEATURED_COUNT = 4;
+
+/**
+ * The rest, as a line rather than a grid.
+ *
+ * This replaced a "View all projects" button that led to a second project
+ * section further down the same page — seven cards, thirty-one filter chips
+ * and a counter reading "7 projects · 31 technologies · 100% open source",
+ * of which the first four were these same four again. The three that were
+ * only there are a rental-site rebuild, a Dockerised Node template and a code
+ * scaffolder: real, and on GitHub, and not the work this page is about. A
+ * card each would say they are; one quiet line says they exist.
+ */
+const AlsoBuilt = () => {
+  const rest = projects.slice(FEATURED_COUNT).filter((p) => p.source_code_link);
+  if (rest.length === 0) return null;
+  return (
+    <p className="mt-10 text-center text-sm text-white/45 leading-relaxed">
+      <span className="text-white/60">Also on GitHub:</span>{' '}
+      {rest.map((p, i) => (
+        <span key={p.id}>
+          <a
+            href={p.source_code_link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center min-h-[44px] -my-3 px-1 text-white/70 hover:text-white underline decoration-white/20 underline-offset-4 hover:decoration-blue-400 transition-colors"
+          >
+            {p.name}
+          </a>
+          {i < rest.length - 1 && <span aria-hidden="true"> · </span>}
+        </span>
+      ))}
+    </p>
+  );
+};
 
 const StackingProjectCards = () => {
   const reduce = useReducedMotion();
@@ -212,7 +232,7 @@ const StackingProjectCards = () => {
         <div className="container mx-auto max-w-6xl">
           <SectionHeading />
           {grid}
-          <ViewAll />
+          <AlsoBuilt />
         </div>
       </section>
     );
@@ -237,7 +257,7 @@ const StackingProjectCards = () => {
           ))}
         </ul>
 
-        <ViewAll />
+        <AlsoBuilt />
       </div>
     </section>
   );

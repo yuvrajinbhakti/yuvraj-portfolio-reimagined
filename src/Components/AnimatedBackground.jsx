@@ -858,13 +858,54 @@ const AnimatedBackground = ({ children, still = false }) => {
       window.matchMedia('(pointer: fine)').matches;
 
     const onPointerMove = (e) => {
+      // A finger dragging is a scroll, not a hover. Naming whatever star it
+      // happens to pass over would put labels under every swipe.
+      if (e.pointerType === 'touch') return;
       // The canvas is fixed at the viewport origin, so client coordinates are
       // already canvas coordinates. No getBoundingClientRect per move.
       pointer = { x: e.clientX, y: e.clientY };
       requestPaintIfStill();
     };
-    const onPointerLeave = () => {
+    const onPointerLeave = (e) => {
+      // A touch pointer "leaves" the moment the finger lifts, which is right
+      // after the tap that set it. Touch has its own lifetime below.
+      if (e?.pointerType === 'touch') return;
       pointer = null;
+      requestPaintIfStill();
+    };
+
+    /*
+     * Tap to name, on touch.
+     *
+     * The sky had no touch handling at all: hover named a star, and a phone
+     * has no hover, so the one interaction the star field offered did not
+     * exist for the visitors most likely to be looking at it in the dark.
+     *
+     * click rather than pointerdown, because pointerdown is also the first
+     * event of every scroll, and a label flashing at the start of each swipe
+     * is noise. A click on touch only fires for a real tap. It carries no
+     * pointerType in every browser, so the type is remembered from the
+     * pointerdown that preceded it. Taps on controls are left alone — the
+     * canvas is pointer-events-none, so the target is whatever the finger
+     * was actually on, and a link should stay a link.
+     *
+     * The label holds for a few seconds and lets go, which is the touch
+     * equivalent of moving the cursor away.
+     */
+    let lastPointerType = 'mouse';
+    let tapTimer = null;
+    const onPointerDown = (e) => {
+      lastPointerType = e.pointerType || 'mouse';
+    };
+    const onTap = (e) => {
+      if (lastPointerType !== 'touch') return;
+      if (e.target?.closest?.('a, button, input, textarea, select, label, [role="button"], [contenteditable]')) return;
+      pointer = { x: e.clientX, y: e.clientY };
+      clearTimeout(tapTimer);
+      tapTimer = setTimeout(() => {
+        pointer = null;
+        requestPaintIfStill();
+      }, 3500);
       requestPaintIfStill();
     };
 
@@ -2132,6 +2173,8 @@ const AnimatedBackground = ({ children, still = false }) => {
     if (finePointer) {
       window.addEventListener('pointermove', onPointerMove, { passive: true });
       document.documentElement.addEventListener('pointerleave', onPointerLeave);
+      window.addEventListener('pointerdown', onPointerDown, { passive: true });
+      window.addEventListener('click', onTap);
     }
 
     // Start animation and meteors. `animate` paints one frame either way; only
@@ -2149,6 +2192,9 @@ const AnimatedBackground = ({ children, still = false }) => {
       window.removeEventListener('resize', updateDimensions);
       window.removeEventListener('pointermove', onPointerMove);
       document.documentElement.removeEventListener('pointerleave', onPointerLeave);
+      window.removeEventListener('pointerdown', onPointerDown);
+      window.removeEventListener('click', onTap);
+      clearTimeout(tapTimer);
       if (rafId !== null) cancelAnimationFrame(rafId);
       if (stillFrame !== null) cancelAnimationFrame(stillFrame);
       if (meteorTimeoutId !== null) clearTimeout(meteorTimeoutId);

@@ -287,6 +287,26 @@ const ScrollManager = () => {
   return null;
 };
 
+/*
+ * Old route -> its section on the one page, keeping the rest of the address.
+ *
+ * `<Navigate to="/#playground" />` threw away everything but the path. The
+ * case studies link to `/playground?example=operational-transform#code-playground`
+ * — the query names the example to load and the hash names the editor, which
+ * sits 1,800px below the top of the playground section — and both were being
+ * dropped, so "Run the algorithm" landed on the section heading with the
+ * default example loaded. The hash is kept if the link supplied one, because
+ * it is more specific than the section; the section id is only the fallback.
+ */
+const SectionRedirect = ({ section }) => {
+  const { search, hash } = useLocation();
+  return <Navigate to={`/${search}${hash || `#${section}`}`} replace />;
+};
+
+SectionRedirect.propTypes = {
+  section: PropTypes.string.isRequired,
+};
+
 // Animated routes with location-keyed transitions
 const AnimatedRoutes = () => {
   const location = useLocation();
@@ -306,10 +326,10 @@ const AnimatedRoutes = () => {
          * of the back-button history, so going back from an old /about link
          * returns to wherever the visitor actually came from.
          */}
-        <Route path="/about" element={<Navigate to="/#about" replace />} />
-        <Route path="/projects" element={<Navigate to="/#projects" replace />} />
-        <Route path="/playground" element={<Navigate to="/#playground" replace />} />
-        <Route path="/contact" element={<Navigate to="/#contact" replace />} />
+        <Route path="/about" element={<SectionRedirect section="about" />} />
+        <Route path="/projects" element={<SectionRedirect section="projects" />} />
+        <Route path="/playground" element={<SectionRedirect section="playground" />} />
+        <Route path="/contact" element={<SectionRedirect section="contact" />} />
 
         {/* The long-form writing keeps its own addresses. */}
         <Route path="/work/:slug" element={<PageTransition><CaseStudy /></PageTransition>} />

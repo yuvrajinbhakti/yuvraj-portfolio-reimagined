@@ -144,16 +144,6 @@ const PLAYGROUND = [
     hint: 'Playground',
     run: { kind: 'navigate', to: `/playground?example=${example.key}#code-playground` },
   })),
-  {
-    id: 'example:terminal',
-    type: 'playground',
-    group: 'Playground',
-    title: 'Interactive Terminal',
-    subtitle: 'A shell that answers questions about my background',
-    keywords: 'shell cli console ask help commands bash prompt',
-    hint: 'Playground',
-    run: { kind: 'navigate', to: '/playground#interactive-terminal' },
-  },
 ];
 
 const ACTIONS = [

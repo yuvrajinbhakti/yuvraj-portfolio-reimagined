@@ -12,7 +12,6 @@ import SocialIcon from "../Components/SocialIcon";
 import StackingProjectCards from "../Components/StackingProjectCards";
 // Former routes, now sections of this one. See where they are rendered below.
 import About from "./About";
-import Projects from "./Projects";
 import Interactive from "./Interactive";
 import Contact from "./Contact";
 // Plain SVG — imported directly because it is a couple of hundred bytes and
@@ -318,7 +317,7 @@ const Home = () => {
                       // layout: without a label to give it height the pill came
                       // to 38px, and centring matters once the icon is the whole
                       // content. Desktop already clears 44 from sm:py-3.
-                      className="group flex items-center justify-center gap-2 min-h-[44px] px-4 py-2.5 sm:px-5 sm:py-3 rounded-full bg-white/5 backdrop-blur-md border border-white/10 hover:border-white/25 hover:bg-white/10 transition-all duration-300"
+                      className="group flex items-center justify-center gap-2 min-h-[44px] px-4 py-2.5 sm:px-5 sm:py-3 rounded-full bg-white/10 border border-white/10 hover:border-white/25 hover:bg-white/15 transition-all duration-300"
                       aria-label={link.name}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -398,7 +397,7 @@ const Home = () => {
           <section className="py-12 md:py-20 px-4 md:px-8 relative" id="featured-section">
             <div className="container mx-auto">
               <ScrollReveal animation="fade">
-                <h2 className="text-2xl md:text-4xl font-bold text-center text-white mb-12 md:mb-16">
+                <h2 className="text-3xl md:text-4xl font-bold text-center text-white mb-12 md:mb-16">
                   What I <span className="text-blue-400">Do</span>
                 </h2>
               </ScrollReveal>
@@ -423,8 +422,18 @@ const Home = () => {
             </div>
           </section>
           
-          {/* Horizontal Scroll Project Showcase */}
-          <StackingProjectCards />
+          <section id="about" className="scroll-mt-20"><About /></section>
+
+          {/* The one project section.
+              There were two: this stack of four, and a second grid of seven
+              underneath About that repeated these same four with thirty-one
+              filter chips and a stats counter on top. Same work, shown twice,
+              with the weaker presentation second. The four with case studies
+              are the projects; the other three are a line at the bottom of the
+              stack, which is all a Docker template and a rental site rebuild
+              can carry next to a platform sixteen thousand merchants use.
+              About sits above so the page runs in the nav's order. */}
+          <section id="projects" className="scroll-mt-20"><StackingProjectCards /></section>
 
           {/*
            * The rest of the site, in order, under one sky.
@@ -445,8 +454,6 @@ const Home = () => {
            * writing, they are linked from outside, and four of them inlined
            * here would double a page that is already four and a half screens.
            */}
-          <section id="about" className="scroll-mt-20"><About /></section>
-          <section id="projects" className="scroll-mt-20"><Projects /></section>
           <section id="playground" className="scroll-mt-20"><Interactive /></section>
           <section id="contact" className="scroll-mt-20"><Contact /></section>
         </div>
@@ -464,7 +471,7 @@ const Home = () => {
                region smaller than the blur radius, and this one is position:
                fixed over the sky canvas — so it was re-blurring a repainting
                surface for every frame of the whole visit. */
-            className={`w-9 h-9 rounded-full flex items-center justify-center border transition-all duration-300 ${
+            className={`w-11 h-11 rounded-full flex items-center justify-center border transition-all duration-300 ${
               isPlayingMusic
                 ? 'bg-white/15 border-white/25 opacity-90'
                 : 'bg-white/10 border-white/10 opacity-40 hover:opacity-90 hover:border-white/25'

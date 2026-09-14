@@ -256,7 +256,12 @@ const TextEffect = () => {
           // for small text, and applying them at 60px is what makes display
           // type read as untreated. The size scale now carries its own optical
           // tracking and line height, so this just gets out of the way.
-          className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-6xl font-bold text-white"
+          // 36px at the smallest width, not 24. The h1 is the one line the
+          // page exists to say, and at 24px on a phone it was smaller than
+          // several section headings further down — and than the subtitle's
+          // own line-height would suggest. Three steps, not six: nothing
+          // between 640 and 768 or above 1024 needed its own size.
+          className="text-4xl sm:text-5xl md:text-6xl font-bold text-white"
           delay={0.5}
           staggerDelay={0.05}
         />

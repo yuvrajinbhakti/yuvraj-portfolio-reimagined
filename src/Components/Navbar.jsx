@@ -55,7 +55,7 @@ const NavItem = ({ to, label, active = false, onClick }) => (
     aria-current={active ? 'true' : undefined}
     onClick={onClick}
     className={`
-      relative py-2 block text-center md:text-left transition-colors duration-200
+      relative flex items-center justify-center md:justify-start min-h-[44px] py-2 transition-colors duration-200
       ${active ? 'text-white' : 'text-white/60 hover:text-white'}
       after:absolute after:left-0 after:right-0 after:-bottom-0.5 after:h-px
       after:bg-blue-400 after:origin-left after:transition-transform after:duration-300
@@ -276,7 +276,7 @@ const Navbar = () => {
           onMouseLeave={() => setMarkHovered(false)}
           onFocus={() => setMarkHovered(true)}
           onBlur={() => setMarkHovered(false)}
-          className="wordmark relative inline-block text-xl font-bold text-white hover:text-blue-300 transition-colors duration-200"
+          className="wordmark relative inline-flex items-center min-h-[44px] text-xl font-bold text-white hover:text-blue-300 transition-colors duration-200"
         >
           <DrawnUnderline
             drawOnMount={false}

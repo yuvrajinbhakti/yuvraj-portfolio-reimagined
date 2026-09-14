@@ -236,7 +236,11 @@ const CodePlayground = () => {
         {/* Professional Header */}
         <div className="bg-gray-900 border-b border-gray-700">
           {/* Compact Top Bar */}
-          <div className="px-6 py-2 flex items-center justify-between">
+          {/* flex-wrap, and the height slider only from sm up. On a 375px phone
+              the run button, three layout toggles, theme, fullscreen and the
+              slider came to 450px on one unwrapping line, so the last controls
+              sat past the right edge where nothing could reach them. */}
+          <div className="px-4 sm:px-6 py-2 flex flex-wrap items-center justify-between gap-y-2">
             {/* <div className="flex items-center gap-3"> */}
               {/* <div className="flex items-center gap-2"> */}
                 {/* <div>
@@ -246,7 +250,7 @@ const CodePlayground = () => {
               {/* </div> */}
             {/* </div> */}
             
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {/* Compact Run Button */}
               <button
                 onClick={runCode}
@@ -272,7 +276,7 @@ const CodePlayground = () => {
                   <button
                     key={option.value}
                     onClick={() => setLayout(option.value)}
-                    className={`min-w-[28px] min-h-[28px] inline-flex items-center justify-center p-1.5 text-xs rounded transition-all duration-200 ${
+                    className={`min-w-[36px] min-h-[36px] inline-flex items-center justify-center p-1.5 text-xs rounded transition-all duration-200 ${
                       layout === option.value
                         ? 'bg-blue-600 text-white shadow-sm'
                         : 'text-gray-400 hover:text-white hover:bg-gray-700'
@@ -288,7 +292,7 @@ const CodePlayground = () => {
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                  className="p-1.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-md transition-all duration-200"
+                  className="min-w-[36px] min-h-[36px] inline-flex items-center justify-center p-1.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-md transition-all duration-200"
                   title="Toggle editor theme"
                   aria-label={theme === 'dark' ? 'Switch editor to light theme' : 'Switch editor to dark theme'}
                 >
@@ -306,7 +310,7 @@ const CodePlayground = () => {
 
                 <button
                   onClick={toggleFullscreen}
-                  className="min-w-[28px] min-h-[28px] inline-flex items-center justify-center p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-md transition-all duration-200"
+                  className="min-w-[36px] min-h-[36px] inline-flex items-center justify-center p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-md transition-all duration-200"
                   title="Toggle Fullscreen (Ctrl+F)"
                 >
                   {isFullscreen ? '⤓' : '⤢'}
@@ -315,7 +319,7 @@ const CodePlayground = () => {
 
               {/* Compact Height Control */}
               {!isFullscreen && (
-                <div className="flex items-center gap-2 ml-2">
+                <div className="hidden sm:flex items-center gap-2 ml-2">
                   <span className="text-gray-400 text-xs">H:</span>
                   <input
                     type="range"
@@ -343,7 +347,7 @@ const CodePlayground = () => {
                     <button
                       key={key}
                       onClick={() => handleExampleLoad(key)}
-                      className="group flex items-center gap-2 px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-md transition-all duration-200 text-xs whitespace-nowrap shrink-0"
+                      className="group flex items-center gap-2 min-h-[36px] px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-md transition-all duration-200 text-xs whitespace-nowrap shrink-0"
                       title={example.description}
                     >
                       {/* The emoji that used to sit here was removed a while
@@ -358,7 +362,7 @@ const CodePlayground = () => {
                   
                   <button
                     onClick={handleFreshStart}
-                    className="flex items-center gap-2 px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-md transition-all duration-200 text-xs font-medium whitespace-nowrap shrink-0"
+                    className="flex items-center gap-2 min-h-[36px] px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-md transition-all duration-200 text-xs font-medium whitespace-nowrap shrink-0"
                     title="Start with clean template"
                   >
                     <span>New Project</span>
@@ -505,12 +509,15 @@ const CodePlayground = () => {
         <div className="bg-gray-900 px-6 py-2 text-xs text-gray-400 flex items-center justify-between border-t border-gray-700">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
               <span>Ready</span>
             </div>
             <span>Auto-runs on change</span>
           </div>
-          <div className="flex items-center gap-4">
+          {/* Keyboard hints only where there is a keyboard with a Ctrl key on
+              it. On a phone they overflowed the footer and described keys the
+              visitor does not have. */}
+          <div className="hidden sm:flex items-center gap-4">
             <div className="flex items-center gap-2 text-gray-500">
               <kbd className="px-1.5 py-0.5 bg-gray-800 rounded text-xs">Ctrl+Enter</kbd>
               <span>Run</span>

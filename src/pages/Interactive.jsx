@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
 import { useRef } from 'react';
-import InteractiveTerminal from '../Components/InteractiveTerminal';
 import CodePlayground from '../Components/CodePlayground';
 import ConvergenceProof from '../Components/ConvergenceProof';
 
@@ -34,12 +33,13 @@ const Interactive = () => {
       description: "ot-core is my operational transformation library. Here is its correctness proof, running on your machine against a seed you choose.",
       component: <ConvergenceProof />,
     },
-    {
-      id: "interactive-terminal",
-      title: "Interactive Terminal",
-      description: "A shell that answers questions about my background. Type help to see what it knows.",
-      component: <InteractiveTerminal />,
-    },
+    // The terminal that sat between these two is gone. It answered questions
+    // about the background the About section already answers in prose, with
+    // a "type help" prompt as the price of admission — a novelty shell is the
+    // second most common portfolio gimmick after the skills wall, and here it
+    // was the one card that demonstrated nothing the rest of the page had not
+    // already shown. Two things that each prove something beat three where
+    // one is decoration.
     {
       id: "code-playground",
       title: "Code Playground",
@@ -91,7 +91,7 @@ const Interactive = () => {
                     per document is the whole point of h1 — five of them on one page
                     leaves a screen reader's heading list with five competing titles
                     and no outline. The hero keeps the only h1 on the page. */}
-                <h2 className="text-5xl md:text-7xl font-bold mb-6 text-white">
+                <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">
                 Developer Playground
               </h2>
               <motion.p 
@@ -100,7 +100,7 @@ const Interactive = () => {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.2, duration: 0.5 }}
               >
-                Check my hardest claim against your own machine, ask the terminal about my background, or edit the code and watch it run.
+                Check my hardest claim against your own machine, or edit the code and watch it run.
               </motion.p>
             </motion.div>
 
@@ -117,18 +117,21 @@ const Interactive = () => {
                   key={feature.id}
                   id={feature.id}
                   variants={itemVariants}
-                  className="scroll-mt-24 md:scroll-mt-28 bg-white/[0.03] backdrop-blur-sm rounded-xl p-6 md:p-8 border border-white/10 relative overflow-hidden max-w-5xl mx-auto"
+                  className="scroll-mt-24 md:scroll-mt-28 bg-white/[0.04] rounded-xl p-6 md:p-8 border border-white/10 relative overflow-hidden max-w-5xl mx-auto"
                 >
                   <div className="text-center mb-8 relative z-10">
                     {/* The heading used to open with a wobbling emoji. Emoji as
                         an icon system is the fastest way to make engineering
                         work read as a hobby project, and it was inside the h2,
                         so screen readers announced it as part of the heading. */}
-                    <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                    {/* h3, under the section's h2 — and the size that goes with
+                        it. These were h2 at 36px, the same level and larger
+                        than the heading of the section they sit inside. */}
+                    <h3 className="text-xl md:text-2xl font-bold mb-4">
                       <span className="text-white">
                         {feature.title}
                       </span>
-                    </h2>
+                    </h3>
                     <motion.p 
                       className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto"
                       initial={{ opacity: 0 }}
