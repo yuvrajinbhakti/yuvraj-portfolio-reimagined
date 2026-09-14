@@ -148,7 +148,7 @@ const Contact = () => {
                 initial={reduce ? false : { opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                className="mt-8 text-left space-y-4"
+                className="mt-8 text-left space-y-4 rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-md p-5 sm:p-6"
               >
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
@@ -199,6 +199,11 @@ const Contact = () => {
                   />
                 </div>
 
+                {/* Glass, but only while open. A frosted panel behind an always-visible
+                    form would be a slab over the sunrise again; behind a form the
+                    visitor asked for, it is the site's own idiom doing the
+                    legibility work over the brightest part of the dawn, and it is
+                    gone again the moment they close it. */}
                 {/* The hero's secondary CTA, not a full-width slab. A saturated
                     blue bar was the loudest thing on the page at its quietest
                     moment, and it sat directly over the sunrise. */}
