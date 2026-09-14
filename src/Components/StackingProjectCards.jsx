@@ -141,6 +141,16 @@ const ProjectCard = ({ project }) => {
                 {demoLabel}
               </a>
             )}
+            {/* Only ot-core carries one. A card that can say "run the proof"
+                and mean it is worth more than any adjective on it. */}
+            {study?.proof && (
+              <Link
+                to={study.proof.to}
+                className="inline-flex items-center gap-1.5 min-h-[44px] py-1.5 -my-1.5 text-emerald-300 hover:text-emerald-200 transition-colors text-sm font-medium"
+              >
+                {study.proof.label}
+              </Link>
+            )}
           </div>
         </div>
       </div>
@@ -167,8 +177,11 @@ const SectionHeading = () => (
     <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
       Featured <span className="text-blue-400">Work</span>
     </h2>
+    {/* Not "from concept through to deployment", which is what every
+        portfolio says of every project. What is actually distinctive about
+        these four is the write-ups, and what the write-ups are about. */}
     <p className="text-white/60 text-base md:text-lg max-w-xl mx-auto">
-      A few things I&apos;ve built, from concept through to deployment.
+      Four builds with write-ups — each one about what broke, and how I found out.
     </p>
   </div>
 );

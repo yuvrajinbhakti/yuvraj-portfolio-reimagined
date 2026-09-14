@@ -1,22 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
-import PropTypes from 'prop-types';
 
 // New components
 import TextEffect from "../Components/TextEffect";
 import AnimatedBackground from "../Components/AnimatedBackground";
-import ScrollReveal from "../Components/ScrollReveal";
-import GlassCard from "../Components/GlassCard";
 import SocialIcon from "../Components/SocialIcon";
 import StackingProjectCards from "../Components/StackingProjectCards";
 // Former routes, now sections of this one. See where they are rendered below.
 import About from "./About";
 import Interactive from "./Interactive";
 import Contact from "./Contact";
-// Plain SVG — imported directly because it is a couple of hundred bytes and
-// carries no WebGL context, unlike the three.js version it replaced.
-import ServiceIcon from "../Components/ServiceIcon";
 import SkyReadout from "../Components/SkyReadout";
 
 // The three.js hero globe used to be lazy-loaded here. It is gone, and with it
@@ -31,121 +25,8 @@ import sakura from '../assets/sakura.mp3';
 import { soundoff, soundon } from "../assets/icons";
 import useDocumentMeta from '../hooks/useDocumentMeta';
 
-// Each card carries a concrete proof point rather than a capability claim.
-// "Creating responsive, performant user interfaces" is something anyone can
-// write; "+25% platform adoption" is not.
-const SERVICES = [
-  {
-    type: 'frontend',
-    title: 'Frontend Engineering',
-    description:
-      'React and TypeScript in production at Razorpay — merchant-facing analytics dashboards and an A/B testing framework with client-side caching.',
-    proof: '+25% platform adoption',
-    // Where the claim is substantiated. /about opens on the experience tab by
-    // default, which is the Razorpay role in full.
-    to: '/#about',
-    linkLabel: 'The work at Razorpay',
-  },
-  {
-    type: 'backend',
-    title: 'Backend & Infrastructure',
-    description:
-      'Node.js and Go services, change-data-capture pipelines, and containerised deploys on Docker and Kubernetes.',
-    proof: 'Onboarding: 2 weeks → 24 hours',
-    // The deepest backend build on this site that can actually be read: Node,
-    // Redis, Docker, and the reasoning behind each.
-    to: '/work/secure-file-sharing',
-    linkLabel: 'Read a backend build',
-  },
-  {
-    type: 'ml',
-    title: 'Machine Learning',
-    description:
-      'Amazon ML Summer School alumnus. Built an ML-powered fraud detection system for real-time transaction monitoring.',
-    proof: 'Top 0.2% of 91,000 applicants',
-    to: '/#about',
-    linkLabel: 'Background and coursework',
-  },
-];
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] } },
-};
-
-const ServiceCard = ({ service }) => {
-  const [isHovered, setIsHovered] = useState(false);
-
-  return (
-    // A link, not a div. Each of these cards makes a specific claim — +25%
-    // adoption, two weeks down to twenty-four hours, top 0.2% of 91,000 — and
-    // until now there was nothing to click on any of them. A number with no
-    // route to its evidence is just an assertion, and three of them in a row
-    // read as a brochure.
-    //
-    // aria-label rather than letting the accessible name fall out of the
-    // contents: unlabelled, a screen reader announces the heading, the whole
-    // description and the statistic as one link name.
-    <Link
-      to={service.to}
-      aria-label={`${service.title} — ${service.linkLabel}`}
-      className="h-full block rounded-2xl focus-visible:outline-none"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onFocus={() => setIsHovered(true)}
-      onBlur={() => setIsHovered(false)}
-    >
-      {/* Left-aligned throughout. Centred body copy is measurably harder to
-          read — every line starts at a different x, so the eye has to hunt for
-          it — and centring three lines of prose inside an otherwise
-          left-aligned page is the strongest template tell on the site. */}
-      <GlassCard className="h-full p-6 md:p-8 flex flex-col group">
-        <div className="mb-3 relative z-0">
-          <ServiceIcon type={service.type} isHovered={isHovered} />
-        </div>
-        <h3 className="text-lg md:text-xl font-bold text-white mb-3 group-hover:text-blue-400 transition-colors duration-300 relative z-10">
-          {service.title}
-        </h3>
-        <p className="text-white/70 text-sm md:text-base leading-relaxed relative z-10 flex-1">
-          {service.description}
-        </p>
-        <div className="relative z-10 mt-5 pt-4 border-t border-white/10">
-          <span className="block text-sm font-semibold text-blue-300">{service.proof}</span>
-          {/* Its own line, not beside the statistic. Side by side, the two
-              longer proofs — "Onboarding: 2 weeks → 24 hours" and "Top 0.2% of
-              91,000 applicants" — wrapped mid-phrase and left the three card
-              footers at three different heights. */}
-          <span
-            aria-hidden="true"
-            className="mt-2 text-xs text-white/40 group-hover:text-blue-300 transition-colors inline-flex items-center gap-1"
-          >
-            {service.linkLabel}
-            <svg
-              className="w-3 h-3 transition-transform duration-200 group-hover:translate-x-0.5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
-          </span>
-        </div>
-      </GlassCard>
-    </Link>
-  );
-};
-
-ServiceCard.propTypes = {
-  service: PropTypes.shape({
-    title: PropTypes.string.isRequired,
-    description: PropTypes.string.isRequired,
-    proof: PropTypes.string.isRequired,
-    to: PropTypes.string.isRequired,
-    linkLabel: PropTypes.string.isRequired,
-    type: PropTypes.oneOf(['frontend', 'backend', 'ml']).isRequired,
-  }).isRequired,
-};
+// The three "What I Do" cards and their data moved to Components/ServiceCards
+// and render inside About now — see the note where that section is mounted.
 
 const Home = () => {
   useDocumentMeta({ path: '/' });
@@ -393,35 +274,11 @@ const Home = () => {
             </motion.div>
           </motion.section>
           
-          {/* Featured Section */}
-          <section className="py-12 md:py-20 px-4 md:px-8 relative" id="featured-section">
-            <div className="container mx-auto">
-              <ScrollReveal animation="fade">
-                <h2 className="text-3xl md:text-4xl font-bold text-center text-white mb-12 md:mb-16">
-                  What I <span className="text-blue-400">Do</span>
-                </h2>
-              </ScrollReveal>
-              
-              {/* One direction, staggered — the previous version slid each card in
-                  from a different side (left/up/right), which reads as three
-                  unrelated effects rather than one considered entrance.
-                  MotionConfig drops the y-offset under reduced motion. */}
-              <motion.div
-                className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8"
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, margin: '-80px' }}
-                variants={{ visible: { transition: { staggerChildren: 0.12 } } }}
-              >
-                {SERVICES.map((service) => (
-                  <motion.div key={service.type} variants={cardVariants}>
-                    <ServiceCard service={service} />
-                  </motion.div>
-                ))}
-              </motion.div>
-            </div>
-          </section>
-          
+          {/* "What I Do" used to sit here as its own section — three cards —
+              followed one screen later by "Hello, I'm Yuvraj", which said the
+              same three things in prose with the same numbers. The cards now
+              live inside About (see ServiceCards), and the page introduces its
+              author once. */}
           <section id="about" className="scroll-mt-20"><About /></section>
 
           {/* The one project section.

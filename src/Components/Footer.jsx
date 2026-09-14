@@ -286,6 +286,30 @@ const Footer = () => {
             </div>
           </div>
 
+          {/* The sentence the rest of the site is built to earn.
+              Every portfolio asserts; this one attaches a check to the two
+              claims that would otherwise be hardest to believe. It sits here,
+              last, because it is a summary and not a headline — a reader who
+              has scrolled the whole night has already seen both proofs work. */}
+          <p className="mt-10 max-w-2xl text-sm text-white/45 leading-relaxed">
+            <span className="text-white/75">This site never asks you to trust it.</span>{' '}
+            The sky behind it is a real catalogue at a real hour —{' '}
+            <Link
+              to="/work/the-sky"
+              className="text-white/70 underline decoration-white/20 underline-offset-4 hover:text-white hover:decoration-blue-400 transition-colors"
+            >
+              check it against the window
+            </Link>
+            . The hardest claim on it runs in your own browser —{' '}
+            <Link
+              to="/#convergence-proof"
+              className="text-white/70 underline decoration-white/20 underline-offset-4 hover:text-white hover:decoration-blue-400 transition-colors"
+            >
+              run the proof
+            </Link>
+            .
+          </p>
+
           {/* Copyright */}
           <div className="mt-8 pt-6 border-t border-white/10 flex flex-col sm:flex-row gap-2 sm:gap-4 items-center justify-between text-white/65 text-sm">
             <div className="flex items-center gap-4">

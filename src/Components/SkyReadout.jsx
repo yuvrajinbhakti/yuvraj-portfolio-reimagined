@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { STARS, STAR_STRIDE, STAR_LABELS, NOTABLE } from '../constants/starCatalog';
 import { localSiderealTime, horizontal } from '../utils/sky';
 import { OBSERVER, formatLocalTime, compassPoint } from '../constants/observer';
@@ -109,6 +110,18 @@ const SkyReadout = () => {
           worth knowing however you are reading. */}
       <p aria-hidden="true" className="mt-1 hidden text-white/20 [@media(pointer:fine)]:block">
         point at a star to name it
+      </p>
+      {/* The claim, and where it is substantiated. The two lines above assert
+          that this is a real sky at a real hour; this is the route to checking
+          that, and to how it is computed. A remarkable claim with no way to
+          verify it is indistinguishable from a decorative one. */}
+      <p className="mt-1">
+        <Link
+          to="/work/the-sky"
+          className="inline-flex items-center min-h-[44px] -my-3 text-white/35 hover:text-white transition-colors underline decoration-white/15 underline-offset-4 hover:decoration-blue-400"
+        >
+          what this sky is, and how to check it →
+        </Link>
       </p>
     </div>
   );

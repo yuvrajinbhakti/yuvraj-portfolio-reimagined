@@ -6,9 +6,10 @@ import {
   VerticalTimelineElement,
 } from "react-vertical-timeline-component";
 import "react-vertical-timeline-component/style.min.css";
+import { Link } from "react-router-dom";
 import ScrollReveal from "../Components/ScrollReveal";
+import ServiceCards from "../Components/ServiceCards";
 import { motion } from "framer-motion";
-import { DrawnName } from '../Components/DrawnUnderline';
 
 // Self-drawing animated SVG timeline accent line
 const AnimatedTimelineLine = ({ itemCount = 4 }) => {
@@ -276,55 +277,63 @@ const About = () => {
                     per document is the whole point of h1 — five of them on one page
                     leaves a screen reader's heading list with five competing titles
                     and no outline. The hero keeps the only h1 on the page. */}
-                <motion.h2 
-                  className="text-3xl md:text-4xl font-bold mb-6 text-center"
+                {/* "About", to match the nav item that lands here. It said
+                    "Hello, I'm Yuvraj" one screen after a hero that said "I'm
+                    Yuvraj Singh Nain" — the same introduction twice, and the
+                    second one in a heading the size of a section title. */}
+                <motion.h2
+                  className="text-3xl md:text-4xl font-bold mb-6 text-center text-white"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
                 >
-                  Hello, I&apos;m{" "}
-                  <DrawnName className="text-blue-400" double>Yuvraj</DrawnName>
+                  About
                 </motion.h2>
-                
-                {/* Left-aligned prose, not a centred one-liner. This is the one
-                    page where the reader wants to know who you are, and it
-                    previously said "based in India, with a passion for creating
-                    innovative web applications" — true of everyone, therefore
-                    about no one. */}
+
+                {/* Three sentences, and every number on this page appears once.
+                    The old prose carried +25%, 24 hours, 1,000 clients, 10,000
+                    operations a second, 75ms and 0.5% — all of which are also on
+                    the cards below or the project card further down, so a reader
+                    met each of them three times on the way to the footer. The one
+                    figure that lives only here is the one that sets the scale:
+                    who the work is for. */}
                 <div className="w-full max-w-2xl mx-auto">
                   <motion.div
-                    className="text-lg text-gray-300 mb-12 space-y-4 leading-relaxed"
+                    className="text-base md:text-lg text-gray-300 mb-12 space-y-4 leading-relaxed"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.2, duration: 0.5 }}
                   >
-                    {/* Every paragraph carries a number. Scale is legible on sight;
-                        framing makes the reader do the work of being impressed. */}
                     <p>
-                      At Razorpay I build the analytics and reporting platform that
+                      I&apos;m a frontend engineer at Razorpay, on the analytics and reporting
+                      platform that
                       <strong className="text-white font-semibold"> 16,000+ merchants </strong>
-                      use to understand their payments. I joined as an intern in July 2024 and
-                      went full-time a year later.
+                      use to understand their payments — an intern from July 2024, full-time a
+                      year later.
                     </p>
                     <p>
-                      Getting it there meant an A/B testing framework with client-side caching,
-                      a change-data-capture pipeline that cut data onboarding from two weeks to
-                      24 hours, and a reporting stack rebuilt from scratch. Platform adoption
-                      went up 25%; report generation time came down 40%.
+                      Most of what I&apos;ve shipped there is the unglamorous middle of a
+                      dashboard: the caching, the pipelines that feed it, and the reporting
+                      stack we rebuilt from scratch.
                     </p>
                     <p>
-                      Outside work, the one I&apos;m proudest of is a collaborative code editor
-                      where I implemented Operational Transform by hand — the algorithm that
-                      lets two people type in the same line without either losing a keystroke.
-                      {/* "It holds" was present tense about a service that is not
-                          currently up, and it read as production traffic when the
-                          numbers come from a load test. Naming the method is also
-                          simply the stronger sentence: a number on its own is a
-                          boast, a number with a methodology behind it is evidence. */}
-                      I load-tested it to 1,000 concurrent clients — 10,000 operations a
-                      second at 75ms P95, with an error rate under 0.5%.
+                      Outside work I build the things I&apos;d want to read a write-up of — a
+                      collaborative editor whose merge logic I later proved wrong, then right,
+                      and this page, whose{" "}
+                      <Link
+                        to="/work/the-sky"
+                        className="text-white underline decoration-white/25 underline-offset-4 hover:decoration-blue-400 transition-colors"
+                      >
+                        sky is real
+                      </Link>
+                      .
                     </p>
                   </motion.div>
+                </div>
+
+                {/* The three cards that were their own "What I Do" section. */}
+                <div className="w-full mb-16">
+                  <ServiceCards />
                 </div>
               </div>
             </ScrollReveal>
@@ -338,9 +347,11 @@ const About = () => {
                 case studies — which is the only place a technology means
                 anything. */}
 
-            {/* Experience/Education/Achievements Tabs */}
+            {/* Experience/Education/Achievements Tabs.
+                id, so the cards above can point at the evidence for their
+                numbers — the Razorpay role in full is the first tab. */}
             <ScrollReveal animation="fade">
-              <div className="w-full max-w-4xl mx-auto">
+              <div id="experience" className="w-full max-w-4xl mx-auto scroll-mt-24">
                 {/* Three tabs at space-x-8 plus px-4 each overflowed a 375px
                     viewport by 14px, which pushed the whole document wider than
                     the screen. Tighter gaps on small screens, and the strip

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import PropTypes from 'prop-types'
 import DrawnUnderline from './DrawnUnderline'
+import SkyClock from './SkyClock'
 import { useCommandPalette } from '../contexts/commandPalette'
 import { MOD_KEY } from '../utils/platform'
 
@@ -304,6 +305,12 @@ const Navbar = () => {
               <NavItem key={item.to} {...item} active={activeSection === item.to.replace('/#', '')} />
             ))}
           </nav>
+
+          {/* Where in the night the page is. The sky runs from dusk at the
+              top to sunrise at the bottom, and until this existed nothing said
+              so outside the hero — a reader halfway down had a darker sky and
+              no idea why. */}
+          <SkyClock />
 
           {/* The palette is worth nothing if nobody knows it is there, and a
               keyboard shortcut with no visible affordance is a secret. Quiet

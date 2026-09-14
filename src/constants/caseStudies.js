@@ -249,6 +249,14 @@ export const caseStudies = [
       to: '/playground?example=operational-transform#code-playground',
       label: 'Run the algorithm',
     },
+    // The correctness proof itself, on the home page: ten thousand random
+    // concurrent pairs checked for convergence in the reader's own browser,
+    // with a broken transform on the next button so the check can be seen to
+    // fail. The card for this project links to it directly.
+    proof: {
+      to: '/#convergence-proof',
+      label: 'Run the proof',
+    },
     metrics: [
       { value: '16.2%', label: 'of concurrent edits diverged, before' },
       { value: '0', label: 'divergences across 920,000 checks, after' },
@@ -324,6 +332,70 @@ export const caseStudies = [
     ],
     takeaway:
       'The gap between "it works" and "I can show you it works" was the entire project. The algorithm was 85% right, which is the most dangerous kind of wrong: good enough that every test I knew how to run came back green. Then the documentation turned out to have the same problem — the sentence about peer-to-peer sounded careful and was false — and then the protocol above the algorithm turned out to have it too, nine times. The lesson was not that I write buggy code. It was that every layer needs a harness the layer below cannot provide, and that I stop building harnesses the moment one of them goes quiet.',
+  },
+  // The background of this site, written up like the projects are — because
+  // it is the most technically involved thing on the page and, until this
+  // existed, the only remarkable claim here with no write-up behind it. It has
+  // no projectId: it is not a repository of its own, it is this one.
+  {
+    slug: 'the-sky',
+    title: 'The sky behind this page',
+    tagline:
+      'A real star catalogue, projected for Chandigarh at the hour the page is showing. Scroll, and the night runs to sunrise.',
+    role: 'Solo — the background of this site',
+    stack: ['Canvas 2D', 'Astronomical reduction', 'd3-celestial catalogue', 'Meeus, ch. 25 and 47', 'React'],
+    links: {
+      code: 'https://github.com/yuvrajinbhakti/yuvraj-portfolio-reimagined',
+    },
+    tryIt: {
+      to: '/',
+      label: 'Watch the night run',
+    },
+    metrics: [
+      { value: '5,044', label: 'stars, every one from the catalogue — none invented' },
+      { value: '0', label: 'network requests — the sky is computed in the page' },
+      { value: '222', label: 'stars that landed on the wrong side of the sky, before the fix' },
+      { value: '27.34d', label: 'the sidereal month the moon model reproduces. True value: 27.32' },
+    ],
+    sections: [
+      {
+        heading: 'What it is',
+        body:
+          'Every star drawn behind this page is a real star, at the position it actually occupies over Chandigarh at the hour the page is showing. The catalogue is the one d3-celestial packages from the standard astronomical sources — 5,044 stars down to magnitude 6.0, which is the naked-eye limit under a dark sky — with right ascension, declination, visual magnitude and B–V colour index for each. Brightness on screen comes from the magnitude; colour from the B–V index, so Betelgeuse is orange and Rigel is blue-white because that is what they are, not because a palette said so. Five hundred and nineteen of them, the ones brighter than magnitude 4, carry a name: point at one and the page tells you which star you are looking at and which constellation it belongs to. The top of the page is sunset tonight. The bottom is the next sunrise. Scrolling moves the clock between them, and the sky turns, the moon crosses at its real phase, the constellations drift, and the horizon in the east begins to warm — because that is what the sky over Chandigarh does between those two hours.',
+      },
+      {
+        heading: 'How a dot becomes a star',
+        body:
+          'A catalogue gives a star\'s position as right ascension and declination — coordinates fixed to the sky, not to any place on Earth. To know where it appears from Chandigarh at a given moment you need the local sidereal time, which comes from the Julian Date and the observer\'s longitude, and then a rotation into altitude and azimuth: how high, and in which compass direction. That is one pass of spherical trigonometry per star. The page then points a camera at a bearing and a tilt, and projects each star stereographically onto the canvas — the same projection a planisphere uses, chosen because it keeps circles as circles, so the figures do not shear at the edges. Doing that for 5,044 stars sixty times a second would be the most expensive thing on the page, so it is not done sixty times a second. The sky turns fifteen degrees an hour; between two frames that is four ten-thousandths of a degree. The projection is cached and recomputed only when the clock has moved more than twenty seconds or the camera has turned more than a quarter of a degree. Each star is drawn as a pre-rendered sprite chosen by magnitude and colour, so a frame is a few thousand image blits and no trigonometry at all.',
+      },
+      {
+        heading: 'The sun, the moon and the hour',
+        body:
+          'The sun is not drawn from a clock; its position comes from the reduction in chapter 25 of Meeus\'s Astronomical Algorithms, which is what gives the page the real moments of the night — sunset, then civil, nautical and astronomical dusk as the sun passes six, twelve and eighteen degrees below the horizon, the deepest point, and the three dawns in reverse order to sunrise. Those moments are what the scroll is mapped onto: the twilight bands fall at fixed depths of the page, and the time between them is interpolated, so a reader is always looking at a sky that will actually exist at some hour tonight. The moon uses a truncated form of the ELP theory from chapter 47 — enough terms for the position and the phase to be right to the eye, not enough for an almanac. It is drawn at its true phase, with the terminator as the ellipse it really is rather than a circle offset sideways, and it sets or rises where the model says it does. Sunrise itself is not assumed to be due east: it is only due east at the equinoxes and wanders about twenty-eight degrees either side across the year, and the camera pans to wherever it actually is.',
+      },
+      {
+        heading: 'Where it is stylised, and says so',
+        body:
+          'Three things are deliberately not true to scale, and it is worth being exact about which. The sun is drawn at twenty times its angular size and the moon at nine, because at true scale each is half a degree across — a dot on a 1440-pixel-wide sky — and a sunrise with a dot in it reads as a bug. The exposure is authored: a real camera would blow out the whole sky long before the sun cleared the horizon, and a real eye adapts continuously, so the brightening curve is a hand-drawn compromise between the two that keeps the stars visible through nautical twilight and lets them go as the sky brightens, which is the order they actually go in. And the horizon is dropped by twenty-six degrees so that more sky than ground fits on a screen that is wider than it is tall. The positions are not stylised. The magnitudes are not. The colours are not. The caption under the hero says "tonight" rather than "now" once the scroll has moved the sky away from the wall clock, because a page whose argument is that its claims can be checked cannot have a label that disagrees with the thing it labels.',
+      },
+      {
+        heading: 'Three bugs the sky told me about',
+        body:
+          'The constellations were mirror images. Orion was there, recognisable, and wrong — the belt ran the wrong way. The camera basis was built from up-cross-forward where it needed forward-cross-up; a handedness error, one line, and every star was reflected across the view axis. Nothing crashed, nothing was off-screen, and no test I had would have caught it, because a mirrored sky has exactly as many stars in exactly as bright a distribution as a real one. A person who knows the sky caught it in a second. The second bug was in the data. Right ascension in hundredths of a degree runs to 36,000, and the catalogue was packed as sixteen-bit integers, which stop at 32,767. Two hundred and twenty-two stars near the end of the range wrapped negative and were drawn on the opposite side of the sky, silently, for weeks. The third was not a bug at all, and cost the most time. The sky\'s clock appeared to freeze while I was measuring it — until I noticed I was measuring a tab that was not visible, where browsers suspend animation frames entirely. I nearly shipped a fix for a fault that did not exist. The lesson from all three is the same one: the sky is a system whose failures look like a working sky, and the only test that catches them is a person, or an instrument, that knows what the sky is supposed to look like.',
+      },
+      {
+        heading: 'What I could not check',
+        body:
+          'The honest limit of this page is that I have not compared it against an ephemeris. At one point I wrote down what I believed were JPL Horizons values for the moon and "verified" the model against them, and then realised I had produced those numbers from memory — which is not verification, it is the appearance of it, and it is exactly the failure mode the rest of this site is built to avoid. So that comparison was thrown away, and what is here instead is structural: the things a correct moon model must reproduce regardless of date. It gives a sidereal month of 27.34 days against a true 27.32, a draconic month of 27.24 against 27.21, a synodic month of 29.52 against 29.53, a distance that ranges from 356,900 to 406,100 kilometres against the real 356,500 to 406,700, and an ecliptic latitude that never exceeds 5.31 degrees against a real ceiling of 5.30. Those are consistent with the model being right and would be very hard to get from a model that was wrong. They are not the same as checking tonight\'s moon against tonight\'s almanac, and this page does not claim they are.',
+      },
+      {
+        heading: 'Check it yourself',
+        body:
+          'The caption at the bottom of the hero names the brightest star currently up and gives its altitude and compass direction — "Arcturus, 43° above the west", say. Open any sky app, set it to Chandigarh and to the hour the caption shows, and look for the same star in the same place. Point at any bright star on the page and it names itself; check the name. Look at the moon\'s phase and compare it to tonight\'s. Scroll to the bottom and note where the sun comes up; compare the direction to the sunrise azimuth for Chandigarh on today\'s date. Every one of those is a claim that is either true or false, and none of them requires trusting me. That is the whole point of having built it this way rather than as a particle effect with a good palette — which is what it is indistinguishable from until you check.',
+      },
+    ],
+    takeaway:
+      'The sky was the most fun thing on this site to build and the hardest thing to know I had built correctly, because every failure produced something that looked like a sky. The mirrored constellations, the two hundred stars on the wrong side, the moon check I had invented — none of them announced themselves. What caught them was insisting that every claim have a route to being checked by someone who is not me, and then following the route. I would rather have a background a stranger can catch me out on than a prettier one nobody can.',
   },
 ];
 
