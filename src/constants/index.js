@@ -127,39 +127,54 @@ export const skills = [
 
 
 export const experiences = [
+    // Two entries, not one. The single "July 2024 – Present" card had grown to
+    // eight bullets, and it flattened the one thing the dates make legible on
+    // their own: what an intern shipped, and what changed once the role was
+    // full-time. The Impact Inventory (Sep 2026) already draws the line —
+    // section D is the internship, A, B and E are the year after — so the
+    // split follows it, and each figure keeps its row id in the comment.
+    //
+    // Kept to outcomes and publicly-known technology. Internal tool names,
+    // system inventory counts and pipeline architecture are deliberately left
+    // out — a portfolio is indexed permanently, unlike a CV sent to a named
+    // recipient. Everything here is marked Measured in the inventory; the old
+    // bullets' 25%, 40%, 70%, the A/B framework and the RBI Hackathon placing
+    // appeared in no source and are gone.
     {
         title: "Frontend Engineer",
         company_name: "Razorpay",
         icon: razorpay,
         iconBg: "#f3f4f6",
-        date: "July 2024 - Present",
-        // Kept to outcomes and publicly-known technology. Internal tool names,
-        // system inventory counts and pipeline architecture are deliberately
-        // left out — a portfolio is indexed permanently, unlike a CV sent to a
-        // named recipient.
-        // Every figure below traces to a row of the Impact Inventory (Sep 2026)
-        // and is marked Measured there — the row id is in the comment. The
-        // previous bullets carried a 25% adoption lift, a 40% report-time cut,
-        // a 70% effort reduction, an A/B framework "improving satisfaction by
-        // 20% and tripling deployment speed", and an RBI Hackathon placing, none
-        // of which appear in the inventory. On a site whose argument is that
-        // its claims can be checked, an unsourced number is a liability.
+        date: "July 2025 - Present",
         points: [
-            "Joined as a Frontend Engineering Intern (July 2024 – July 2025) and converted to a full-time Frontend Engineer in July 2025.",
-            // D1 — measured: "currently live for ~15k merchants".
-            "Sole frontend engineer on the embedded-analytics product now live for ~15,000 merchants — a React micro-app scoping every query to the requesting merchant, shipped across three repositories.",
-            // E1 + B6 — codeowner; field onboarding 4–5 days → 1 day, PRs 6 → 3–4.
+            // E1 + B6 — codeowner; field onboarding 4–5 days → 1 day, PRs 6 → 3–4 (Oct 2025).
             "Reporting codeowner across the merchant and admin dashboards. Rebuilt report onboarding as a config-driven admin UI, taking a new field from four or five days down to one and a new entity from six PRs to three.",
-            // B8 + B7 — exports 95 days → 5 years; annual reports to 100% of India merchants.
+            // B8 + B7 — exports 95 days → 5 years; annual reports to 100% of India merchants (Apr 2026).
             "Extended report exports from 95 days to five years of history, and rolled annual reports out to 100% of India merchants behind feature-flag experiments.",
             // A1/A2 + A3 — zero data gaps, zero duplicate writes; spot reclaim killing the output committer, fleet fix shipped. Counts left out on purpose.
             "Migrated the team's Airflow estate from 2 to 3 with zero data gaps and zero duplicate writes, and root-caused a class of Spark/EMR failures written off as flakiness — spot reclaim killing the output committer — then shipped the fleet fix.",
             // B10 — HTTP-200-wrapped 500s the retry classifier never inspected; redeploy to 100% of merchants in IN/US/SG with zero incidents.
             "Brought a collapsed reporting end-to-end suite back to green — the failures were 500s wrapped in HTTP 200s that the retry classifier never inspected — and used it to gate a zero-incident redeploy across India, the US and Singapore.",
-            // D2 + E3 — turnaround weeks → 24 hours; four people mentored.
-            "Shipped self-serve onboarding that replaced hand-raised PRs with a guided flow, cutting turnaround from weeks to 24 hours; mentored four engineers through PR process, canary-gated merges and API testing.",
+            // E3 — four people, named in the inventory.
+            "Mentored four engineers through PR process, canary-gated merges and API testing.",
             // E4 — breadth, without the PR count (activity, not impact).
             "Built with React, TypeScript, Go, PHP, Spark, Terraform, Docker and Kubernetes."
+        ],
+    },
+    {
+        title: "Frontend Engineering Intern",
+        company_name: "Razorpay",
+        icon: razorpay,
+        iconBg: "#f3f4f6",
+        date: "July 2024 - July 2025",
+        points: [
+            // D1 — measured: "currently live for ~15k merchants".
+            "Sole frontend engineer on the embedded-analytics product now live for ~15,000 merchants — a React micro-app scoping every query to the requesting merchant, shipped across three repositories.",
+            // D2 — turnaround weeks → 24 hours (May 2025).
+            "Shipped self-serve onboarding that replaced hand-raised PRs with a guided flow, cutting turnaround from weeks to 24 hours.",
+            // D3 — the team's first attribution signal; product name left out.
+            "Built a tracked growth campaign into the report emails behind a feature-flag experiment — the team's first attribution signal for its data-sync product.",
+            "Converted to a full-time Frontend Engineer in July 2025."
         ],
     },
     {
