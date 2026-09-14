@@ -99,7 +99,11 @@ const Contact = () => {
 
   return (
     <div className="w-full">
-      <section className="w-full pt-12 md:pt-20 px-4 md:px-8 mb-12 md:mb-20">
+      {/* mb-24 md:mb-36, up from 12/20. This is the last section before the
+          footer and the sun comes up directly beneath it; with the old margin
+          the open panel sat on the horizon line with the footer behind it,
+          and the one moment the page builds to had no room to happen. */}
+      <section className="w-full pt-12 md:pt-20 px-4 md:px-8 mb-24 md:mb-36">
         <div className="max-w-xl mx-auto text-center">
           <ScrollReveal animation="fade">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Get in touch</h2>
@@ -231,7 +235,7 @@ const Contact = () => {
                     is what makes the panel read as finished rather than
                     sketched. It matches "View Projects" at the top of the
                     page in colour, shape and size. */}
-                <div className="flex items-center justify-center gap-4 pt-1">
+                <div className="flex items-center justify-center gap-4 pt-2">
                   <motion.button
                     type="submit"
                     disabled={sending}
@@ -251,8 +255,15 @@ const Contact = () => {
                 </div>
 
                 {/* Mounted with the form and filled later: screen readers only
-                    announce changes to a live region that already existed. */}
-                <div role="status" aria-live="polite" className="min-h-[1.5rem] text-sm text-center">
+                    announce changes to a live region that already existed.
+                    But it takes no room until it has something to say —
+                    min-h-[1.5rem] plus the parent's space-y left a 70px hole
+                    under the buttons against 28px above the first label, and
+                    the panel read as bottom-heavy. empty:!mt-0 cancels the
+                    space-y margin while the region is empty; it stays display:
+                    block, so it is still in the accessibility tree when the
+                    result arrives. */}
+                <div role="status" aria-live="polite" className="text-sm text-center empty:!mt-0">
                   {status && (
                     <span className={status.ok ? "text-emerald-300" : "text-rose-300"}>{status.text}</span>
                   )}
