@@ -43,7 +43,7 @@ const Interactive = () => {
     {
       id: "code-playground",
       title: "Code Playground",
-      description: "A live HTML, CSS and JavaScript editor with an instant preview. Edit anything; it re-runs as you type.",
+      description: "Three problems from the work, built live: two people typing in the same line, a rupee input that groups in lakhs and crores, and a payment's lifecycle with every way it goes wrong. Edit anything; it re-runs as you type.",
       component: <CodePlayground />,
     }
   ];
