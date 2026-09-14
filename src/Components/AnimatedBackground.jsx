@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import {
   STARS,
   STAR_STRIDE,
@@ -36,6 +36,86 @@ const AnimatedBackground = ({ children, still = false }) => {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
   const reduce = useReducedMotion();
+
+  /*
+   * Tilt to look around, on phones.
+   *
+   * The sky is the one thing here a phone can do better than a laptop. On a
+   * desktop it is a picture you scroll past; held in a hand, with the device's
+   * own orientation driving the bearing, it is a window — you turn, and the
+   * sky turns the other way, the way a window does. That is worth more on the
+   * small screen than any of the hover affordances, which a touch device
+   * cannot reach at all.
+   *
+   * It is a ref rather than state because the animation loop reads it every
+   * frame and a re-render per orientation event would be sixty pointless
+   * React renders a second. The button is state, because the button is a
+   * button.
+   */
+  const tiltOffsetRef = useRef(0);
+  const [tilt, setTilt] = useState('unsupported');
+
+  // Offered only where it can actually work. Desktop browsers define
+  // DeviceOrientationEvent and then never fire one, so feature-detecting the
+  // constructor alone would put a button on every laptop that does nothing
+  // when pressed. A coarse pointer is the real question being asked: is this
+  // a thing someone is holding.
+  useEffect(() => {
+    if (reduce || still) return;
+    if (typeof window === 'undefined' || typeof window.DeviceOrientationEvent === 'undefined') return;
+    if (!window.matchMedia?.('(pointer: coarse)').matches) return;
+    setTilt('off');
+  }, [reduce, still]);
+
+  const enableTilt = useCallback(async () => {
+    if (tilt === 'on') {
+      setTilt('off');
+      tiltOffsetRef.current = 0;
+      return;
+    }
+    // iOS 13+ will not deliver a single event until this resolves, and it only
+    // resolves from inside a user gesture — which is why this is a button and
+    // not something the page turns on for you.
+    const request = window.DeviceOrientationEvent?.requestPermission;
+    if (typeof request === 'function') {
+      try {
+        if ((await request.call(window.DeviceOrientationEvent)) !== 'granted') {
+          setTilt('denied');
+          return;
+        }
+      } catch {
+        setTilt('denied');
+        return;
+      }
+    }
+    setTilt('on');
+  }, [tilt]);
+
+  useEffect(() => {
+    if (tilt !== 'on') return;
+
+    /*
+     * gamma is the left-right tilt, and it is the only axis used. beta would
+     * be the natural way to look up and down, but the vertical framing here is
+     * the scroll storyboard's — it is how far through the night the page is —
+     * and letting a wrist argue with it would break the one thing the sky is
+     * saying.
+     *
+     * Clamped to +-38 degrees, so the sunrise still arrives where the page
+     * says it does; a visitor can look along the horizon, not spin away from
+     * the story. Low-passed because raw orientation on a handheld device is
+     * jittery enough to make the star field shimmer at rest.
+     */
+    const onOrientation = (event) => {
+      const gamma = event.gamma;
+      if (typeof gamma !== 'number') return;
+      const target = Math.max(-38, Math.min(38, gamma * 0.8));
+      tiltOffsetRef.current += (target - tiltOffsetRef.current) * 0.08;
+    };
+
+    window.addEventListener('deviceorientation', onOrientation, { passive: true });
+    return () => window.removeEventListener('deviceorientation', onOrientation);
+  }, [tilt]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -466,7 +546,10 @@ const AnimatedBackground = ({ children, still = false }) => {
       // Signed shortest way round, so it turns east through south-east rather
       // than the long way round through west.
       const delta = ((sunriseAzimuth - VIEW_AZIMUTH + 540) % 360) - 180;
-      return VIEW_AZIMUTH + delta * eased;
+      // The handheld offset rides on top of the storyboard rather than
+      // replacing it, so the pan to the sunrise still happens on a phone and
+      // the visitor is looking around inside it.
+      return VIEW_AZIMUTH + delta * eased + tiltOffsetRef.current;
     };
 
     const cameraBasis = (tiltDown = 0, azimuth = VIEW_AZIMUTH) => {
@@ -1829,10 +1912,54 @@ const AnimatedBackground = ({ children, still = false }) => {
       // weight.
       // Faded with the stars they connect. A figure outlining stars that twilight
       // has already washed out is a diagram, not a constellation.
-      context.strokeStyle = `rgba(120, 165, 235, ${0.075 * starVisibility})`;
       context.lineWidth = 1;
       context.translate(0, -scrollY * 0.06);
+      /*
+       * They were drawn at 0.075 alpha and nothing else, which meant that in
+       * practice nobody ever saw one. The comment above is right that a sky of
+       * figures at full strength reads as a network diagram — the lines are
+       * regular and stars are not, so at equal weight the eye goes to the
+       * lattice and the sky stops being a sky. But the conclusion drawn from
+       * that was to make them permanently invisible, which throws away the
+       * moment the whole thing exists for: somebody recognising Orion.
+       *
+       * Both can be true if the brightness is local. The figures stay at the
+       * edge of visible across the sky, and lift only within a couple of
+       * hundred pixels of the cursor — so at any instant the lattice covers a
+       * small patch rather than the whole field, and moving the pointer walks
+       * a pool of light over the constellations. Nothing to read, nothing to
+       * click, no instructions: the reward is for moving the mouse, which
+       * people do anyway.
+       *
+       * The pointer is in screen space and the segments are drawn through the
+       * translate above, so it has to be moved into the same space to compare.
+       */
+      const pointerYInSky = pointer ? pointer.y + scrollY * 0.06 : 0;
+      const GLOW_RADIUS = 210;
+      const GLOW_R2 = GLOW_RADIUS * GLOW_RADIUS;
+
       for (const segment of constellationSegments) {
+        let lift = 0;
+        if (pointer) {
+          // Nearest vertex, not nearest point on the line. A constellation's
+          // vertices are its stars and they are close together relative to the
+          // radius, so the difference is invisible and this is a handful of
+          // subtractions instead of a projection per edge.
+          let best = Infinity;
+          for (let i = 0; i < segment.length; i++) {
+            const dx = segment[i][0] - pointer.x;
+            const dy = segment[i][1] - pointerYInSky;
+            const d2 = dx * dx + dy * dy;
+            if (d2 < best) best = d2;
+          }
+          if (best < GLOW_R2) {
+            // Squared falloff, so the pool has a soft edge rather than a rim.
+            const t = 1 - Math.sqrt(best) / GLOW_RADIUS;
+            lift = t * t;
+          }
+        }
+
+        context.strokeStyle = `rgba(120, 165, 235, ${((0.075 + lift * 0.3) * starVisibility).toFixed(3)})`;
         context.beginPath();
         context.moveTo(segment[0][0], segment[0][1]);
         for (let i = 1; i < segment.length; i++) context.lineTo(segment[i][0], segment[i][1]);
@@ -2051,7 +2178,34 @@ const AnimatedBackground = ({ children, still = false }) => {
         }}
       />
       
-      <div 
+      {/* Only ever rendered on a device that can actually deliver orientation
+          events — see the coarse-pointer check above. On a laptop this is not
+          a disabled button, it is nothing at all. */}
+      {tilt !== 'unsupported' && (
+        <button
+          type="button"
+          onClick={enableTilt}
+          aria-pressed={tilt === 'on'}
+          className={`fixed bottom-4 right-4 z-50 min-h-[44px] px-3.5 py-2 rounded-full text-xs font-medium border transition-colors duration-300 ${
+            tilt === 'on'
+              ? 'bg-blue-500/20 border-blue-300/40 text-blue-100'
+              : 'bg-black/40 border-white/15 text-white/70'
+          }`}
+        >
+          {/* A denial is not always final — on Android it can be a transient
+              no, and the button stays live so a second tap can succeed. On
+              iOS it sticks until site data is cleared, which is the browser's
+              call to communicate, not this button's. Either way it says what
+              tapping does rather than stating a dead end. */}
+          {tilt === 'denied'
+            ? 'Motion blocked · retry'
+            : tilt === 'on'
+              ? 'Tilt: on'
+              : 'Tilt to look around'}
+        </button>
+      )}
+
+      <div
         className="relative w-full"
         style={{ zIndex: 1 }}
       >
