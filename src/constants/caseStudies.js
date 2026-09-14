@@ -354,7 +354,14 @@ export const caseStudies = [
     metrics: [
       { value: '5,044', label: 'stars, every one from the catalogue — none invented' },
       { value: '0', label: 'network requests — the sky is computed in the page' },
-      { value: '222', label: 'stars that landed on the wrong side of the sky, before the fix' },
+      // Was "222 — stars that landed on the wrong side of the sky, before the
+      // fix". The other three metrics say what the sky is; that one was a
+      // defect count with no after-number beside it, so it read as a bug tally
+      // rather than a result. ot-core's "16.2% diverged / 0 after" works
+      // because it is a pair — this had no pair. The story keeps its place in
+      // "Three bugs the sky told me about", where it has the narrative that
+      // makes it worth telling.
+      { value: '519', label: 'stars bright enough to name — point at one and it names itself' },
       { value: '27.34d', label: 'the sidereal month the moon model reproduces. True value: 27.32' },
     ],
     sections: [

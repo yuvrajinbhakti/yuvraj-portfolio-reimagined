@@ -175,7 +175,11 @@ ProjectCard.propTypes = {
 const SectionHeading = () => (
   <div className="text-center mb-10 md:mb-14">
     <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
-      Featured <span className="text-blue-400">Work</span>
+      {/* One white heading, like the other three. This was the only section
+          title with a word picked out in blue — an accent on one of four is
+          not an accent, it is an inconsistency, and the eye reads it as the
+          most important section rather than the second one. */}
+      Featured work
     </h2>
     {/* Not "from concept through to deployment", which is what every
         portfolio says of every project. What is actually distinctive about

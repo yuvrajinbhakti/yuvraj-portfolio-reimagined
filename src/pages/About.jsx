@@ -277,18 +277,39 @@ const About = () => {
                     per document is the whole point of h1 — five of them on one page
                     leaves a screen reader's heading list with five competing titles
                     and no outline. The hero keeps the only h1 on the page. */}
-                {/* "About", to match the nav item that lands here. It said
-                    "Hello, I'm Yuvraj" one screen after a hero that said "I'm
-                    Yuvraj Singh Nain" — the same introduction twice, and the
-                    second one in a heading the size of a section title. */}
+                {/*
+                  * "About" with a line under it — the heading was never the
+                  * real problem.
+                  *
+                  * It has been wrong twice. It said "Hello, I'm Yuvraj" one
+                  * screen below a hero reading "I'm Yuvraj Singh Nain", which
+                  * is the same introduction twice; that became a bare "About",
+                  * which was the only one of the four section titles with
+                  * nothing beneath it — Featured work, Developer Playground
+                  * and Get in touch all carry a second line. A bare word
+                  * centred over prose is what looked plain, not the word.
+                  *
+                  * So the standard heading stays, and the line beneath does
+                  * the work it does in the other three: says what is in the
+                  * section. Here that is its three parts, in order — the
+                  * prose, the cards, the timeline.
+                  */}
                 <motion.h2
-                  className="text-3xl md:text-4xl font-bold mb-6 text-center text-white"
+                  className="text-3xl md:text-4xl font-bold mb-3 text-center text-white"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
                 >
                   About
                 </motion.h2>
+                <motion.p
+                  className="text-base md:text-lg text-white/60 mb-10 text-center max-w-xl mx-auto leading-relaxed"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.15, duration: 0.5 }}
+                >
+                  Where I work, what I&apos;ve shipped there, and what I build outside it.
+                </motion.p>
 
                 {/* Four sentences. Every number in them is a Measured row of the
                     Impact Inventory and appears once across the page's summary
