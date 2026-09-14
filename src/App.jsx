@@ -4,6 +4,7 @@ import Footer from './Components/Footer';
 import CursorPresenceProvider from './Components/CursorPresenceProvider';
 import CommandPaletteProvider from './Components/CommandPaletteProvider';
 import GhostCursors from './Components/GhostCursors';
+import SkyClock from './Components/SkyClock';
 import { useEffect, useRef, Suspense, lazy } from 'react';
 import { AnimatePresence, motion, MotionConfig, useReducedMotion } from 'framer-motion';
 import { gsap } from 'gsap';
@@ -368,6 +369,15 @@ const App = () => {
                   route, and outside <main> because it is decoration layered over
                   the page rather than part of its content. */}
               <GhostCursors />
+
+              {/* The sky's caption, in the bottom-right corner once the hero
+                  has scrolled past. Here rather than inside Navbar because a
+                  fixed element is positioned against the viewport only if no
+                  ancestor establishes a containing block, and the header's
+                  backdrop-blur does — it pinned to the navbar instead. Kept
+                  outside AnimatedRoutes for the same reason: the page
+                  transition animates a transform. */}
+              <SkyClock />
               {/* tabIndex={-1} so the skip link can actually move focus here;
                   without it the browser scrolls but focus stays in the nav. */}
               <main id="main-content" tabIndex={-1}>

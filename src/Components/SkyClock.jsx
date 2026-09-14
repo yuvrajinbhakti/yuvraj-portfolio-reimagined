@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import PropTypes from 'prop-types';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { OBSERVER, formatLocalTime } from '../constants/observer';
 import { nextSunrise, solarTimeline } from '../utils/sun';
 import { subscribeSkyTime } from '../utils/skyClock';
@@ -34,8 +34,28 @@ import { subscribeSkyTime } from '../utils/skyClock';
  * already read the caption that defines it. The nav computes that for free —
  * `activeSection` is null in the hero and a section id below it.
  *
- * Desktop only. The bar has no room for it on a phone, and the phone gets the
- * tilt control instead.
+ * In the corner, not the bar.
+ *
+ * The hero's readout sits at the bottom-left of the viewport, so putting this
+ * in the nav meant the sky's caption jumped from the bottom of the screen to
+ * the top the moment the reader scrolled past it. In a bottom corner it stays
+ * where the caption already was — the same information in the same place, the
+ * whole way down — and a navigation bar goes back to being for navigation.
+ *
+ * Bottom-right rather than bottom-left: the music toggle has the left corner.
+ *
+ * Desktop and a real pointer only. The bar had no room for it on a phone, and
+ * the right corner on a touch device belongs to the tilt control — the two
+ * could otherwise meet on a large tablet, where the lg breakpoint and a coarse
+ * pointer are both true.
+ *
+ * Rendered from App rather than from the nav, which is where the first attempt
+ * at this put it. A `position: fixed` element is positioned against the
+ * viewport only if no ancestor establishes a containing block, and the header
+ * carries backdrop-blur — a backdrop-filter does establish one. So the corner
+ * it pinned to was the navbar's, not the screen's, and it sat above the top of
+ * the viewport. Anything with a transform, a filter or a backdrop-filter does
+ * this, which rules out the page transition wrapper too.
  */
 
 const phaseFor = (t, tl) => {
@@ -51,7 +71,43 @@ const phaseFor = (t, tl) => {
   return 'sunrise';
 };
 
-const SkyClock = ({ visible = true }) => {
+const SkyClock = () => {
+  const { pathname } = useLocation();
+  const ref = useRef(null);
+
+  /*
+   * Shown once the hero is behind the reader, which is the moment the hero's
+   * own readout — the one with the city and the zone on it — scrolls away.
+   * Two captions saying the same hour on one screen is one too many, and the
+   * barer of the two should not be the one left on its own.
+   *
+   * Home only: a case study holds the sky still at the darkest part of the
+   * night, so a clock there would name an hour that never moves.
+   *
+   * Written straight to the node rather than held in React state, which is
+   * the pattern GlassCard already uses for its pointer values and for the same
+   * reason — a scroll handler should not be asking React to re-render. Here it
+   * also avoids a second problem: React deprioritises rendering a document
+   * nobody is looking at, so a state-driven version of this simply does not
+   * update in a background tab. Two style properties and an attribute do.
+   */
+  useEffect(() => {
+    const measure = () => {
+      const el = ref.current;
+      if (!el) return;
+      const show = pathname === '/' && window.scrollY > window.innerHeight * 0.75;
+      el.style.opacity = show ? '1' : '0';
+      el.style.transform = show ? 'none' : 'translateY(4px)';
+      el.setAttribute('aria-hidden', String(!show));
+    };
+    measure();
+    window.addEventListener('scroll', measure, { passive: true });
+    window.addEventListener('resize', measure, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', measure);
+      window.removeEventListener('resize', measure);
+    };
+  }, [pathname]);
   // The night this page is drawing, computed once. The same reduction the
   // canvas uses, so the two cannot disagree about when dusk ends.
   const timeline = useMemo(() => {
@@ -75,16 +131,19 @@ const SkyClock = ({ visible = true }) => {
   if (!timeline) return null;
 
   return (
-    // Collapsed by max-width rather than unmounted, so arriving and leaving is
-    // a transition instead of the rest of the bar jumping sideways by however
-    // wide "nautical dusk" happens to be. aria-hidden while collapsed: a
-    // screen reader should not announce a clock that is not being shown, and
-    // the hero's readout is the accessible version of this anyway.
+    // Fixed, so it is out of the bar's layout entirely — no collapsing width,
+    // nothing to push sideways. It fades and rises a few pixels on arrival.
+    // pointer-events-none: it is a caption, not a control, and it should never
+    // eat a click meant for whatever is behind it.
+    //
+    // aria-hidden while invisible: a screen reader should not announce a clock
+    // that is not being shown, and the hero's readout is the accessible
+    // version of this anyway.
     <span
-      aria-hidden={!visible}
-      className={`hidden lg:inline-flex items-center gap-2 overflow-hidden whitespace-nowrap font-mono text-[11px] text-white/35 tabular-nums select-none transition-[max-width,opacity] duration-500 ease-out ${
-        visible ? 'max-w-[240px] opacity-100' : 'max-w-0 opacity-0'
-      }`}
+      ref={ref}
+      aria-hidden="true"
+      style={{ opacity: 0, transform: 'translateY(4px)' }}
+      className="hidden lg:[@media(pointer:fine)]:flex fixed bottom-6 right-6 z-40 items-center gap-2 whitespace-nowrap font-mono text-[11px] text-white/35 tabular-nums select-none pointer-events-none transition-[opacity,transform] duration-500 ease-out"
       title={`${OBSERVER.city} — the hour the sky behind the page is showing`}
     >
       <span>{formatLocalTime(new Date(state.time))}</span>
@@ -92,11 +151,6 @@ const SkyClock = ({ visible = true }) => {
       <span>{phaseFor(state.time, timeline)}</span>
     </span>
   );
-};
-
-SkyClock.propTypes = {
-  /** False in the hero, where the full readout already says this. */
-  visible: PropTypes.bool,
 };
 
 export default SkyClock;
