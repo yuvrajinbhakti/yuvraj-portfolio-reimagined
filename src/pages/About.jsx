@@ -325,14 +325,14 @@ const About = () => {
                   * is the ordinary editorial answer and it adds no words.
                   */}
 
-                {/* Four sentences. Every number in them is a Measured row of the
-                    Impact Inventory and appears once across the page's summary
-                    layers — hero, this prose, the cards, the project cards. The
-                    experience tab below repeats them by design: it is the
-                    record the cards link to as evidence. The old prose carried
-                    +25%, 40%, 1,000 clients, 10,000 operations a second, 75ms
-                    and 0.5%; the first two are in no source, and the rest belong
-                    to the project card and its write-up. */}
+                {/* Yuvraj's own copy, used as written bar two changes noted
+                    below. Every claim in it traces to the Impact Inventory:
+                    ~15,000 merchants is D1 (measured), the self-serve
+                    onboarding D2/C1, timezone handling B9, the E2E work B10,
+                    and the "backend rabbit hole" is section A — the Airflow
+                    migration and the EMR root cause. No figure here appears
+                    anywhere else on the page; the cards below carry their own
+                    and the experience tab is the record they link to. */}
                 <div className="w-full max-w-2xl mx-auto">
                   <motion.div
                     className="text-base md:text-lg text-white/65 mb-12 space-y-5 leading-relaxed"
@@ -340,40 +340,46 @@ const About = () => {
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.2, duration: 0.5 }}
                   >
-                    {/* D1, measured: "currently live for ~15k merchants". This
-                        said 16,000+, a figure that appears nowhere in the
-                        inventory the rest of the page is now traced to. */}
-                    {/* The lede. One step up in size and brightness — enough
-                        to give the block a top, not enough to become a second
+                    {/* The lede. One step up in size and brightness — enough to
+                        give the block a top, not enough to become a second
                         heading. */}
                     <p className="text-lg md:text-xl text-white/85">
-                      I&apos;m a frontend engineer at Razorpay, on the reporting and data
-                      platform. I joined as an intern in July 2024 and was made full-time a year
-                      later, and I was the sole frontend engineer on the embedded-analytics
-                      product now live for
-                      <strong className="text-white font-semibold"> ~15,000 merchants</strong>.
-                    </p>
-                    {/* B6 (four or five days to one) and B10 (the suite, three
-                        regions, zero incidents). The old sentence's 40% cut in
-                        report generation time is not in the inventory and is
-                        gone. */}
-                    <p>
-                      Most of what I&apos;ve shipped there is the unglamorous middle of a data
-                      product — the Airflow migration nobody sees, a config-driven onboarding
-                      UI that took a new report field from four days to one, and the
-                      end-to-end suite that gates deploys across three regions.
+                      I&apos;m a frontend engineer at Razorpay, working on reporting and data
+                      products. I joined as an intern in July 2024 and went full-time a year
+                      later. Since then I&apos;ve been the sole frontend engineer across parts of
+                      the data platform, shipping everything from self-serve onboarding and
+                      reporting workflows to timezone edge cases, E2E infrastructure, and the
+                      occasional backend rabbit hole.
                     </p>
                     <p>
-                      Outside work I build the things I&apos;d want to read a write-up of: a
-                      collaborative editor whose merge logic I later proved wrong, then right,
-                      and this page, whose{" "}
+                      Earlier, I built the frontend for an embedded analytics product now live
+                      for{" "}
+                      <strong className="text-white font-semibold">~15,000 merchants</strong>.
+                      These days I spend as much time understanding what happens behind the UI
+                      as I do building the UI itself — migrations, APIs, distributed systems,
+                      failures, and all the unglamorous machinery that makes a data product
+                      actually work.
+                    </p>
+                    <p>
+                      Outside work, I build things mostly because I&apos;m curious. I built a
+                      real-time collaborative editor, discovered that my merge logic was wrong,
+                      tore it apart, and eventually extracted the corrected operational-transform
+                      core into an npm package. I also built this site — including the page
+                      about{" "}
+                      {/* A router Link, not the absolute localhost URL from the
+                          draft: that would have shipped a dead link to anyone
+                          not running the dev server. */}
                       <Link
                         to="/work/the-sky"
                         className="text-white underline decoration-white/25 underline-offset-4 hover:decoration-blue-400 transition-colors"
                       >
-                        sky is real
+                        the sky
                       </Link>
-                      .
+                      , which is, fortunately, real.
+                    </p>
+                    <p>
+                      I like building things, breaking them, figuring out why they broke, and
+                      writing about what I learned.
                     </p>
                   </motion.div>
                 </div>

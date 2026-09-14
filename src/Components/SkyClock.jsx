@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import PropTypes from 'prop-types';
 import { OBSERVER, formatLocalTime } from '../constants/observer';
 import { nextSunrise, solarTimeline } from '../utils/sun';
 import { subscribeSkyTime } from '../utils/skyClock';
@@ -19,6 +20,20 @@ import { subscribeSkyTime } from '../utils/skyClock';
  * drawing: "nautical dusk" is a real thing with a real definition (sun between
  * 6 and 12 degrees below the horizon), not a mood.
  *
+ * Not in the hero, though — which is where it was wrong.
+ *
+ * The hero already carries the full readout: "Chandigarh · 06:26 pm IST ·
+ * tonight", with the city and the zone that make the number mean something.
+ * Showing the same hour in the bar at the same time was the same fact twice on
+ * one screen, and in the bar it had none of that context — an hour on its own
+ * reads as a broken clock to anyone outside India.
+ *
+ * So it appears only once the reader is past the hero, which is exactly when
+ * the readout scrolls away and the sky starts visibly changing with nothing to
+ * explain it. It also means the bare hour is only ever shown to someone who has
+ * already read the caption that defines it. The nav computes that for free —
+ * `activeSection` is null in the hero and a section id below it.
+ *
  * Desktop only. The bar has no room for it on a phone, and the phone gets the
  * tilt control instead.
  */
@@ -36,7 +51,7 @@ const phaseFor = (t, tl) => {
   return 'sunrise';
 };
 
-const SkyClock = () => {
+const SkyClock = ({ visible = true }) => {
   // The night this page is drawing, computed once. The same reduction the
   // canvas uses, so the two cannot disagree about when dusk ends.
   const timeline = useMemo(() => {
@@ -60,8 +75,16 @@ const SkyClock = () => {
   if (!timeline) return null;
 
   return (
+    // Collapsed by max-width rather than unmounted, so arriving and leaving is
+    // a transition instead of the rest of the bar jumping sideways by however
+    // wide "nautical dusk" happens to be. aria-hidden while collapsed: a
+    // screen reader should not announce a clock that is not being shown, and
+    // the hero's readout is the accessible version of this anyway.
     <span
-      className="hidden lg:inline-flex items-center gap-2 font-mono text-[11px] text-white/35 tabular-nums select-none"
+      aria-hidden={!visible}
+      className={`hidden lg:inline-flex items-center gap-2 overflow-hidden whitespace-nowrap font-mono text-[11px] text-white/35 tabular-nums select-none transition-[max-width,opacity] duration-500 ease-out ${
+        visible ? 'max-w-[240px] opacity-100' : 'max-w-0 opacity-0'
+      }`}
       title={`${OBSERVER.city} — the hour the sky behind the page is showing`}
     >
       <span>{formatLocalTime(new Date(state.time))}</span>
@@ -69,6 +92,11 @@ const SkyClock = () => {
       <span>{phaseFor(state.time, timeline)}</span>
     </span>
   );
+};
+
+SkyClock.propTypes = {
+  /** False in the hero, where the full readout already says this. */
+  visible: PropTypes.bool,
 };
 
 export default SkyClock;
