@@ -1,25 +1,30 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import ScrollReveal from "../Components/ScrollReveal";
 import { RESUME_URL } from "../constants";
 import { sendContactEmail, isEmailJSConfigured, createMailtoLink } from "../utils/emailService";
 
 /*
- * One heading, one address, three links — and a form that says what it does.
+ * One heading, one address, three links — and a form that waits to be asked.
  *
- * This section used to be three headings, two glass cards, a location, a
- * Twitter handle and the form. It is one column now, address first, because
- * the address is what a visitor to a portfolio actually wants and the one
- * thing here that cannot fail.
+ * This section sits at the bottom of the page, which on this page is not an
+ * arbitrary place: the sky behind it has run from dusk to the edge of sunrise,
+ * and the sun comes up exactly here. The previous layout put a five-field form
+ * and a full-width blue button over it. Cold navy boxes on a warm dawn, and the
+ * one moment the whole scroll is building to, hidden behind a textarea.
  *
- * The form stays, wired to EmailJS, because the deployed site has the keys set
- * and it sends. The mistake to avoid is the one the previous version made when
- * the keys were absent: it looked like a form, validated like a form, and on
- * submit announced that EmailJS was not configured and offered a mailto link —
- * collecting a message and then asking for it to be typed again. So the button
- * is honest about which of the two it will do. With keys, it sends. Without,
- * it says "Open in your mail app" and does exactly that, with the message
- * carried across in the body.
+ * So the form is collapsed until somebody wants it. The address is the primary
+ * control and cannot fail; the three links are the ways to check the person is
+ * real; one quiet line offers the form, and the sunrise stays visible. When the
+ * form does open, its fields are translucent rather than painted navy, so they
+ * take the colour of whatever sky is behind them, and the button is the same
+ * outline the hero's "Contact Me" uses — the ask that opens the page and the
+ * one that closes it look like the same ask.
+ *
+ * The form still sends. The deployed site has EmailJS keys, so with them the
+ * button reads "Send" and sends; without them it reads "Open in your mail app"
+ * and does exactly that with the draft carried across — never a form that
+ * collects a message and then asks for it to be typed again.
  */
 
 const EMAIL = "yuvrajsinghnain03@gmail.com";
@@ -33,13 +38,25 @@ const links = [
 // Read once at module load: it is build-time configuration, not state.
 const CAN_SEND = Boolean(isEmailJSConfigured());
 
+// Translucent, not painted. bg-[#0f172a]/70 was a navy slab on an orange sky;
+// white at 6% is a slightly lighter patch of whatever the sky is doing.
 const field =
-  "w-full min-h-[44px] px-4 py-3 rounded-lg bg-[#0f172a]/70 border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors";
+  "w-full min-h-[44px] px-4 py-3 rounded-lg bg-white/[0.06] border border-white/15 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-blue-400/70 focus:border-transparent transition-colors";
 
 const Contact = () => {
+  const reduce = useReducedMotion();
+  const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [sending, setSending] = useState(false);
   const [status, setStatus] = useState(null);
+  const nameRef = useRef(null);
+
+  // Opening the form is a request to type, so the caret goes to the first
+  // field. preventScroll: the field is already on screen, and a scroll jump on
+  // top of a disclosure reads as the page lurching.
+  useEffect(() => {
+    if (open) nameRef.current?.focus({ preventScroll: true });
+  }, [open]);
 
   const onChange = (e) => setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
@@ -107,76 +124,112 @@ const Contact = () => {
               ))}
             </ul>
 
-            <form onSubmit={onSubmit} className="mt-10 text-left space-y-4" noValidate={false}>
-              <p className="text-sm text-white/45 text-center mb-2">
-                {CAN_SEND ? "Or write here — it arrives in the same inbox." : "Or draft here — it opens in your mail app."}
+            {/* The disclosure. One line of text, not a button-shaped button:
+                the address above is the primary action and this should not
+                compete with it. */}
+            {!open && (
+              <p className="mt-8">
+                <button
+                  type="button"
+                  onClick={() => setOpen(true)}
+                  aria-expanded={open}
+                  aria-controls="contact-form"
+                  className="inline-flex items-center min-h-[44px] px-3 text-sm text-white/55 hover:text-white transition-colors underline decoration-white/20 underline-offset-4 hover:decoration-blue-400"
+                >
+                  {CAN_SEND ? "Or write here — it arrives in the same inbox" : "Or draft here — it opens in your mail app"}
+                </button>
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="contact-name" className="block text-sm text-white/60 mb-1.5">
-                    Name
-                  </label>
-                  <input
-                    id="contact-name"
-                    name="name"
-                    type="text"
-                    required
-                    autoComplete="name"
-                    value={form.name}
-                    onChange={onChange}
-                    className={field}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="contact-email" className="block text-sm text-white/60 mb-1.5">
-                    Email
-                  </label>
-                  <input
-                    id="contact-email"
-                    name="email"
-                    type="email"
-                    required
-                    autoComplete="email"
-                    value={form.email}
-                    onChange={onChange}
-                    className={field}
-                  />
-                </div>
-              </div>
-              <div>
-                <label htmlFor="contact-message" className="block text-sm text-white/60 mb-1.5">
-                  Message
-                </label>
-                <textarea
-                  id="contact-message"
-                  name="message"
-                  required
-                  rows={4}
-                  minLength={10}
-                  value={form.message}
-                  onChange={onChange}
-                  className={`${field} resize-none`}
-                />
-              </div>
+            )}
 
-              <motion.button
-                type="submit"
-                disabled={sending}
-                whileHover={sending ? undefined : { scale: 1.01 }}
-                whileTap={sending ? undefined : { scale: 0.99 }}
-                className="w-full min-h-[48px] rounded-lg font-semibold text-white bg-blue-600 hover:bg-blue-500 disabled:bg-blue-400/60 disabled:cursor-wait transition-colors"
+            {open && (
+              <motion.form
+                id="contact-form"
+                onSubmit={onSubmit}
+                initial={reduce ? false : { opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                className="mt-8 text-left space-y-4"
               >
-                {sending ? "Sending…" : CAN_SEND ? "Send" : "Open in your mail app"}
-              </motion.button>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="contact-name" className="block text-sm text-white/60 mb-1.5">
+                      Name
+                    </label>
+                    <input
+                      ref={nameRef}
+                      id="contact-name"
+                      name="name"
+                      type="text"
+                      required
+                      autoComplete="name"
+                      value={form.name}
+                      onChange={onChange}
+                      className={field}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="contact-email" className="block text-sm text-white/60 mb-1.5">
+                      Email
+                    </label>
+                    <input
+                      id="contact-email"
+                      name="email"
+                      type="email"
+                      required
+                      autoComplete="email"
+                      value={form.email}
+                      onChange={onChange}
+                      className={field}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label htmlFor="contact-message" className="block text-sm text-white/60 mb-1.5">
+                    Message
+                  </label>
+                  <textarea
+                    id="contact-message"
+                    name="message"
+                    required
+                    rows={4}
+                    minLength={10}
+                    value={form.message}
+                    onChange={onChange}
+                    className={`${field} resize-none`}
+                  />
+                </div>
 
-              {/* Mounted unconditionally and filled later: screen readers only
-                  announce changes to a live region that already existed. */}
-              <div role="status" aria-live="polite" className="min-h-[1.5rem] text-sm text-center">
-                {status && (
-                  <span className={status.ok ? "text-emerald-300" : "text-rose-300"}>{status.text}</span>
-                )}
-              </div>
-            </form>
+                {/* The hero's secondary CTA, not a full-width slab. A saturated
+                    blue bar was the loudest thing on the page at its quietest
+                    moment, and it sat directly over the sunrise. */}
+                <div className="flex items-center justify-center gap-4 pt-1">
+                  <motion.button
+                    type="submit"
+                    disabled={sending}
+                    whileHover={sending || reduce ? undefined : { y: -2 }}
+                    whileTap={sending || reduce ? undefined : { scale: 0.98 }}
+                    className="inline-flex items-center justify-center min-h-[44px] px-7 py-3 rounded-lg border border-white/30 text-white text-sm sm:text-base font-medium hover:bg-white/10 disabled:opacity-60 disabled:cursor-wait transition-colors"
+                  >
+                    {sending ? "Sending…" : CAN_SEND ? "Send" : "Open in your mail app"}
+                  </motion.button>
+                  <button
+                    type="button"
+                    onClick={() => setOpen(false)}
+                    className="inline-flex items-center min-h-[44px] px-3 text-sm text-white/45 hover:text-white transition-colors"
+                  >
+                    Never mind
+                  </button>
+                </div>
+
+                {/* Mounted with the form and filled later: screen readers only
+                    announce changes to a live region that already existed. */}
+                <div role="status" aria-live="polite" className="min-h-[1.5rem] text-sm text-center">
+                  {status && (
+                    <span className={status.ok ? "text-emerald-300" : "text-rose-300"}>{status.text}</span>
+                  )}
+                </div>
+              </motion.form>
+            )}
           </ScrollReveal>
         </div>
       </section>
