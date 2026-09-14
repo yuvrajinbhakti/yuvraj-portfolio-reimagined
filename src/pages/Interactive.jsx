@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { useRef } from 'react';
 import InteractiveTerminal from '../Components/InteractiveTerminal';
 import CodePlayground from '../Components/CodePlayground';
+import ConvergenceProof from '../Components/ConvergenceProof';
 
 /*
  * A section of the one page now, not a route of its own.
@@ -25,6 +26,14 @@ const Interactive = () => {
   // a playground example from ⌘K should land on the editor, not at the top of
   // a page the editor happens to be near the bottom of.
   const features = [
+    {
+      // First, because it is the only thing on this site a reader can check
+      // rather than take on trust — and the hardest thing here to have built.
+      id: "convergence-proof",
+      title: "Convergence, in your browser",
+      description: "ot-core is my operational transformation library. Here is its correctness proof, running on your machine against a seed you choose.",
+      component: <ConvergenceProof />,
+    },
     {
       id: "interactive-terminal",
       title: "Interactive Terminal",
@@ -91,7 +100,7 @@ const Interactive = () => {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.2, duration: 0.5 }}
               >
-                Two things I built to answer questions about myself. Ask the terminal, or edit the code and watch it run.
+                Check my hardest claim against your own machine, ask the terminal about my background, or edit the code and watch it run.
               </motion.p>
             </motion.div>
 
