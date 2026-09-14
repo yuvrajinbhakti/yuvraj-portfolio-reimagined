@@ -290,14 +290,14 @@ const About = () => {
                   About
                 </motion.h2>
 
-                {/* Four sentences, and every number on this page appears once.
-                    The old prose carried +25%, 24 hours, 1,000 clients, 10,000
-                    operations a second, 75ms and 0.5% — all of which are also on
-                    the cards below or the project card further down, so a reader
-                    met each of them three times on the way to the footer. Two
-                    figures live only here: the one that sets the scale — who the
-                    work is for — and the 40%, which the cards do not carry and
-                    which an earlier draft of this dropped altogether. */}
+                {/* Four sentences. Every number in them is a Measured row of the
+                    Impact Inventory and appears once across the page's summary
+                    layers — hero, this prose, the cards, the project cards. The
+                    experience tab below repeats them by design: it is the
+                    record the cards link to as evidence. The old prose carried
+                    +25%, 40%, 1,000 clients, 10,000 operations a second, 75ms
+                    and 0.5%; the first two are in no source, and the rest belong
+                    to the project card and its write-up. */}
                 <div className="w-full max-w-2xl mx-auto">
                   <motion.div
                     className="text-base md:text-lg text-gray-300 mb-12 space-y-4 leading-relaxed"
@@ -305,17 +305,25 @@ const About = () => {
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.2, duration: 0.5 }}
                   >
+                    {/* D1, measured: "currently live for ~15k merchants". This
+                        said 16,000+, a figure that appears nowhere in the
+                        inventory the rest of the page is now traced to. */}
                     <p>
-                      I&apos;m a frontend engineer at Razorpay, on the analytics and reporting
-                      platform that
-                      <strong className="text-white font-semibold"> 16,000+ merchants </strong>
-                      use to understand their payments. I joined as an intern in July 2024 and
-                      was made full-time a year later.
+                      I&apos;m a frontend engineer at Razorpay, on the reporting and data
+                      platform. I joined as an intern in July 2024 and was made full-time a year
+                      later, and I was the sole frontend engineer on the embedded-analytics
+                      product now live for
+                      <strong className="text-white font-semibold"> ~15,000 merchants</strong>.
                     </p>
+                    {/* B6 (four or five days to one) and B10 (the suite, three
+                        regions, zero incidents). The old sentence's 40% cut in
+                        report generation time is not in the inventory and is
+                        gone. */}
                     <p>
-                      Most of what I&apos;ve shipped there is the unglamorous middle of a
-                      dashboard — the caching, the pipelines that feed it, and a reporting
-                      stack rebuilt from scratch that cut report generation time by 40%.
+                      Most of what I&apos;ve shipped there is the unglamorous middle of a data
+                      product — the Airflow migration nobody sees, a config-driven onboarding
+                      UI that took a new report field from four days to one, and the
+                      end-to-end suite that gates deploys across three regions.
                     </p>
                     <p>
                       Outside work I build the things I&apos;d want to read a write-up of: a

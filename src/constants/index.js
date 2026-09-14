@@ -137,14 +137,29 @@ export const experiences = [
         // system inventory counts and pipeline architecture are deliberately
         // left out — a portfolio is indexed permanently, unlike a CV sent to a
         // named recipient.
+        // Every figure below traces to a row of the Impact Inventory (Sep 2026)
+        // and is marked Measured there — the row id is in the comment. The
+        // previous bullets carried a 25% adoption lift, a 40% report-time cut,
+        // a 70% effort reduction, an A/B framework "improving satisfaction by
+        // 20% and tripling deployment speed", and an RBI Hackathon placing, none
+        // of which appear in the inventory. On a site whose argument is that
+        // its claims can be checked, an unsourced number is a liability.
         points: [
             "Joined as a Frontend Engineering Intern (July 2024 – July 2025) and converted to a full-time Frontend Engineer in July 2025.",
-            "Built merchant-facing analytics and reporting dashboards, driving a 25% increase in platform adoption through real-time data visualisation.",
-            "Replaced a legacy reporting stack with a modern operations platform, cutting report generation time by 40% across business units.",
-            "Built a self-serve data onboarding pipeline using change-data-capture, reducing setup from two weeks to 24 hours and engineering effort by 70%.",
-            "Architected an ML-powered fraud detection system that placed in the Top 30 of 500+ teams at the RBI Hackathon.",
-            "Shipped an A/B testing framework with client-side caching and user segmentation, improving user satisfaction by 20% and tripling deployment speed.",
-            "Built with React, TypeScript, REST APIs, Docker and Kubernetes."
+            // D1 — measured: "currently live for ~15k merchants".
+            "Sole frontend engineer on the embedded-analytics product now live for ~15,000 merchants — a React micro-app scoping every query to the requesting merchant, shipped across three repositories.",
+            // E1 + B6 — codeowner; field onboarding 4–5 days → 1 day, PRs 6 → 3–4.
+            "Reporting codeowner across the merchant and admin dashboards. Rebuilt report onboarding as a config-driven admin UI, taking a new field from four or five days down to one and a new entity from six PRs to three.",
+            // B8 + B7 — exports 95 days → 5 years; annual reports to 100% of India merchants.
+            "Extended report exports from 95 days to five years of history, and rolled annual reports out to 100% of India merchants behind feature-flag experiments.",
+            // A1/A2 + A3 — zero data gaps, zero duplicate writes; spot reclaim killing the output committer, fleet fix shipped. Counts left out on purpose.
+            "Migrated the team's Airflow estate from 2 to 3 with zero data gaps and zero duplicate writes, and root-caused a class of Spark/EMR failures written off as flakiness — spot reclaim killing the output committer — then shipped the fleet fix.",
+            // B10 — HTTP-200-wrapped 500s the retry classifier never inspected; redeploy to 100% of merchants in IN/US/SG with zero incidents.
+            "Brought a collapsed reporting end-to-end suite back to green — the failures were 500s wrapped in HTTP 200s that the retry classifier never inspected — and used it to gate a zero-incident redeploy across India, the US and Singapore.",
+            // D2 + E3 — turnaround weeks → 24 hours; four people mentored.
+            "Shipped self-serve onboarding that replaced hand-raised PRs with a guided flow, cutting turnaround from weeks to 24 hours; mentored four engineers through PR process, canary-gated merges and API testing.",
+            // E4 — breadth, without the PR count (activity, not impact).
+            "Built with React, TypeScript, Go, PHP, Spark, Terraform, Docker and Kubernetes."
         ],
     },
     {

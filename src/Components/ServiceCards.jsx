@@ -15,15 +15,21 @@ import ServiceIcon from './ServiceIcon';
  *
  * Each card carries a concrete proof point rather than a capability claim.
  * "Creating responsive, performant user interfaces" is something anyone can
- * write; "+25% platform adoption" is not.
+ * write; "95 days → 5 years of history" is not.
+ *
+ * Every number traces to a Measured row of the Impact Inventory (Sep 2026);
+ * the row id is beside it. The cards used to say "+25% platform adoption" and
+ * "2 weeks → 24 hours" — the first appears nowhere in the inventory, and the
+ * second is recorded there as "weeks", not two.
  */
 const SERVICES = [
   {
     type: 'frontend',
     title: 'Frontend Engineering',
     description:
-      'React and TypeScript in production at Razorpay — merchant-facing analytics dashboards and an A/B testing framework with client-side caching.',
-    proof: '+25% platform adoption',
+      'React and TypeScript in production at Razorpay — an embedded-analytics product, the reporting UI across two dashboards, and the end-to-end suite that gates their deploys.',
+    // B8 — report exports extended from 95 days to five years.
+    proof: 'Exports: 95 days → 5 years of history',
     // The role in full is the experience tab directly below these cards.
     to: '/#experience',
     linkLabel: 'The role, in full',
@@ -32,8 +38,9 @@ const SERVICES = [
     type: 'backend',
     title: 'Backend & Infrastructure',
     description:
-      'Node.js and Go services, change-data-capture pipelines, and containerised deploys on Docker and Kubernetes.',
-    proof: 'Onboarding: 2 weeks → 24 hours',
+      'Airflow, Spark and EMR alongside the UI — a warehouse migration with zero data gaps, and the root cause of cluster failures the team had written off as flakiness.',
+    // D2 — self-serve onboarding, turnaround weeks → 24 hours.
+    proof: 'Onboarding: weeks → 24 hours',
     // The deepest backend build on this site that can actually be read: Node,
     // Redis, Docker, and the reasoning behind each.
     to: '/work/secure-file-sharing',
@@ -59,9 +66,9 @@ const ServiceCard = ({ service }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    // A link, not a div. Each of these cards makes a specific claim — +25%
-    // adoption, two weeks down to twenty-four hours, top 0.2% of 91,000 — and
-    // a number with no route to its evidence is just an assertion.
+    // A link, not a div. Each of these cards makes a specific claim — five
+    // years of export history, weeks down to twenty-four hours, top 0.2% of
+    // 91,000 — and a number with no route to its evidence is just an assertion.
     //
     // aria-label rather than letting the accessible name fall out of the
     // contents: unlabelled, a screen reader announces the heading, the whole
