@@ -936,12 +936,23 @@ const AnimatedBackground = ({ children, still = false }) => {
       // A ring rather than a highlight on the star itself: brightening the dot
       // would be a lie about its magnitude, and the whole point of the field is
       // that the magnitudes are true.
-      ctx.strokeStyle = 'rgba(147, 197, 253, 0.5)';
+      const RING = 9;
+      ctx.strokeStyle = 'rgba(147, 197, 253, 0.45)';
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.arc(x, y, 10, 0, TAU);
+      ctx.arc(x, y, RING, 0, TAU);
       ctx.stroke();
 
+      /*
+       * The label floats. It used to sit in a filled card — a rounded box at
+       * 82% navy with a hairline — and the card was the heaviest thing on a
+       * sky made of points and glass. It also covered stars, which on a field
+       * whose whole argument is that every dot is real is a strange thing for
+       * the naming feature to do. A star chart does what this does now: a
+       * short leader from the ring, and the name set straight onto the sky,
+       * with a soft shadow doing the legibility work the box used to. Two
+       * lines of text over stars is fine; a slab over stars is not.
+       */
       const NAME_FONT = '600 13px ui-sans-serif, system-ui, -apple-system, sans-serif';
       const META_FONT = '11px ui-monospace, SFMono-Regular, Menlo, monospace';
       const meta = `${full} · ${Math.round(star.altitude)}° ${compass(star.azimuth)}`;
@@ -950,34 +961,43 @@ const AnimatedBackground = ({ children, still = false }) => {
       const nameWidth = ctx.measureText(name).width;
       ctx.font = META_FONT;
       const metaWidth = ctx.measureText(meta).width;
+      const blockW = Math.max(nameWidth, metaWidth);
 
-      const boxW = Math.max(nameWidth, metaWidth) + 20;
-      const boxH = 44;
-      // Flip to the other side rather than let the card leave the viewport.
-      const left = x + 18 + boxW > width ? x - 18 - boxW : x + 18;
-      // The ceiling is the bottom of the nav bar, not the top of the viewport.
-      // A star near the top of the screen put the card under the fixed header,
-      // which is opaque and sits above the canvas — the name was simply gone.
-      const top = Math.min(Math.max(headerHeight + 8, y - boxH / 2), height - boxH - 8);
+      // Up and to the right by default; mirrored when that would leave the
+      // canvas, and dropped below the star when it would run under the fixed
+      // header, which is opaque and sits above the canvas.
+      const LEAD = 22;
+      const GAP = 5;
+      const right = x + LEAD + GAP + blockW <= width - 8;
+      const above = y - LEAD - 16 >= headerHeight + 8;
+      const dx = right ? 1 : -1;
+      const dy = above ? -1 : 1;
+      const leadEndX = x + dx * LEAD;
+      const leadEndY = y + dy * LEAD;
+      const textX = right ? leadEndX + GAP : leadEndX - GAP - blockW;
+      // The name's baseline sits on the leader's end; the meta line hangs
+      // below it either way, so the leader always meets the top line.
+      const nameY = leadEndY + (above ? 0 : 12);
+      const metaY = nameY + 15;
 
-      ctx.fillStyle = 'rgba(8, 13, 30, 0.82)';
-      ctx.strokeStyle = 'rgba(147, 197, 253, 0.18)';
+      const s = RING / Math.SQRT2;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.28)';
       ctx.lineWidth = 1;
       ctx.beginPath();
-      // roundRect landed in Safari 16.4; a square card is a fine thing to fall
-      // back to and a thrown TypeError is not.
-      if (ctx.roundRect) ctx.roundRect(left, top, boxW, boxH, 6);
-      else ctx.rect(left, top, boxW, boxH);
-      ctx.fill();
+      ctx.moveTo(x + dx * s, y + dy * s);
+      ctx.lineTo(leadEndX, leadEndY);
       ctx.stroke();
 
       ctx.textBaseline = 'alphabetic';
+      ctx.shadowColor = 'rgba(2, 6, 23, 0.9)';
+      ctx.shadowBlur = 6;
+      ctx.shadowOffsetY = 1;
       ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
       ctx.font = NAME_FONT;
-      ctx.fillText(name, left + 10, top + 20);
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+      ctx.fillText(name, textX, nameY);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
       ctx.font = META_FONT;
-      ctx.fillText(meta, left + 10, top + 35);
+      ctx.fillText(meta, textX, metaY);
 
       ctx.restore();
     };

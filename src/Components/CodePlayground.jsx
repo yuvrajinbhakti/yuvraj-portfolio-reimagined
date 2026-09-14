@@ -195,14 +195,14 @@ const CodePlayground = () => {
           width: 16px;
           height: 16px;
           border-radius: 50%;
-          background: #3b82f6;
+          background: #60a5fa;
           cursor: pointer;
-          border: 2px solid #1e40af;
+          border: 2px solid rgba(2, 6, 23, 0.9);
           box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
         
         .slider::-webkit-slider-thumb:hover {
-          background: #2563eb;
+          background: #93c5fd;
           transform: scale(1.1);
         }
         
@@ -210,9 +210,9 @@ const CodePlayground = () => {
           width: 16px;
           height: 16px;
           border-radius: 50%;
-          background: #3b82f6;
+          background: #60a5fa;
           cursor: pointer;
-          border: 2px solid #1e40af;
+          border: 2px solid rgba(2, 6, 23, 0.9);
           box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
@@ -228,13 +228,13 @@ const CodePlayground = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className={`bg-gray-900 rounded-xl border border-gray-700 shadow-2xl overflow-hidden ${
+        className={`bg-[#0b1020] rounded-xl border border-white/10 shadow-2xl overflow-hidden ${
           isFullscreen ? 'fixed inset-4 z-50' : ''
         }`}
         style={{ height: isFullscreen ? 'calc(100vh - 2rem)' : `${playgroundHeight}px` }}
       >
         {/* Professional Header */}
-        <div className="bg-gray-900 border-b border-gray-700">
+        <div className="bg-[#0b1020] border-b border-white/10">
           {/* Compact Top Bar */}
           {/* flex-wrap, and the height slider only from sm up. On a 375px phone
               the run button, three layout toggles, theme, fullscreen and the
@@ -245,7 +245,7 @@ const CodePlayground = () => {
               {/* <div className="flex items-center gap-2"> */}
                 {/* <div>
                   <h1 className="text-white font-semibold text-base">Code Playground</h1>
-                  <p className="text-gray-400 text-xs">Live coding environment</p>
+                  <p className="text-white/50 text-xs">Live coding environment</p>
                 </div> */}
               {/* </div> */}
             {/* </div> */}
@@ -255,7 +255,7 @@ const CodePlayground = () => {
               <button
                 onClick={runCode}
                 disabled={isRunning}
-                className="bg-blue-600 hover:bg-blue-500 disabled:bg-gray-600 text-white px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 flex items-center gap-2 shadow-lg min-w-[70px]"
+                className="bg-blue-600 hover:bg-blue-500 disabled:bg-white/10 text-white px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 flex items-center gap-2 shadow-lg min-w-[70px]"
                 title="Run Code (Ctrl+Enter)"
               >
                 {isRunning ? (
@@ -271,7 +271,7 @@ const CodePlayground = () => {
               </button>
 
               {/* Compact Layout Controls */}
-              <div className="flex items-center gap-1 bg-gray-800 rounded-md p-0.5">
+              <div className="flex items-center gap-1 bg-white/5 rounded-md p-0.5">
                 {LAYOUT_OPTIONS.map((option) => (
                   <button
                     key={option.value}
@@ -279,7 +279,7 @@ const CodePlayground = () => {
                     className={`min-w-[36px] min-h-[36px] inline-flex items-center justify-center p-1.5 text-xs rounded transition-all duration-200 ${
                       layout === option.value
                         ? 'bg-blue-600 text-white shadow-sm'
-                        : 'text-gray-400 hover:text-white hover:bg-gray-700'
+                        : 'text-white/50 hover:text-white hover:bg-white/10'
                     }`}
                     title={`${option.label} (Ctrl+${option.shortcut})`}
                   >
@@ -292,7 +292,7 @@ const CodePlayground = () => {
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                  className="min-w-[36px] min-h-[36px] inline-flex items-center justify-center p-1.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-md transition-all duration-200"
+                  className="min-w-[36px] min-h-[36px] inline-flex items-center justify-center p-1.5 text-white/50 hover:text-white hover:bg-white/10 rounded-md transition-all duration-200"
                   title="Toggle editor theme"
                   aria-label={theme === 'dark' ? 'Switch editor to light theme' : 'Switch editor to dark theme'}
                 >
@@ -310,7 +310,7 @@ const CodePlayground = () => {
 
                 <button
                   onClick={toggleFullscreen}
-                  className="min-w-[36px] min-h-[36px] inline-flex items-center justify-center p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-md transition-all duration-200"
+                  className="min-w-[36px] min-h-[36px] inline-flex items-center justify-center p-1.5 text-white/50 hover:text-white hover:bg-white/10 rounded-md transition-all duration-200"
                   title="Toggle Fullscreen (Ctrl+F)"
                 >
                   {isFullscreen ? '⤓' : '⤢'}
@@ -320,25 +320,25 @@ const CodePlayground = () => {
               {/* Compact Height Control */}
               {!isFullscreen && (
                 <div className="hidden sm:flex items-center gap-2 ml-2">
-                  <span className="text-gray-400 text-xs">H:</span>
+                  <span className="text-white/50 text-xs">H:</span>
                   <input
                     type="range"
                     min="400"
                     max="800"
                     value={playgroundHeight}
                     onChange={(e) => setPlaygroundHeight(parseInt(e.target.value))}
-                    className="w-16 h-6 py-2.5 bg-clip-content bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                    className="w-16 h-6 py-2.5 bg-clip-content bg-white/10 rounded-lg appearance-none cursor-pointer slider"
                   />
-                  <span className="text-gray-400 text-xs font-mono w-8">{Math.round(playgroundHeight/100)*100}</span>
+                  <span className="text-white/50 text-xs font-mono w-8">{Math.round(playgroundHeight/100)*100}</span>
                 </div>
               )}
             </div>
           </div>
 
           {/* Compact Scrollable Examples Bar */}
-          <div className="px-6 py-1.5 bg-gray-850 border-t border-gray-700">
+          <div className="px-6 py-1.5 bg-white/[0.03] border-t border-white/10">
             <div className="flex items-center gap-3">
-              <span className="text-gray-400 text-xs font-medium shrink-0">Try it:</span>   
+              <span className="text-white/50 text-xs font-medium shrink-0">Try it:</span>   
               
               {/* Horizontally Scrollable Examples */}
               <div className="flex-1 overflow-x-auto scrollbar-hide">
@@ -347,7 +347,7 @@ const CodePlayground = () => {
                     <button
                       key={key}
                       onClick={() => handleExampleLoad(key)}
-                      className="group flex items-center gap-2 min-h-[36px] px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-md transition-all duration-200 text-xs whitespace-nowrap shrink-0"
+                      className="group flex items-center gap-2 min-h-[36px] px-2.5 py-1 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white rounded-md transition-all duration-200 text-xs whitespace-nowrap shrink-0"
                       title={example.description}
                     >
                       {/* The emoji that used to sit here was removed a while
@@ -358,7 +358,7 @@ const CodePlayground = () => {
                     </button>
                   ))}
                   
-                  <div className="w-px h-3 bg-gray-600 mx-1 shrink-0"></div>
+                  <div className="w-px h-3 bg-white/20 mx-1 shrink-0"></div>
                   
                   <button
                     onClick={handleFreshStart}
@@ -383,22 +383,22 @@ const CodePlayground = () => {
           {/* Code Editor */}
           {layout !== 'output-only' && (
             <div 
-              className={`flex flex-col ${layout === 'vertical' ? 'w-full' : ''} bg-gray-850`}
+              className={`flex flex-col ${layout === 'vertical' ? 'w-full' : ''} bg-white/[0.03]`}
               style={{ 
                 width: layout === 'horizontal' ? `${editorWidth}%` : '100%',
                 height: layout === 'vertical' ? '50%' : '100%'
               }}
             >
               {/* Enhanced Tabs */}
-              <div className="flex bg-gray-800 border-b border-gray-700 overflow-x-auto">
+              <div className="flex bg-white/5 border-b border-white/10 overflow-x-auto">
                 {TABS.map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={`px-4 py-2.5 text-sm font-medium transition-all duration-200 flex items-center gap-2 border-b-2 whitespace-nowrap shrink-0 ${
                       activeTab === tab.id
-                        ? `bg-gray-700 text-white border-blue-500 ${tab.color}`
-                        : 'text-gray-400 hover:text-white hover:bg-gray-750 border-transparent'
+                        ? `bg-white/10 text-white border-blue-500 ${tab.color}`
+                        : 'text-white/50 hover:text-white hover:bg-white/5 border-transparent'
                     }`}
                   >
                     <span>{tab.icon}</span>
@@ -420,7 +420,7 @@ const CodePlayground = () => {
                   onChange={(e) => setCode(prev => ({ ...prev, [activeTab]: e.target.value }))}
                   className={`w-full h-full p-4 pl-16 font-mono text-sm resize-none outline-none leading-relaxed ${
                     theme === 'dark' 
-                      ? 'bg-gray-900 text-gray-100' 
+                      ? 'bg-[#0b1020] text-white/90' 
                       : 'bg-white text-gray-800'
                   }`}
                   placeholder={`Enter your ${activeTab.toUpperCase()} code here...\n\nTip: Use Ctrl+Enter to run your code`}
@@ -428,7 +428,7 @@ const CodePlayground = () => {
                 />
                 
                 {/* Professional Line Numbers */}
-                <div className="absolute top-0 left-0 w-14 h-full bg-gray-800 border-r border-gray-700 flex flex-col text-xs text-gray-500 pt-4 overflow-hidden select-none">
+                <div className="absolute top-0 left-0 w-14 h-full bg-white/5 border-r border-white/10 flex flex-col text-xs text-white/35 pt-4 overflow-hidden select-none">
                   {code[activeTab].split('\n').map((_, index) => (
                     <div key={index} className="h-5 flex items-center justify-end pr-3 leading-relaxed font-mono">
                       {index + 1}
@@ -450,7 +450,7 @@ const CodePlayground = () => {
                 document.body.style.cursor = 'col-resize';
               }}
             >
-              <div className="w-1 h-20 bg-gray-600 group-hover:bg-blue-500 transition-all duration-200 rounded-full"></div>
+              <div className="w-1 h-20 bg-white/20 group-hover:bg-blue-500 transition-all duration-200 rounded-full"></div>
               <div className="absolute inset-0 -mx-2"></div>
             </div>
           )}
@@ -478,7 +478,7 @@ const CodePlayground = () => {
               {layout === 'output-only' && (
                 <button
                   onClick={() => setLayout('horizontal')}
-                  className="text-xs text-gray-300 hover:text-white bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded transition-all duration-200"
+                  className="text-xs text-white/70 hover:text-white bg-white/10 hover:bg-white/15 px-3 py-1 rounded transition-all duration-200"
                 >
                   Show Editor
                 </button>
@@ -506,7 +506,7 @@ const CodePlayground = () => {
         </div>
 
         {/* Professional Footer */}
-        <div className="bg-gray-900 px-6 py-2 text-xs text-gray-400 flex items-center justify-between border-t border-gray-700">
+        <div className="bg-[#0b1020] px-6 py-2 text-xs text-white/50 flex items-center justify-between border-t border-white/10">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
@@ -518,12 +518,12 @@ const CodePlayground = () => {
               it. On a phone they overflowed the footer and described keys the
               visitor does not have. */}
           <div className="hidden sm:flex items-center gap-4">
-            <div className="flex items-center gap-2 text-gray-500">
-              <kbd className="px-1.5 py-0.5 bg-gray-800 rounded text-xs">Ctrl+Enter</kbd>
+            <div className="flex items-center gap-2 text-white/35">
+              <kbd className="px-1.5 py-0.5 bg-white/5 rounded text-xs">Ctrl+Enter</kbd>
               <span>Run</span>
             </div>
-            <div className="flex items-center gap-2 text-gray-500">
-              <kbd className="px-1.5 py-0.5 bg-gray-800 rounded text-xs">Ctrl+F</kbd>
+            <div className="flex items-center gap-2 text-white/35">
+              <kbd className="px-1.5 py-0.5 bg-white/5 rounded text-xs">Ctrl+F</kbd>
               <span>Fullscreen</span>
             </div>
           </div>
