@@ -290,13 +290,14 @@ const About = () => {
                   About
                 </motion.h2>
 
-                {/* Three sentences, and every number on this page appears once.
+                {/* Four sentences, and every number on this page appears once.
                     The old prose carried +25%, 24 hours, 1,000 clients, 10,000
                     operations a second, 75ms and 0.5% — all of which are also on
                     the cards below or the project card further down, so a reader
-                    met each of them three times on the way to the footer. The one
-                    figure that lives only here is the one that sets the scale:
-                    who the work is for. */}
+                    met each of them three times on the way to the footer. Two
+                    figures live only here: the one that sets the scale — who the
+                    work is for — and the 40%, which the cards do not carry and
+                    which an earlier draft of this dropped altogether. */}
                 <div className="w-full max-w-2xl mx-auto">
                   <motion.div
                     className="text-base md:text-lg text-gray-300 mb-12 space-y-4 leading-relaxed"
@@ -308,16 +309,16 @@ const About = () => {
                       I&apos;m a frontend engineer at Razorpay, on the analytics and reporting
                       platform that
                       <strong className="text-white font-semibold"> 16,000+ merchants </strong>
-                      use to understand their payments — an intern from July 2024, full-time a
-                      year later.
+                      use to understand their payments. I joined as an intern in July 2024 and
+                      was made full-time a year later.
                     </p>
                     <p>
                       Most of what I&apos;ve shipped there is the unglamorous middle of a
-                      dashboard: the caching, the pipelines that feed it, and the reporting
-                      stack we rebuilt from scratch.
+                      dashboard — the caching, the pipelines that feed it, and a reporting
+                      stack rebuilt from scratch that cut report generation time by 40%.
                     </p>
                     <p>
-                      Outside work I build the things I&apos;d want to read a write-up of — a
+                      Outside work I build the things I&apos;d want to read a write-up of: a
                       collaborative editor whose merge logic I later proved wrong, then right,
                       and this page, whose{" "}
                       <Link
