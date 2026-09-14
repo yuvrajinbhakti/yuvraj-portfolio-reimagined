@@ -295,21 +295,35 @@ const About = () => {
                   * prose, the cards, the timeline.
                   */}
                 <motion.h2
-                  className="text-3xl md:text-4xl font-bold mb-3 text-center text-white"
+                  className="text-3xl md:text-4xl font-bold mb-6 text-center text-white"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
                 >
                   About
                 </motion.h2>
-                <motion.p
-                  className="text-base md:text-lg text-white/60 mb-10 text-center max-w-xl mx-auto leading-relaxed"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.15, duration: 0.5 }}
-                >
-                  Where I work, what I&apos;ve shipped there, and what I build outside it.
-                </motion.p>
+                {/*
+                  * No subtitle line here, deliberately — the third attempt at
+                  * this heading, and the first one to identify what was
+                  * actually wrong.
+                  *
+                  * The other three sections carry a line under the title
+                  * because their content is a grid or a widget, which needs
+                  * framing: "each one about what broke", "check my hardest
+                  * claim against your own machine". Each makes a claim or
+                  * issues an invitation. The line written for this section
+                  * did neither — "Where I work, what I've shipped there, and
+                  * what I build outside it" is a table of contents, and a
+                  * table of contents above three paragraphs is filler.
+                  *
+                  * This section's content is prose, and prose is its own
+                  * subtitle. What made it look plain was not a missing label
+                  * but missing hierarchy: a heading dropping straight into
+                  * three paragraphs of identical size and colour. So the
+                  * first paragraph is a lede — larger, brighter, the sentence
+                  * that has to land — and the two that follow are body. That
+                  * is the ordinary editorial answer and it adds no words.
+                  */}
 
                 {/* Four sentences. Every number in them is a Measured row of the
                     Impact Inventory and appears once across the page's summary
@@ -321,7 +335,7 @@ const About = () => {
                     to the project card and its write-up. */}
                 <div className="w-full max-w-2xl mx-auto">
                   <motion.div
-                    className="text-base md:text-lg text-gray-300 mb-12 space-y-4 leading-relaxed"
+                    className="text-base md:text-lg text-white/65 mb-12 space-y-5 leading-relaxed"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.2, duration: 0.5 }}
@@ -329,7 +343,10 @@ const About = () => {
                     {/* D1, measured: "currently live for ~15k merchants". This
                         said 16,000+, a figure that appears nowhere in the
                         inventory the rest of the page is now traced to. */}
-                    <p>
+                    {/* The lede. One step up in size and brightness — enough
+                        to give the block a top, not enough to become a second
+                        heading. */}
+                    <p className="text-lg md:text-xl text-white/85">
                       I&apos;m a frontend engineer at Razorpay, on the reporting and data
                       platform. I joined as an intern in July 2024 and was made full-time a year
                       later, and I was the sole frontend engineer on the embedded-analytics
